@@ -1,0 +1,1477 @@
+<!DOCTYPE html>
+<html lang="hi" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>TARAL - Nature's Flow, Health and Glow | Packaged Drinking Water</title>
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts -->
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
+    <!-- QRCode JS Library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    fontFamily: {
+                        sans: ['Plus Jakarta Sans', 'sans-serif'],
+                        heading: ['Outfit', 'sans-serif'],
+                    },
+                    colors: {
+                        brand: {
+                            50: '#f0f9ff',
+                            100: '#e0f2fe',
+                            200: '#bae6fd',
+                            400: '#38bdf8',
+                            500: '#0ea5e9',
+                            600: '#0284c7',
+                            700: '#0369a1',
+                            800: '#075985',
+                            900: '#0c4a6e',
+                        }
+                    }
+                }
+            }
+        }
+    </script>
+
+    <style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background-color: #f8fafc;
+            color: #0f172a;
+            -webkit-tap-highlight-color: transparent;
+        }
+        h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', sans-serif; }
+        
+        .clean-card {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(8px);
+            border: 1px solid #e2e8f0;
+            box-shadow: 0 10px 25px -5px rgba(14, 165, 233, 0.08);
+        }
+        .clean-card-hover {
+            transition: all 0.3s ease;
+        }
+        .clean-card-hover:hover {
+            transform: translateY(-4px);
+            border-color: #0ea5e9;
+            box-shadow: 0 20px 30px -10px rgba(14, 165, 233, 0.18);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #0284c7 0%, #2563eb 50%, #0284c7 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .btn-gradient {
+            background: linear-gradient(135deg, #0284c7, #2563eb);
+            transition: all 0.3s ease;
+        }
+        .btn-gradient:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px -5px rgba(2, 132, 199, 0.4);
+        }
+        @keyframes floatSlow {
+            0%, 100% { transform: translateY(0px) rotate(0deg); }
+            50% { transform: translateY(-8px) rotate(1deg); }
+        }
+        .animate-float { animation: floatSlow 4s ease-in-out infinite; }
+
+        .insta-gradient {
+            background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+        }
+
+        .bg-watermark-overlay {
+            position: absolute;
+            inset: 0;
+            background-image: url('taral water bottle.jpeg');
+            background-repeat: no-repeat;
+            background-size: contain;
+            background-position: center;
+            opacity: 0.03;
+            pointer-events: none;
+        }
+
+        button, input, select {
+            touch-action: manipulation;
+        }
+
+        #welcomeOverlay {
+            transition: opacity 0.3s ease, visibility 0.3s ease;
+        }
+        .modal-hidden {
+            opacity: 0 !important;
+            visibility: hidden !important;
+            pointer-events: none !important;
+        }
+    </style>
+</head>
+<body class="overflow-x-hidden relative">
+
+    <!-- WELCOME LANDING OVERLAY -->
+    <div id="welcomeOverlay" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
+        <div class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-sky-100 p-6 sm:p-8 text-center space-y-6 my-auto">
+            
+            <button onclick="visitOfficialWebsite()" class="absolute top-4 right-4 w-9 h-9 rounded-full bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold flex items-center justify-center text-sm transition cursor-pointer" title="Close and Visit Site">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+
+            <div class="flex flex-col items-center justify-center space-y-2">
+                <div class="w-14 h-14 rounded-2xl bg-gradient-to-tr from-sky-500 to-blue-600 flex items-center justify-center shadow-lg text-white text-2xl">
+                    <i class="fa-solid fa-droplet animate-bounce"></i>
+                </div>
+                <h2 class="text-3xl font-black text-slate-900 tracking-wider font-heading uppercase">TARAL</h2>
+                <p class="text-xs font-bold text-sky-600 tracking-widest uppercase">Nature's Flow, Health and Glow</p>
+            </div>
+
+            <!-- STEP 1 -->
+            <div id="welcomeStep1" class="space-y-4 pt-2">
+                <p class="text-sm text-slate-600 font-medium">Welcome! Refresh your mood today or explore our official website ✨</p>
+                
+                <div class="space-y-3">
+                    <button onclick="openMoodSelector()" class="w-full btn-gradient text-white py-4 px-6 rounded-2xl font-bold text-sm sm:text-base uppercase tracking-wider flex items-center justify-center gap-3 shadow-lg hover:scale-[1.02] transition cursor-pointer">
+                        <span>💖 Get Today's Mood Refresh Message</span>
+                    </button>
+
+                    <button onclick="visitOfficialWebsite()" class="w-full bg-slate-100 hover:bg-sky-50 text-slate-800 hover:text-sky-700 border border-slate-200 py-3.5 px-6 rounded-2xl font-bold text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 transition cursor-pointer">
+                        <span>🌐 Visit Our Official Website / Offers</span>
+                        <i class="fa-solid fa-arrow-right text-xs"></i>
+                    </button>
+                </div>
+            </div>
+
+            <!-- STEP 2 -->
+            <div id="welcomeStep2" class="hidden space-y-4 pt-2">
+                <p class="text-sm font-bold text-slate-800">Choose your vibe to unlock today's message:</p>
+                
+                <div class="grid grid-cols-2 gap-3">
+                    <button onclick="showMoodCard('her')" class="bg-gradient-to-r from-pink-500 to-rose-500 hover:from-pink-600 hover:to-rose-600 text-white p-4 rounded-2xl font-black text-sm uppercase tracking-wider flex flex-col items-center justify-center gap-2 shadow-md hover:scale-105 transition cursor-pointer">
+                        <span class="text-2xl">🌸</span>
+                        <span>For Her</span>
+                    </button>
+
+                    <button onclick="showMoodCard('him')" class="bg-gradient-to-r from-sky-600 to-blue-700 hover:from-sky-700 hover:to-blue-800 text-white p-4 rounded-2xl font-black text-sm uppercase tracking-wider flex flex-col items-center justify-center gap-2 shadow-md hover:scale-105 transition cursor-pointer">
+                        <span class="text-2xl">⚡</span>
+                        <span>For Him</span>
+                    </button>
+                </div>
+
+                <button onclick="backToStep1()" class="w-full py-2 text-xs font-bold text-slate-500 hover:text-sky-600 flex items-center justify-center gap-1.5 transition cursor-pointer border-t border-slate-100 pt-3">
+                    <i class="fa-solid fa-arrow-left"></i> Back
+                </button>
+            </div>
+
+            <!-- STEP 3 -->
+            <div id="welcomeStep3" class="hidden space-y-5 pt-1">
+                <div id="moodCardContainer" class="p-6 rounded-2xl border text-left relative overflow-hidden shadow-inner space-y-3">
+                    <div id="moodBadge" class="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest"></div>
+                    <p id="moodQuoteText" class="text-sm sm:text-base font-extrabold text-slate-800 leading-relaxed italic font-heading"></p>
+
+                    <div class="border-t border-slate-200/60 pt-2 flex justify-between items-center text-[10px] font-bold text-slate-400">
+                        <span>✨ Daily Compliment of the Day</span>
+                        <span class="text-sky-600 font-extrabold uppercase">#TARALHydration</span>
+                    </div>
+                </div>
+
+                <div class="space-y-2.5">
+                    <button onclick="shareOnInstaStory()" class="w-full insta-gradient text-white py-3.5 px-5 rounded-2xl font-bold text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-md hover:scale-[1.02] transition cursor-pointer">
+                        <i class="fa-brands fa-instagram text-lg"></i> Share on Instagram Story / Copy
+                    </button>
+
+                    <button onclick="visitOfficialWebsite()" class="w-full bg-sky-900 hover:bg-slate-900 text-white py-3.5 px-5 rounded-2xl font-bold text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-md transition cursor-pointer">
+                        <span>🌐 Visit Official Website / Offers</span>
+                        <i class="fa-solid fa-arrow-right"></i>
+                    </button>
+                </div>
+
+                <div class="flex justify-between items-center border-t border-slate-100 pt-3 text-xs font-bold text-slate-500">
+                    <button onclick="backToStep2()" class="hover:text-sky-600 flex items-center gap-1 transition cursor-pointer">
+                        <i class="fa-solid fa-arrow-left"></i> Change Gender / Vibe
+                    </button>
+                    <button onclick="backToStep1()" class="hover:text-sky-600 flex items-center gap-1 transition cursor-pointer">
+                        Main Menu <i class="fa-solid fa-house"></i>
+                    </button>
+                </div>
+
+                <p id="copyToast" class="text-[11px] font-bold text-emerald-600 min-h-[16px]"></p>
+            </div>
+        </div>
+    </div>
+
+    <!-- FLOATING RE-OPEN MOOD POPUP BUTTON -->
+    <button onclick="openWelcomeOverlay()" class="fixed bottom-4 left-4 z-50 bg-white hover:bg-sky-50 text-sky-800 px-3.5 py-2.5 rounded-full shadow-2xl border-2 border-sky-300 flex items-center gap-2 text-xs font-bold transition hover:scale-105 cursor-pointer">
+        <span class="text-base">💖</span>
+        <span class="hidden sm:inline">Refresh Mood</span>
+    </button>
+
+    <!-- FLOATING SOCIAL WIDGETS -->
+    <div class="fixed bottom-4 right-4 z-50 flex flex-col space-y-2.5 items-center">
+        <button onclick="scrollToTop()" title="Go to Top" class="bg-white hover:bg-slate-100 text-sky-600 w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center shadow-xl border border-sky-200 transition hover:scale-110 cursor-pointer">
+            <i class="fa-solid fa-arrow-up text-sm sm:text-base"></i>
+        </button>
+
+        <a href="https://www.linkedin.com/company/the-taral/" target="_blank" title="TARAL LinkedIn Page" class="bg-[#0a66c2] hover:bg-[#084e96] text-white w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shadow-2xl transition-all hover:scale-110 border-2 border-white animate-bounce">
+            <i class="fa-brands fa-linkedin-in text-lg sm:text-xl"></i>
+        </a>
+
+        <a href="https://www.facebook.com/share/1EZ7kXudrS/" target="_blank" title="TARAL Facebook Page" class="bg-blue-600 hover:bg-blue-500 text-white w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shadow-2xl transition-all hover:scale-110 border-2 border-white animate-bounce">
+            <i class="fa-brands fa-facebook-f text-lg sm:text-xl"></i>
+        </a>
+
+        <a href="https://www.instagram.com/taral_.09?igsh=MWszMjl1bnZ1cjRpMg==" target="_blank" title="TARAL Instagram Profile" class="insta-gradient text-white w-11 h-11 sm:w-12 sm:h-12 rounded-full flex items-center justify-center shadow-2xl transition-all hover:scale-110 border-2 border-white animate-bounce">
+            <i class="fa-brands fa-instagram text-xl sm:text-2xl"></i>
+        </a>
+
+        <a href="https://wa.me/917432057456?text=Hello%20TARAL%20Team%2C%20I%20am%20interested%20in%20becoming%20a%20partner." target="_blank" title="WhatsApp Order" class="bg-emerald-500 hover:bg-emerald-400 text-white w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center shadow-2xl transition-all hover:scale-110 border-2 border-white animate-bounce">
+            <i class="fa-brands fa-whatsapp text-2xl sm:text-3xl"></i>
+        </a>
+    </div>
+
+    <!-- Top Ribbon -->
+    <div class="bg-gradient-to-r from-sky-700 via-blue-700 to-indigo-800 text-white text-[11px] sm:text-xs py-2 px-3 text-center border-b border-sky-600">
+        <span class="font-bold bg-white text-sky-900 px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] uppercase tracking-wider mr-1.5 inline-block">B2B Launch</span>
+        <span>TARAL Water is accepting Distributors & Retailers!</span>
+        <button onclick="scrollToSection('calculator')" class="underline ml-1.5 font-bold hover:text-sky-200 inline-block cursor-pointer">Calculate Margin &rarr;</button>
+    </div>
+
+    <!-- Navigation Header -->
+    <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-sky-100 px-4 sm:px-6 py-3 sm:py-4 shadow-sm">
+        <div class="max-w-7xl mx-auto flex justify-between items-center">
+            <a href="#" onclick="scrollToTop()" class="flex items-center space-x-2.5">
+                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-teal-600 to-teal-800 flex items-center justify-center shadow-md">
+                    <i class="fa-solid fa-droplet text-white text-lg sm:text-xl"></i>
+                </div>
+                <div>
+                    <span class="text-xl sm:text-2xl font-black tracking-wider text-slate-900 block leading-none font-heading uppercase">TARAL</span>
+                    <span class="text-[8px] sm:text-[9px] tracking-widest text-teal-700 font-bold uppercase">Nature's Flow</span>
+                </div>
+            </a>
+            
+            <div class="hidden lg:flex items-center space-x-8 font-semibold text-sm text-slate-600">
+                <button onclick="scrollToTop()" class="hover:text-sky-600 transition cursor-pointer">Home</button>
+                <button onclick="scrollToSection('about')" class="hover:text-sky-600 transition cursor-pointer">Brand Philosophy</button>
+                <button onclick="scrollToSection('pricing')" class="hover:text-sky-600 transition cursor-pointer">Products & Pricing</button>
+                <button onclick="scrollToSection('hydration')" class="hover:text-sky-600 transition cursor-pointer">Hydration Calculator</button>
+                <button onclick="scrollToSection('calculator')" class="hover:text-sky-600 transition cursor-pointer">Margin & Quotation</button>
+                <button onclick="scrollToSection('filtration')" class="hover:text-sky-600 transition cursor-pointer">5-Stage Filtration</button>
+                <button onclick="scrollToSection('faqs')" class="hover:text-sky-600 transition cursor-pointer">Merchant FAQ</button>
+            </div>
+
+            <button onclick="scrollToSection('contact')" class="btn-gradient px-3.5 py-2 sm:px-5 sm:py-2.5 rounded-xl font-bold text-[11px] sm:text-xs text-white uppercase tracking-wider flex items-center gap-1.5 shadow-sm cursor-pointer">
+                <i class="fa-brands fa-whatsapp text-sm"></i> Order WhatsApp
+            </button>
+        </div>
+    </nav>
+
+    <!-- HERO SECTION -->
+    <section id="home" class="relative min-h-[80vh] sm:min-h-[85vh] flex items-center justify-center pt-6 pb-12 sm:pt-8 sm:pb-16 px-4 sm:px-6 bg-gradient-to-b from-sky-50/80 via-white to-slate-50 overflow-hidden">
+        <div class="bg-watermark-overlay"></div>
+
+        <div class="max-w-7xl mx-auto grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 items-center relative z-10">
+            
+            <div class="lg:col-span-7 space-y-4 sm:space-y-6 text-left">
+                <span class="inline-flex items-center space-x-2 px-3 py-1 sm:px-4 sm:py-1.5 rounded-full bg-sky-100/90 border border-sky-200 text-sky-800 text-[10px] sm:text-xs font-bold uppercase tracking-widest shadow-sm">
+                    <i class="fa-solid fa-shield-halved text-sky-600"></i> FSSAI & GST Certified
+                </span>
+
+                <div class="space-y-2 sm:space-y-3">
+                    <h1 class="text-5xl sm:text-7xl md:text-8xl font-black tracking-tight leading-none font-heading uppercase">
+                        <span class="gradient-text drop-shadow-sm">TARAL</span>
+                    </h1>
+                    <div class="inline-block bg-gradient-to-r from-sky-500/10 via-blue-500/10 to-transparent border-l-4 border-sky-600 pl-3 sm:pl-4 py-1.5 rounded-r-xl">
+                        <p class="text-lg sm:text-2xl md:text-3xl font-extrabold text-sky-800 tracking-wide font-heading italic">
+                            "Nature's Flow, Health and Glow."
+                        </p>
+                    </div>
+                </div>
+
+                <p class="text-slate-600 text-sm sm:text-base md:text-lg leading-relaxed max-w-2xl font-normal">
+                    Welcome to <strong class="text-slate-900">TARAL Packaged Drinking Water</strong>. Standardized with RO, UF, UV Disinfection, and Ozonation for absolute purity and optimal TDS balance in every drop.
+                </p>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5 sm:gap-3 pt-1 sm:pt-2">
+                    <div class="clean-card p-2.5 sm:p-3 rounded-xl sm:rounded-2xl flex items-center space-x-2.5 sm:space-x-3">
+                        <i class="fa-solid fa-chart-line text-blue-600 text-lg sm:text-xl shrink-0"></i>
+                        <div>
+                            <p class="text-[9px] sm:text-[10px] text-slate-500 font-medium">Distributor Margin</p>
+                            <p class="text-[11px] sm:text-xs font-bold text-slate-900">Up to 30.00%</p>
+                        </div>
+                    </div>
+                    <div class="clean-card p-2.5 sm:p-3 rounded-xl sm:rounded-2xl flex items-center space-x-2.5 sm:space-x-3">
+                        <i class="fa-solid fa-store text-emerald-600 text-lg sm:text-xl shrink-0"></i>
+                        <div>
+                            <p class="text-[9px] sm:text-[10px] text-slate-500 font-medium">Retailer Margin</p>
+                            <p class="text-[11px] sm:text-xs font-bold text-slate-900">Up to 53.85%</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="flex flex-col sm:flex-row gap-3 sm:gap-4 pt-2">
+                    <button onclick="scrollToSection('contact')" class="btn-gradient px-6 py-3.5 sm:px-8 sm:py-4 rounded-xl font-bold text-white text-xs sm:text-sm flex items-center justify-center gap-2.5 uppercase tracking-wider shadow-md w-full sm:w-auto cursor-pointer">
+                        <i class="fa-brands fa-whatsapp text-lg sm:text-xl"></i> Direct Partner / Case Order
+                    </button>
+                    <a href="1000243677.png" download="TARAL_Business_Brochure.png" class="bg-white hover:bg-sky-50 text-sky-700 px-5 py-3.5 sm:px-6 sm:py-4 rounded-xl font-bold text-xs sm:text-sm border border-sky-200 transition flex items-center justify-center gap-2 shadow-sm w-full sm:w-auto">
+                        <i class="fa-solid fa-file-pdf text-rose-500 text-base sm:text-lg"></i> Download Business Brochure
+                    </a>
+                </div>
+
+                <div class="flex items-center space-x-3.5 sm:space-x-4 pt-3 border-t border-slate-200">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-full bg-gradient-to-r from-sky-500 to-blue-600 flex items-center justify-center font-bold text-white font-heading text-base sm:text-lg shadow-sm shrink-0">
+                        RP
+                    </div>
+                    <div>
+                        <p class="text-[11px] sm:text-xs text-slate-500 font-medium">Promoter / Founder</p>
+                        <p class="text-xs sm:text-sm font-bold text-slate-900">Ritik Pathak</p>
+                        <p class="text-[10px] sm:text-[11px] text-sky-700 font-medium">Corporate Address: Pari Chowk, Greater Noida, UP - 201315</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-5 relative flex justify-center">
+                <div class="clean-card p-2.5 sm:p-3 rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl relative animate-float max-w-md w-full overflow-hidden bg-white border border-teal-100">
+                    <div class="relative rounded-xl sm:rounded-2xl overflow-hidden bg-slate-100 flex justify-center items-center h-[340px] sm:h-[450px]">
+                        <img src="taral water bottle.jpeg" alt="TARAL Premium Packaged Drinking Water Bottles" class="w-full h-full object-cover object-center hover:scale-105 transition duration-700">
+                        
+                        <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-teal-950 via-teal-900/80 to-transparent p-4 sm:p-5 text-center">
+                            <h3 class="text-xl sm:text-2xl font-black text-white font-heading tracking-wide">TARAL Premium Hydration</h3>
+                            <p class="text-[11px] sm:text-xs text-teal-100 font-semibold mt-0.5">Nature's Flow, Health and Glow</p>
+                        </div>
+                    </div>
+
+                    <div class="absolute -top-3 -left-3 sm:-top-4 sm:-left-4 bg-white/95 backdrop-blur-md p-2 sm:p-2.5 rounded-xl sm:rounded-2xl border border-sky-200 shadow-lg flex items-center space-x-2">
+                        <svg class="w-8 h-8 sm:w-10 sm:h-10 animate-bounce" viewBox="0 0 100 100" fill="none">
+                            <path d="M50 10 C50 10 20 55 20 70 C20 86.5 33.4 100 50 100 C66.6 100 80 86.5 80 70 C80 55 50 10 50 10Z" fill="#0D9488"/>
+                            <circle cx="40" cy="65" r="5" fill="#031321"/>
+                            <circle cx="60" cy="65" r="5" fill="#031321"/>
+                            <circle cx="42" cy="63" r="2" fill="#ffffff"/>
+                            <circle cx="62" cy="63" r="2" fill="#ffffff"/>
+                            <path d="M40 78 Q50 88 60 78" stroke="#031321" stroke-width="4" stroke-linecap="round" fill="none"/>
+                            <ellipse cx="28" cy="72" rx="5" ry="3" fill="#f43f5e" opacity="0.6"/>
+                            <ellipse cx="72" cy="72" rx="5" ry="3" fill="#f43f5e" opacity="0.6"/>
+                        </svg>
+                        <div>
+                            <p class="text-[8px] sm:text-[9px] text-slate-500 uppercase font-bold">Official Mascot</p>
+                            <p class="text-[11px] sm:text-xs font-extrabold text-slate-900">Droppy Says Hi! 💧</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </section>
+
+    <!-- LIVE ASSURANCE STATS -->
+    <section class="py-6 sm:py-8 px-4 sm:px-6 max-w-4xl mx-auto">
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+            <div class="clean-card p-4 sm:p-5 rounded-2xl border border-sky-100 text-center bg-white">
+                <i class="fa-solid fa-shield-check text-2xl sm:text-3xl text-emerald-500 mb-1"></i>
+                <h3 class="text-xl sm:text-2xl font-black text-slate-900">100% Guaranteed</h3>
+                <p class="text-[10px] sm:text-[11px] text-slate-500 uppercase font-bold">FSSAI Batch Tested</p>
+            </div>
+            <div class="clean-card p-4 sm:p-5 rounded-2xl border border-sky-100 text-center bg-white">
+                <i class="fa-solid fa-clock text-2xl sm:text-3xl text-sky-500 mb-1"></i>
+                <h3 class="text-xl sm:text-2xl font-black text-slate-900">24 Hours</h3>
+                <p class="text-[10px] sm:text-[11px] text-slate-500 uppercase font-bold">Doorstep Replenishment</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SAMPLE BOTTLE REQUEST SECTION -->
+    <section id="sample" class="py-8 sm:py-12 px-4 sm:px-6 max-w-7xl mx-auto">
+        <div class="clean-card p-6 sm:p-10 rounded-2xl sm:rounded-3xl border border-sky-200 relative overflow-hidden bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-xl">
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center">
+                <div class="lg:col-span-7 space-y-3 sm:space-y-4">
+                    <span class="text-[10px] sm:text-xs font-bold text-sky-900 uppercase tracking-widest bg-white/90 px-3 py-1 rounded-full shadow-sm inline-block">
+                        Exclusive B2B Trial
+                    </span>
+                    <h2 class="text-2xl sm:text-4xl font-extrabold text-white font-heading">
+                        Are You a Retailer, Cafe, Hotel, or Club Owner?
+                    </h2>
+                    <p class="text-sky-100 text-xs sm:text-sm leading-relaxed">
+                        TARAL Water ki water purity aur premium bottle design test karne ke liye aage badhein. Apne outlet/business details submit karein aur direct free trial batch request karein!
+                    </p>
+                    <div class="flex flex-wrap gap-2 sm:gap-3 pt-1">
+                        <span class="text-[10px] sm:text-[11px] bg-sky-700/60 text-white px-2.5 py-1 rounded-lg border border-white/20">✓ Zero Risk</span>
+                        <span class="text-[10px] sm:text-[11px] bg-sky-700/60 text-white px-2.5 py-1 rounded-lg border border-white/20">✓ 24-Hour Doorstep Delivery</span>
+                        <span class="text-[10px] sm:text-[11px] bg-sky-700/60 text-white px-2.5 py-1 rounded-lg border border-white/20">✓ High Retailer Margin</span>
+                    </div>
+                </div>
+
+                <div class="lg:col-span-5 text-center lg:text-right pt-2 lg:pt-0">
+                    <button onclick="requestSample()" class="w-full sm:w-auto bg-white hover:bg-slate-100 text-sky-900 font-black px-6 py-4 sm:px-8 sm:py-5 rounded-xl sm:rounded-2xl text-xs sm:text-sm uppercase tracking-wider shadow-2xl transition hover:scale-105 inline-flex items-center justify-center gap-2.5 cursor-pointer">
+                        <i class="fa-solid fa-box-open text-lg sm:text-xl text-sky-600"></i> Order Free Sample Case / Trial
+                    </button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- DELIVERY COVERAGE CHECKER SECTION -->
+    <section class="py-6 sm:py-8 px-4 sm:px-6 max-w-4xl mx-auto">
+        <div class="clean-card p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-sky-100 space-y-3 sm:space-y-4 bg-white">
+            <div class="flex items-center space-x-3">
+                <i class="fa-solid fa-truck-fast text-xl sm:text-2xl text-sky-600 shrink-0"></i>
+                <div>
+                    <h4 class="text-base sm:text-lg font-bold text-slate-900 font-heading">24-Hour Express Delivery Checker</h4>
+                    <p class="text-[11px] sm:text-xs text-slate-500">Check express supply availability in your location</p>
+                </div>
+            </div>
+
+            <div class="space-y-2.5 pt-1">
+                <div class="flex flex-col sm:flex-row gap-2">
+                    <input type="text" id="pincodeInput" maxlength="6" placeholder="Enter Pincode (e.g., 201315)" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 text-xs focus:outline-none focus:border-sky-500">
+                    <button onclick="checkPincode()" class="btn-gradient px-5 py-3 rounded-xl font-bold text-xs uppercase text-white shrink-0 cursor-pointer">Check Availability</button>
+                </div>
+                <p id="pincodeResult" class="text-xs font-bold text-emerald-600 min-h-[18px]"></p>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 1: BRAND VISION -->
+    <section id="about" class="py-12 sm:py-16 px-4 sm:px-6 bg-white border-y border-slate-200">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center max-w-3xl mx-auto mb-10 sm:mb-16 space-y-2 sm:space-y-3">
+                <span class="text-[10px] sm:text-xs font-bold text-sky-700 uppercase tracking-widest bg-sky-100 px-3.5 py-1.5 rounded-full border border-sky-200 inline-block">
+                    1. Introduction & Legal Standardization
+                </span>
+                <h2 class="text-2xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 font-heading">
+                    Brand Vision & Compliances
+                </h2>
+                <p class="text-slate-600 text-xs sm:text-sm md:text-base leading-relaxed">
+                    TARAL operates utilizing state-of-the-art production infrastructures. This keeps capital liabilities low and passes higher financial margins directly to partners.
+                </p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-8">
+                <div class="clean-card p-6 sm:p-8 rounded-2xl sm:rounded-3xl clean-card-hover bg-slate-50">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-sky-100 rounded-2xl flex items-center justify-center text-sky-600 text-lg sm:text-xl mb-3.5 border border-sky-200">
+                        <i class="fa-solid fa-building-columns"></i>
+                    </div>
+                    <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-1.5 font-heading">MCA Company Registration</h3>
+                    <p class="text-slate-600 text-xs leading-relaxed">
+                        Fully incorporated under the Ministry of Corporate Affairs (MCA), ensuring complete institutional stability, legal backing, and institutional compliance.
+                    </p>
+                </div>
+
+                <div class="clean-card p-6 sm:p-8 rounded-2xl sm:rounded-3xl clean-card-hover bg-slate-50">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-100 rounded-2xl flex items-center justify-center text-blue-600 text-lg sm:text-xl mb-3.5 border border-blue-200">
+                        <i class="fa-solid fa-shield-virus"></i>
+                    </div>
+                    <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-1.5 font-heading">FSSAI Certified</h3>
+                    <p class="text-slate-600 text-xs leading-relaxed">
+                        Certified by the Food Safety and Standards Authority of India. Every single batch consistently matches and exceeds mandated safety norms.
+                    </p>
+                </div>
+
+                <div class="clean-card p-6 sm:p-8 rounded-2xl sm:rounded-3xl clean-card-hover bg-slate-50">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-emerald-100 rounded-2xl flex items-center justify-center text-emerald-600 text-lg sm:text-xl mb-3.5 border border-emerald-200">
+                        <i class="fa-solid fa-copyright"></i>
+                    </div>
+                    <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-1.5 font-heading">Trademark Protection</h3>
+                    <p class="text-slate-600 text-xs leading-relaxed">
+                        The brand name 'TARAL' and visual assets are trademark-protected, securing intellectual property rights against counterfeiting.
+                    </p>
+                </div>
+
+                <div class="clean-card p-6 sm:p-8 rounded-2xl sm:rounded-3xl clean-card-hover bg-slate-50">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-indigo-100 rounded-2xl flex items-center justify-center text-indigo-600 text-lg sm:text-xl mb-3.5 border border-indigo-200">
+                        <i class="fa-solid fa-file-invoice-dollar"></i>
+                    </div>
+                    <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-1.5 font-heading">GST Registered Invoicing</h3>
+                    <p class="text-slate-600 text-xs leading-relaxed">
+                        Verified Goods and Services Tax registration facilitating fully digitized, transparent, and audit-safe GST-compliant invoicing for B2B buyers.
+                    </p>
+                </div>
+
+                <div class="clean-card p-6 sm:p-8 rounded-2xl sm:rounded-3xl clean-card-hover bg-slate-50">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-purple-100 rounded-2xl flex items-center justify-center text-purple-600 text-lg sm:text-xl mb-3.5 border border-purple-200">
+                        <i class="fa-solid fa-qrcode"></i>
+                    </div>
+                    <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-1.5 font-heading">Mobile QR Code Scan</h3>
+                    <p class="text-slate-600 text-xs leading-relaxed">
+                        Integrated mobile-scannable QR codes printable on bottles for direct mobile camera scanning and instant website redirection.
+                    </p>
+                </div>
+
+                <div class="clean-card p-6 sm:p-8 rounded-2xl sm:rounded-3xl clean-card-hover bg-slate-50">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-teal-100 rounded-2xl flex items-center justify-center text-teal-600 text-lg sm:text-xl mb-3.5 border border-teal-200">
+                        <i class="fa-solid fa-truck-fast"></i>
+                    </div>
+                    <h3 class="text-lg sm:text-xl font-bold text-slate-900 mb-1.5 font-heading">24-Hour Local Replenishment</h3>
+                    <p class="text-slate-600 text-xs leading-relaxed">
+                        Dedicated local distribution hub at Pari Chowk, Greater Noida guarantees doorstep fulfillment within 24 hours to prevent stock-outs.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 2: PRODUCTS & MARKET PRICING -->
+    <section id="pricing" class="py-12 sm:py-16 px-4 sm:px-6 max-w-7xl mx-auto border-t border-slate-200 mt-6 sm:mt-10">
+        <div class="text-center max-w-3xl mx-auto mb-10 sm:mb-16 space-y-2 sm:space-y-3">
+            <span class="text-[10px] sm:text-xs font-bold text-sky-700 uppercase tracking-widest bg-sky-100 px-3.5 py-1.5 rounded-full border border-sky-200 inline-block">
+                Bottle Sizes & Wholesale Rates
+            </span>
+            <h2 class="text-2xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 font-heading">
+                Standard Market Bottle Sizes
+            </h2>
+            <p class="text-slate-600 text-xs sm:text-sm md:text-base">
+                TARAL offers luxury-grade bottle design and pure taste at standard market-competitive prices.
+            </p>
+        </div>
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-5xl mx-auto">
+            <!-- 500ml Bottle Card -->
+            <div class="clean-card p-6 sm:p-8 rounded-2xl sm:rounded-3xl border border-teal-200 relative overflow-hidden bg-white shadow-lg">
+                <div class="absolute top-0 right-0 bg-teal-600 text-white font-black text-[9px] sm:text-[10px] uppercase px-3 py-1 sm:px-4 sm:py-1 rounded-bl-xl tracking-wider z-10 shadow-md">
+                    High Volume Pickup
+                </div>
+                
+                <div class="h-52 sm:h-64 w-full mb-5 sm:mb-6 rounded-xl sm:rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 relative group">
+                    <img src="taral water bottle.jpeg" alt="TARAL 500ml Bottle" class="w-full h-full object-cover object-center group-hover:scale-110 transition duration-700">
+                    <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent flex items-end p-3.5 sm:p-4">
+                        <span class="text-white font-bold text-base sm:text-lg font-heading tracking-wide">500ml Retail Pack</span>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-3 sm:space-x-4 mb-4">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-teal-50 rounded-xl flex items-center justify-center text-teal-600 text-xl sm:text-2xl border border-teal-100 shrink-0">
+                        <i class="fa-solid fa-bottle-water"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg sm:text-xl font-bold text-slate-900 font-heading">500ml Handheld Bottle</h3>
+                        <p class="text-slate-500 text-[10px] sm:text-[11px] font-semibold">Ideal for Transit Hubs, Events, and Cafes</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-200 mb-5 sm:mb-6 space-y-2">
+                    <div class="flex justify-between text-xs text-slate-600">
+                        <span>Standard Carton Box:</span>
+                        <span class="text-slate-900 font-bold">24 Bottles / Case</span>
+                    </div>
+                    <div class="flex justify-between text-xs text-slate-600 border-t border-slate-200 pt-2">
+                        <span>Distributor Margin Rate:</span>
+                        <span class="text-sky-600 font-bold">14.29% Margin</span>
+                    </div>
+                    <div class="flex justify-between text-xs text-slate-600 border-t border-slate-200 pt-2">
+                        <span>Retailers Margin Rate:</span>
+                        <span class="text-emerald-600 font-bold">25.00% Margin</span>
+                    </div>
+                </div>
+
+                <button onclick="scrollToSection('contact')" class="btn-gradient w-full py-3 sm:py-3.5 rounded-xl font-bold text-white text-xs uppercase tracking-wider text-center block shadow-md cursor-pointer">
+                    Order 500ml Cases Now
+                </button>
+            </div>
+
+            <!-- 1 Litre Bottle Card -->
+            <div class="clean-card p-6 sm:p-8 rounded-2xl sm:rounded-3xl border border-sky-100 relative overflow-hidden bg-white">
+                <div class="absolute top-0 right-0 bg-blue-600 text-white font-black text-[9px] sm:text-[10px] uppercase px-3 py-1 sm:px-4 sm:py-1 rounded-bl-xl tracking-wider z-10">
+                    Daily Utility Standard
+                </div>
+                
+                <div class="h-52 sm:h-64 w-full mb-5 sm:mb-6 rounded-xl sm:rounded-2xl overflow-hidden bg-blue-50 border border-blue-100 flex flex-col items-center justify-center space-y-2 sm:space-y-3">
+                    <i class="fa-solid fa-whiskey-glass text-5xl sm:text-6xl text-blue-300"></i>
+                    <span class="text-blue-800 font-bold text-base sm:text-lg font-heading tracking-wide">1000ml (1 Litre) Pack</span>
+                </div>
+
+                <div class="flex items-center space-x-3 sm:space-x-4 mb-4">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-blue-50 rounded-xl flex items-center justify-center text-blue-600 text-xl sm:text-2xl border border-blue-100 shrink-0">
+                        <i class="fa-solid fa-bottle-droplet"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg sm:text-xl font-bold text-slate-900 font-heading">1000ml (1 Litre) Bottle</h3>
+                        <p class="text-slate-500 text-[10px] sm:text-[11px] font-semibold">Ideal for Kirana Stores and Home Daily Need</p>
+                    </div>
+                </div>
+
+                <div class="bg-slate-50 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border border-slate-200 mb-5 sm:mb-6 space-y-2">
+                    <div class="flex justify-between text-xs text-slate-600">
+                        <span>Standard Carton Box:</span>
+                        <span class="text-slate-900 font-bold">12 Bottles / Case</span>
+                    </div>
+                    <div class="flex justify-between text-xs text-slate-600 border-t border-slate-200 pt-2">
+                        <span>Distributor Margin Rate:</span>
+                        <span class="text-blue-600 font-bold">30.00% Margin</span>
+                    </div>
+                    <div class="flex justify-between text-xs text-slate-600 border-t border-slate-200 pt-2">
+                        <span>Retailers Margin Rate:</span>
+                        <span class="text-emerald-600 font-bold">53.85% Margin</span>
+                    </div>
+                </div>
+
+                <button onclick="scrollToSection('contact')" class="btn-gradient w-full py-3 sm:py-3.5 rounded-xl font-bold text-white text-xs uppercase tracking-wider text-center block shadow-md cursor-pointer">
+                    Order 1L Cases Now
+                </button>
+            </div>
+        </div>
+    </section>
+
+    <!-- DAILY HYDRATION CALCULATOR -->
+    <section id="hydration" class="py-8 sm:py-12 px-4 sm:px-6 max-w-5xl mx-auto">
+        <div class="clean-card p-6 sm:p-10 rounded-2xl sm:rounded-3xl border border-sky-200 space-y-5 sm:space-y-6 bg-white">
+            <div class="text-center max-w-2xl mx-auto space-y-2">
+                <span class="text-[10px] sm:text-xs font-bold text-sky-700 uppercase tracking-widest bg-sky-100 px-3.5 py-1 rounded-full border border-sky-200 inline-block">
+                    Consumer Wellness Tool
+                </span>
+                <h2 class="text-2xl sm:text-4xl font-bold text-slate-900 font-heading">Daily Hydration Calculator</h2>
+                <p class="text-slate-500 text-xs sm:text-sm">Apna Body Weight aur Activity Level select karke jaanein aapko daily kitne Litres TARAL Water ki zaroorat hai!</p>
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 pt-1">
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Your Weight (KG): <span id="weightVal" class="text-sky-600 font-bold text-sm">65 KG</span></label>
+                    <input type="range" id="userWeight" min="30" max="120" value="65" oninput="calculateHydration()" class="w-full accent-sky-600 cursor-pointer h-2 bg-slate-200 rounded-lg">
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">Daily Activity Level</label>
+                    <select id="userActivity" onchange="calculateHydration()" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 text-xs focus:outline-none focus:border-sky-500">
+                        <option value="1.0">Normal / Office Work (Low Sweat)</option>
+                        <option value="1.2">Active / Moderate Exercise (Moderate)</option>
+                        <option value="1.4">Athlete / Heavy Workout / Outdoor (High Sweat)</option>
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 bg-sky-50/80 p-5 sm:p-6 rounded-xl sm:rounded-2xl border border-sky-100 text-center">
+                <div>
+                    <p class="text-[10px] sm:text-[11px] text-slate-500 uppercase font-bold">Recommended Daily Water Intake</p>
+                    <h3 id="hydrationLiters" class="text-2xl sm:text-3xl font-black text-sky-600 mt-1">2.3 Litres / Day</h3>
+                </div>
+                <div>
+                    <p class="text-[10px] sm:text-[11px] text-slate-500 uppercase font-bold">TARAL Bottles Equivalent</p>
+                    <h3 id="hydrationBottles" class="text-xl sm:text-2xl font-extrabold text-blue-600 mt-1">~5x 500ml Bottles</h3>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- MARGIN CALCULATOR SECTION -->
+    <section id="calculator" class="py-12 sm:py-16 px-4 sm:px-6 bg-white border-y border-slate-200 mt-6 sm:mt-10">
+        <div class="max-w-5xl mx-auto space-y-6 sm:space-y-8">
+            <div class="text-center max-w-3xl mx-auto space-y-2.5 sm:space-y-3">
+                <span class="text-[10px] sm:text-xs font-bold text-sky-700 uppercase tracking-widest bg-sky-100 px-3.5 py-1.5 rounded-full border border-sky-200 inline-block">
+                    Live B2B ROI Calculator
+                </span>
+                
+                <h2 class="text-2xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 font-heading">
+                    Distributor & Retailer Margin Calculator
+                </h2>
+
+                <div class="inline-flex items-center gap-2 bg-gradient-to-r from-amber-500 via-orange-500 to-amber-600 text-white font-extrabold px-4 py-2 sm:px-6 sm:py-2 rounded-full text-[11px] sm:text-sm uppercase tracking-wider shadow-lg border-2 border-amber-300 animate-pulse my-1">
+                    <i class="fa-solid fa-handshake text-sm sm:text-base"></i> Special Negotiable Margins & Extra Bulk Discounts Available!
+                </div>
+
+                <p class="text-slate-600 text-xs sm:text-sm">
+                    Calculate direct margins, generate custom Proforma Estimate Quotations, and view 30% advance payment details instantly!
+                </p>
+            </div>
+
+            <div class="clean-card p-5 sm:p-10 rounded-2xl sm:rounded-3xl border border-sky-100 bg-slate-50">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-8 mb-6 sm:mb-8">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">1. Select Your Partner Role</label>
+                        <select id="calcRole" onchange="calculateProfit()" class="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 sm:py-3.5 text-slate-900 text-xs sm:text-sm focus:outline-none focus:border-sky-500">
+                            <option value="distributor">Regional Distributor</option>
+                            <option value="retailer">Retailer / Kirana Shop</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">2. Select Bottle Packing Size</label>
+                        <select id="calcSize" onchange="calculateProfit()" class="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 sm:py-3.5 text-slate-900 text-xs sm:text-sm focus:outline-none focus:border-sky-500">
+                            <option value="500ml">500ml Bottles (24 Bottles / Case)</option>
+                            <option value="1000ml">1000ml / 1L Bottles (12 Bottles / Case)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-5 sm:gap-6 mb-6 sm:mb-8 items-center">
+                    <div>
+                        <label class="block text-xs font-bold uppercase tracking-wider text-slate-700 mb-2">3. Enter Custom Case Quantity (No. of Cases)</label>
+                        <input type="number" id="customCasesInput" min="1" max="5000" value="100" oninput="calculateProfit()" placeholder="Enter cases (e.g. 25, 50, 100)" class="w-full bg-white border border-slate-300 rounded-xl px-4 py-3 sm:py-3.5 text-slate-900 text-sm focus:outline-none focus:border-sky-500 font-bold">
+                    </div>
+                    
+                    <div>
+                        <div class="flex justify-between items-center mb-2">
+                            <label class="block text-xs font-bold uppercase tracking-wider text-slate-700">Quick Volume Control</label>
+                            <p id="caseVal" class="text-xs font-bold text-sky-600">100 Cases Selected</p>
+                        </div>
+                        
+                        <div class="flex items-center gap-2.5">
+                            <button type="button" onclick="adjustCases(-1)" title="Decrease 1 Case" class="w-11 h-11 rounded-xl bg-sky-100 hover:bg-sky-200 active:bg-sky-300 text-sky-800 font-black text-2xl flex items-center justify-center border border-sky-300 shadow-sm shrink-0 transition cursor-pointer">–</button>
+                            
+                            <input type="range" id="calcCases" min="1" max="1000" step="1" value="100" oninput="syncCasesSlider(this.value)" class="w-full accent-sky-600 cursor-pointer h-2 bg-slate-200 rounded-lg">
+                            
+                            <button type="button" onclick="adjustCases(1)" title="Increase 1 Case" class="w-11 h-11 rounded-xl bg-sky-600 hover:bg-sky-700 active:bg-sky-800 text-white font-black text-2xl flex items-center justify-center border border-sky-600 shadow-sm shrink-0 transition cursor-pointer">+</button>
+                        </div>
+
+                        <div class="flex flex-wrap gap-1.5 sm:gap-2 pt-3 justify-end">
+                            <button type="button" onclick="adjustCases(10)" class="px-2.5 py-1 text-[10px] sm:text-[11px] font-bold bg-white hover:bg-sky-50 text-sky-700 rounded-lg border border-sky-200 shadow-sm transition cursor-pointer">+10 Cases</button>
+                            <button type="button" onclick="adjustCases(50)" class="px-2.5 py-1 text-[10px] sm:text-[11px] font-bold bg-white hover:bg-sky-50 text-sky-700 rounded-lg border border-sky-200 shadow-sm transition cursor-pointer">+50 Cases</button>
+                            <button type="button" onclick="adjustCases(100)" class="px-2.5 py-1 text-[10px] sm:text-[11px] font-bold bg-white hover:bg-sky-50 text-sky-700 rounded-lg border border-sky-200 shadow-sm transition cursor-pointer">+100 Cases</button>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4 pt-5 sm:pt-6 border-t border-slate-200 text-center">
+                    <div class="bg-white p-3.5 sm:p-4 rounded-xl sm:rounded-2xl border border-amber-300 relative">
+                        <span class="absolute -top-2.5 inset-x-0 mx-auto w-max bg-amber-500 text-white text-[8px] sm:text-[9px] uppercase font-extrabold px-2 py-0.5 rounded-full">Margin Rate</span>
+                        <p class="text-[10px] sm:text-[11px] text-slate-500 uppercase font-bold mt-1">Your Margin Rate</p>
+                        <h4 id="outMargin" class="text-xl sm:text-2xl font-extrabold text-sky-600 mt-1">14.29% Margin</h4>
+                    </div>
+                    <div class="bg-gradient-to-tr from-teal-500 to-teal-700 p-3.5 sm:p-4 rounded-xl sm:rounded-2xl text-white shadow-md">
+                        <p class="text-[10px] sm:text-[11px] text-teal-100 uppercase font-bold">Total Net Profit Earning</p>
+                        <h4 id="outEarnings" class="text-2xl sm:text-3xl font-black text-white mt-1">₹2,400 Profit</h4>
+                    </div>
+                </div>
+
+                <div class="mt-6 sm:mt-8 pt-5 sm:pt-6 border-t border-slate-200 flex flex-col sm:flex-row justify-between items-center gap-4 bg-amber-50/70 p-4 sm:p-5 rounded-xl sm:rounded-2xl border border-amber-200 shadow-sm text-center sm:text-left">
+                    <div class="space-y-1">
+                        <h4 class="text-xs sm:text-sm font-bold text-amber-900 flex items-center justify-center sm:justify-start gap-1.5"><i class="fa-solid fa-file-pdf text-rose-600"></i> Proforma Estimate Preview</h4>
+                        <p class="text-[11px] sm:text-xs text-amber-800 font-medium">Notice: This PDF is an <b>Unpaid Estimate Slip</b>. Original GST Tax Invoice & Final Delivery Voucher will be generated post 30% advance payment verification.</p>
+                    </div>
+                    <div class="flex flex-col sm:flex-row gap-2.5 w-full sm:w-auto">
+                        <button onclick="printInvoicePDF()" class="btn-gradient px-5 py-3 rounded-xl font-bold text-xs uppercase text-white tracking-wider flex items-center justify-center gap-2 shadow-md cursor-pointer w-full sm:w-auto shrink-0">
+                            <i class="fa-solid fa-file-pdf text-rose-200"></i> Print / Download PDF Quotation
+                        </button>
+                        <button onclick="shareInvoiceWhatsApp()" class="bg-emerald-50 hover:bg-emerald-100 px-5 py-3 rounded-xl font-bold text-xs uppercase text-emerald-700 border border-emerald-300 flex items-center justify-center gap-2 cursor-pointer w-full sm:w-auto shrink-0">
+                            <i class="fa-brands fa-whatsapp text-lg text-emerald-600"></i> Negotiate & Send Quote
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 4: 5-STAGE FILTRATION -->
+    <section id="filtration" class="py-12 sm:py-16 px-4 sm:px-6 max-w-7xl mx-auto">
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 items-center">
+            <div class="lg:col-span-6 space-y-4 sm:space-y-6">
+                <span class="text-[10px] sm:text-xs font-bold text-sky-700 uppercase tracking-widest bg-sky-100 px-3.5 py-1.5 rounded-full border border-sky-200 inline-block">
+                    Advanced Filtration Science
+                </span>
+                <h2 class="text-2xl sm:text-4xl font-extrabold text-slate-900 font-heading leading-tight">
+                    Multi-Stage FIC Filtration Process
+                </h2>
+                <p class="text-slate-600 text-xs sm:text-sm leading-relaxed">
+                    TARAL operates through state-of-the-art robotic co-packing facilities operating under automated parameter controls:
+                </p>
+
+                <div class="space-y-3 sm:space-y-4 pt-1">
+                    <div class="clean-card p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white flex items-start space-x-3.5 sm:space-x-4">
+                        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center font-bold shrink-0 mt-0.5 text-sm sm:text-base">1</div>
+                        <div>
+                            <h4 class="text-slate-900 font-bold text-sm sm:text-base">Reverse Osmosis (RO) Purification</h4>
+                            <p class="text-slate-500 text-[11px] sm:text-xs mt-0.5">Strips harmful heavy metals, pesticides, micro-solts, and dissolved chemical residues.</p>
+                        </div>
+                    </div>
+
+                    <div class="clean-card p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white flex items-start space-x-3.5 sm:space-x-4">
+                        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-blue-100 text-blue-600 flex items-center justify-center font-bold shrink-0 mt-0.5 text-sm sm:text-base">2</div>
+                        <div>
+                            <h4 class="text-slate-900 font-bold text-sm sm:text-base">Ultrafiltration (UF) & UV Disinfection</h4>
+                            <p class="text-slate-500 text-[11px] sm:text-xs mt-0.5">Eliminates 99.99% biological contaminants, bacteria, and viral pathogens without toxic chlorine.</p>
+                        </div>
+                    </div>
+
+                    <div class="clean-card p-3.5 sm:p-4 rounded-xl sm:rounded-2xl bg-white flex items-start space-x-3.5 sm:space-x-4">
+                        <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-indigo-100 text-indigo-600 flex items-center justify-center font-bold shrink-0 mt-0.5 text-sm sm:text-base">3</div>
+                        <div>
+                            <h4 class="text-slate-900 font-bold text-sm sm:text-base">Ozonation & Mineral TDS Balancing</h4>
+                            <p class="text-slate-500 text-[11px] sm:text-xs mt-0.5">Enriches water with essential minerals for a sweet, refreshing taste and cellular vitality.</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="lg:col-span-6 space-y-4">
+                <h3 class="text-lg sm:text-xl font-bold text-slate-900 font-heading mb-3 sm:mb-4">Target Market Penetration Sectors</h3>
+                
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div class="clean-card p-4 sm:p-5 rounded-xl sm:rounded-2xl bg-white space-y-1.5">
+                        <i class="fa-solid fa-store text-xl sm:text-2xl text-sky-600"></i>
+                        <h4 class="font-bold text-slate-900 text-xs sm:text-sm">General Trade (Kirana)</h4>
+                        <p class="text-[10px] sm:text-[11px] text-slate-500">High volume daily rotation driven by merchant loyalty and double case margins.</p>
+                    </div>
+
+                    <div class="clean-card p-4 sm:p-5 rounded-xl sm:rounded-2xl bg-white space-y-1.5">
+                        <i class="fa-solid fa-utensils text-xl sm:text-2xl text-blue-600"></i>
+                        <h4 class="font-bold text-slate-900 text-xs sm:text-sm">HORECA Sector</h4>
+                        <p class="text-[10px] sm:text-[11px] text-slate-500">QSRs, cafes, and dining venues preference for TARAL's minimal luxury packaging aesthetic.</p>
+                    </div>
+
+                    <div class="clean-card p-4 sm:p-5 rounded-xl sm:rounded-2xl bg-white space-y-1.5">
+                        <i class="fa-solid fa-bus text-xl sm:text-2xl text-indigo-600"></i>
+                        <h4 class="font-bold text-slate-900 text-xs sm:text-sm">Transit & Highway Hubs</h4>
+                        <p class="text-[10px] sm:text-[11px] text-slate-500">Metro kiosks and fuel stations where commuters demand chilled premium water instantly.</p>
+                    </div>
+
+                    <div class="clean-card p-4 sm:p-5 rounded-xl sm:rounded-2xl bg-white space-y-1.5">
+                        <i class="fa-solid fa-building text-xl sm:text-2xl text-teal-600"></i>
+                        <h4 class="font-bold text-slate-900 text-xs sm:text-sm">Institutional Bulk Sales</h4>
+                        <p class="text-[10px] sm:text-[11px] text-slate-500">Direct supply to corporate offices, coaching centers, colleges, and event caterers.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 5: MERCHANT FAQ PLAYBOOK -->
+    <section id="faqs" class="py-12 sm:py-16 px-4 sm:px-6 max-w-5xl mx-auto">
+        <div class="text-center max-w-3xl mx-auto mb-8 sm:mb-12 space-y-2 sm:space-y-3">
+            <span class="text-[10px] sm:text-xs font-bold text-sky-700 uppercase tracking-widest bg-sky-100 px-3.5 py-1.5 rounded-full border border-sky-200 inline-block">
+                5. B2B Sales Objection Handling Guide
+            </span>
+            <h2 class="text-2xl sm:text-4xl md:text-5xl font-extrabold text-slate-900 font-heading">
+                Merchant FAQ Playbook
+            </h2>
+            <p class="text-slate-600 text-xs sm:text-sm">
+                Click on any question below to reveal corporate responses to close B2B retail deals effectively.
+            </p>
+        </div>
+
+        <div class="space-y-3 sm:space-y-4">
+            <!-- Q1 -->
+            <div class="clean-card rounded-xl sm:rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm hover:border-sky-300 transition">
+                <button onclick="toggleFaq('faq1')" class="w-full p-4 sm:p-6 text-left font-bold text-slate-900 font-heading flex justify-between items-center gap-3 bg-slate-50/50 hover:bg-sky-50/60 transition cursor-pointer">
+                    <span class="flex items-start gap-2.5 text-sm sm:text-base md:text-lg">
+                        <span class="text-sky-600 font-black shrink-0">Q1.</span> Other local or existing water brands dominate shelf space. Why stock TARAL?
+                    </span>
+                    <div id="faq1-btn" class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center shrink-0 border border-sky-200 shadow-sm transition-transform duration-300">
+                        <i id="faq1-icon" class="fa-solid fa-chevron-down text-xs sm:text-sm"></i>
+                    </div>
+                </button>
+                <div id="faq1" class="hidden p-4 sm:p-6 pt-2 text-slate-600 text-xs sm:text-sm leading-relaxed border-t border-slate-100 bg-white">
+                    <p class="pl-2 border-l-2 border-sky-500">
+                        <strong>Corporate Response:</strong> Sir, other local or existing water brands may have market presence, but precisely because they operate on traditional structures, they offer extremely thin profit margins per case. They cap your profits. TARAL offers identical water purity (RO+UV+Ozone), luxury bottle aesthetics, and absolute legal validation (FSSAI, GST, Trademark, QR Code). The difference is our optimized supply chain gives you <strong>nearly double the ROI per case</strong> compared to other local or existing water brands.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Q2 -->
+            <div class="clean-card rounded-xl sm:rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm hover:border-sky-300 transition">
+                <button onclick="toggleFaq('faq2')" class="w-full p-4 sm:p-6 text-left font-bold text-slate-900 font-heading flex justify-between items-center gap-3 bg-slate-50/50 hover:bg-sky-50/60 transition cursor-pointer">
+                    <span class="flex items-start gap-2.5 text-sm sm:text-base md:text-lg">
+                        <span class="text-sky-600 font-black shrink-0">Q2.</span> Is TARAL fully compliant with government food safety regulations? Will I face inspection issues?
+                    </span>
+                    <div id="faq2-btn" class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center shrink-0 border border-sky-200 shadow-sm transition-transform duration-300">
+                        <i id="faq2-icon" class="fa-solid fa-chevron-down text-xs sm:text-sm"></i>
+                    </div>
+                </button>
+                <div id="faq2" class="hidden p-4 sm:p-6 pt-2 text-slate-600 text-xs sm:text-sm leading-relaxed border-t border-slate-100 bg-white">
+                    <p class="pl-2 border-l-2 border-sky-500">
+                        <strong>Corporate Response:</strong> You can be 100% stress-free, sir. TARAL is a standardized corporate entity backed by an active FSSAI license, MCA registration, GST registration, and registered trademark. Every bottle features printable QR codes for direct website authentication, and we supply tax-compliant invoices with every dispatch.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Q3 -->
+            <div class="clean-card rounded-xl sm:rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm hover:border-sky-300 transition">
+                <button onclick="toggleFaq('faq3')" class="w-full p-4 sm:p-6 text-left font-bold text-slate-900 font-heading flex justify-between items-center gap-3 bg-slate-50/50 hover:bg-sky-50/60 transition cursor-pointer">
+                    <span class="flex items-start gap-2.5 text-sm sm:text-base md:text-lg">
+                        <span class="text-sky-600 font-black shrink-0">Q3.</span> Since it is a new brand, what happens if stock gets stuck? Will I take a loss?
+                    </span>
+                    <div id="faq3-btn" class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center shrink-0 border border-sky-200 shadow-sm transition-transform duration-300">
+                        <i id="faq3-icon" class="fa-solid fa-chevron-down text-xs sm:text-sm"></i>
+                    </div>
+                </button>
+                <div id="faq3" class="hidden p-4 sm:p-6 pt-2 text-slate-600 text-xs sm:text-sm leading-relaxed border-t border-slate-100 bg-white">
+                    <p class="pl-2 border-l-2 border-sky-500">
+                        <strong>Corporate Response:</strong> We completely eliminate your financial risk through our <strong>100% Stock Buy-Back Guarantee</strong> for initial partnerships. If any batch fails to liquidate within the agreed timeframe, our logistics team collects the inventory for a full refund or exchange. We also supply high-visibility brand counter displays.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Q4 -->
+            <div class="clean-card rounded-xl sm:rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm hover:border-sky-300 transition">
+                <button onclick="toggleFaq('faq4')" class="w-full p-4 sm:p-6 text-left font-bold text-slate-900 font-heading flex justify-between items-center gap-3 bg-slate-50/50 hover:bg-sky-50/60 transition cursor-pointer">
+                    <span class="flex items-start gap-2.5 text-sm sm:text-base md:text-lg">
+                        <span class="text-sky-600 font-black shrink-0">Q4.</span> You are outsourcing via manufacturing partners. How do you guarantee consistent taste?
+                    </span>
+                    <div id="faq4-btn" class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center shrink-0 border border-sky-200 shadow-sm transition-transform duration-300">
+                        <i id="faq4-icon" class="fa-solid fa-chevron-down text-xs sm:text-sm"></i>
+                    </div>
+                </button>
+                <div id="faq4" class="hidden p-4 sm:p-6 pt-2 text-slate-600 text-xs sm:text-sm leading-relaxed border-t border-slate-100 bg-white">
+                    <p class="pl-2 border-l-2 border-sky-500">
+                        <strong>Corporate Response:</strong> Facilities utilize advanced, fully automated robotic filtration plants operating under computerized parameter controls. Every single production batch undergoes strict laboratory evaluation for mineral TDS levels and safety under FSSAI and BIS protocols, guaranteeing 365-day taste consistency.
+                    </p>
+                </div>
+            </div>
+
+            <!-- Q5 -->
+            <div class="clean-card rounded-xl sm:rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm hover:border-sky-300 transition">
+                <button onclick="toggleFaq('faq5')" class="w-full p-4 sm:p-6 text-left font-bold text-slate-900 font-heading flex justify-between items-center gap-3 bg-slate-50/50 hover:bg-sky-50/60 transition cursor-pointer">
+                    <span class="flex items-start gap-2.5 text-sm sm:text-base md:text-lg">
+                        <span class="text-sky-600 font-black shrink-0">Q5.</span> What is your delivery turnaround time during peak summer demand?
+                    </span>
+                    <div id="faq5-btn" class="w-8 h-8 sm:w-9 sm:h-9 rounded-lg sm:rounded-xl bg-sky-100 text-sky-700 flex items-center justify-center shrink-0 border border-sky-200 shadow-sm transition-transform duration-300">
+                        <i id="faq5-icon" class="fa-solid fa-chevron-down text-xs sm:text-sm"></i>
+                    </div>
+                </button>
+                <div id="faq5" class="hidden p-4 sm:p-6 pt-2 text-slate-600 text-xs sm:text-sm leading-relaxed border-t border-slate-100 bg-white">
+                    <p class="pl-2 border-l-2 border-sky-500">
+                        <strong>Corporate Response:</strong> We operate a localized fulfillment center right here at Pari Chowk, Greater Noida. A simple call or digital message ensures doorstep retail delivery within <strong>24 hours</strong> so you never suffer from 'Stock-Out' situations.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- SECTION 7: WHATSAPP ORDER & PARTNER FORM -->
+    <section id="contact" class="py-12 sm:py-16 px-4 sm:px-6 max-w-3xl mx-auto">
+        <div class="clean-card p-6 sm:p-10 rounded-2xl sm:rounded-3xl border border-sky-200 shadow-xl bg-white">
+            <div class="text-center mb-6 sm:mb-8">
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-heading">Become a Partner / Place Case Order</h2>
+                <p class="text-slate-500 text-xs mt-1.5">Form submit karte hi saari details direct WhatsApp number **+91 7432057456** par open hongi!</p>
+            </div>
+
+            <form onsubmit="sendToWhatsApp(event)" class="space-y-3.5 sm:space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Aapka Naam / Name *</label>
+                        <input type="text" id="name" required placeholder="Ex: Rahul Pathak" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 text-xs focus:outline-none focus:border-sky-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Phone / Mobile Number *</label>
+                        <input type="tel" id="phone" required placeholder="Ex: 9876543210" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 text-xs focus:outline-none focus:border-sky-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Partnership Role *</label>
+                        <select id="type" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 text-xs focus:outline-none focus:border-sky-500">
+                            <option value="Regional Distributor">Regional Distributor</option>
+                            <option value="Retailer / Kirana Store">Retailer / Kirana Store</option>
+                            <option value="Cafe / Hotel / Club Owner">Cafe / Hotel / Club Owner</option>
+                            <option value="Free Sample Trial Order">Free Sample Case / Trial Request</option>
+                            <option value="Bulk Event Order">Bulk Event / Corporate Order</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Location / Address</label>
+                        <input type="text" id="location" placeholder="Ex: Pari Chowk, Greater Noida" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 text-xs focus:outline-none focus:border-sky-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Bottle Size Required</label>
+                        <select id="bottleSize" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 text-xs focus:outline-none focus:border-sky-500">
+                            <option value="500ml Bottles">500ml Bottles</option>
+                            <option value="1000ml / 1L Bottles">1000ml / 1L Bottles</option>
+                            <option value="Mix Cases Batch">Mix Cases Batch (500ml + 1L)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Quantity (No. of Cases)</label>
+                        <input type="number" id="quantity" placeholder="Ex: 50 Cases" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 text-xs focus:outline-none focus:border-sky-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Additional Requirements / Message</label>
+                    <textarea id="message" rows="3" placeholder="Apni zaroorat ke bare mein likhein..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 text-xs focus:outline-none focus:border-sky-500"></textarea>
+                </div>
+
+                <button type="submit" class="w-full btn-gradient py-3.5 rounded-xl font-bold text-white text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg cursor-pointer">
+                    <i class="fa-brands fa-whatsapp text-lg sm:text-xl"></i> Send Direct WhatsApp Order
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- FOOTER -->
+    <footer class="bg-slate-900 border-t border-slate-800 py-10 sm:py-12 px-4 sm:px-6 text-xs text-slate-400">
+        <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 pb-8 border-b border-slate-800">
+            <div class="md:col-span-6 space-y-2">
+                <h3 class="text-lg sm:text-xl font-extrabold text-white font-heading">TARAL PACKAGED DRINKING WATER</h3>
+                <p class="text-slate-400 text-xs">Promoter / Founder: Ritik Pathak</p>
+                <p class="text-slate-400 text-xs">Corporate Address: Pari Chowk, Greater Noida, Gautam Buddha Nagar, Uttar Pradesh - 201315</p>
+            </div>
+            <div class="md:col-span-6 text-left md:text-right space-y-2">
+                <p><i class="fa-solid fa-phone text-teal-400 mr-2"></i> +91 7432057456</p>
+                <p><i class="fa-solid fa-envelope text-teal-400 mr-2"></i> taral09@gmail.com</p>
+                <div class="flex md:justify-end gap-3 pt-1 text-base text-white">
+                    <a href="https://www.linkedin.com/company/the-taral/" target="_blank" class="hover:text-sky-400 transition" title="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
+                    <a href="https://www.facebook.com/share/1EZ7kXudrS/" target="_blank" class="hover:text-teal-400 transition" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="https://www.instagram.com/taral_.09?igsh=MWszMjl1bnZ1cjRpMg==" target="_blank" class="hover:text-pink-400 transition" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="https://wa.me/917432057456" target="_blank" class="hover:text-emerald-400 transition" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
+                </div>
+            </div>
+        </div>
+        <div class="max-w-7xl mx-auto pt-4 text-center text-[10px] text-slate-500">
+            © 2026 TARAL Packaged Water. All Rights Reserved. MCA Incorporated.
+        </div>
+    </footer>
+
+    <!-- JavaScript & Analytics Integration Logic -->
+    <script>
+        // ==========================================
+        // BACKEND ANALYTICS TRACKING SCRIPT
+        // ==========================================
+        let clientSessionId = localStorage.getItem('taral_session_id');
+        if (!clientSessionId) {
+            clientSessionId = 'taral_user_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
+            localStorage.setItem('taral_session_id', clientSessionId);
+        }
+
+        // Init Visit Log
+        fetch('/api/track/visit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                sessionId: clientSessionId,
+                userAgent: navigator.userAgent,
+                referrer: document.referrer || 'Direct',
+                screenResolution: `${window.screen.width}x${window.screen.height}`
+            })
+        }).catch(err => console.log('Tracking initialized'));
+
+        // Ping Heartbeat every 10 seconds
+        setInterval(() => {
+            fetch('/api/track/ping', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessionId: clientSessionId })
+            }).catch(e => {});
+        }, 10000);
+
+        // ==========================================
+        // ORIGINAL WEBSITE LOGIC
+        // ==========================================
+        const herQuotes = [
+            "Hey Beautiful! You're working so hard today. Remember to pause, take a deep breath, and drink enough water. You've got this! ✨ Stay Hydrated & Keep Glowing 🌸",
+            "Hey Queen! Your glow is unmatched today. Take a quick hydration break and rule the world! 👑 Stay Hydrated & Keep Shining ✨",
+            "You bring so much positivity around! Don't forget to fuel your body with pure TARAL water today. 💧 Keep Glowing & Smiling 🌸",
+            "Friendly reminder: You are strong, capable, and amazing. Hydrate yourself and keep chasing those dreams! 💖 Stay Hydrated 🌊"
+        ];
+
+        const himQuotes = [
+            "Hey Champ! Hustling daily is tough, but you're doing great. Take a small break, hydrate yourself, and keep pushing forward! 👊 Stay Hydrated & Keep Winning 🚀",
+            "Hey King! Success takes grit and daily effort. Keep your energy high with a fresh sip of pure water. 👑 Stay Hydrated & Dominate ⚡",
+            "Big moves require sharp focus! Take a 2-minute pause, hydrate, and get back in the game. 👊 Keep Hustling & Winning 🚀",
+            "Respect the grind! Stay relentless, stay hydrated with TARAL, and make today count. ⚡ Stay Strong & Keep Winning 💥"
+        ];
+
+        let activeQuoteText = "";
+
+        function scrollToTop() {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function scrollToSection(sectionId) {
+            const sec = document.getElementById(sectionId);
+            if(sec) {
+                sec.scrollIntoView({ behavior: 'smooth' });
+            }
+        }
+
+        window.addEventListener('popstate', function(event) {
+            const overlay = document.getElementById('welcomeOverlay');
+            const step3 = document.getElementById('welcomeStep3');
+            const step2 = document.getElementById('welcomeStep2');
+
+            if (!overlay.classList.contains('modal-hidden')) {
+                if (!step3.classList.contains('hidden')) {
+                    step3.classList.add('hidden');
+                    step2.classList.remove('hidden');
+                } else if (!step2.classList.contains('hidden')) {
+                    step2.classList.add('hidden');
+                    document.getElementById('welcomeStep1').classList.remove('hidden');
+                } else {
+                    overlay.classList.add('modal-hidden');
+                }
+            } else {
+                overlay.classList.remove('modal-hidden');
+                backToStep1();
+            }
+        });
+
+        function pushModalState(stepTag) {
+            history.pushState({ step: stepTag }, "", window.location.pathname);
+        }
+
+        function openMoodSelector() {
+            document.getElementById('welcomeStep1').classList.add('hidden');
+            document.getElementById('welcomeStep2').classList.remove('hidden');
+            document.getElementById('welcomeStep3').classList.add('hidden');
+            pushModalState('mood-gender-select');
+        }
+
+        function backToStep1() {
+            document.getElementById('welcomeStep2').classList.add('hidden');
+            document.getElementById('welcomeStep3').classList.add('hidden');
+            document.getElementById('welcomeStep1').classList.remove('hidden');
+        }
+
+        function backToStep2() {
+            document.getElementById('welcomeStep3').classList.add('hidden');
+            document.getElementById('welcomeStep2').classList.remove('hidden');
+        }
+
+        function showMoodCard(gender) {
+            document.getElementById('welcomeStep2').classList.add('hidden');
+            document.getElementById('welcomeStep3').classList.remove('hidden');
+
+            const container = document.getElementById('moodCardContainer');
+            const badge = document.getElementById('moodBadge');
+            const quoteEl = document.getElementById('moodQuoteText');
+
+            if(gender === 'her') {
+                const randomQuote = herQuotes[Math.floor(Math.random() * herQuotes.length)];
+                activeQuoteText = randomQuote;
+                quoteEl.innerText = `"${randomQuote}"`;
+                
+                container.className = "p-6 rounded-2xl border border-pink-200 bg-gradient-to-br from-pink-50 via-rose-50 to-white text-left relative overflow-hidden shadow-sm space-y-3";
+                badge.className = "inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-pink-100 text-pink-700 border border-pink-300";
+                badge.innerText = "🌸 FOR HER • TODAY'S GLOW QUOTE";
+            } else {
+                const randomQuote = himQuotes[Math.floor(Math.random() * himQuotes.length)];
+                activeQuoteText = randomQuote;
+                quoteEl.innerText = `"${randomQuote}"`;
+                
+                container.className = "p-6 rounded-2xl border border-sky-200 bg-gradient-to-br from-sky-50 via-blue-50 to-white text-left relative overflow-hidden shadow-sm space-y-3";
+                badge.className = "inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-sky-100 text-sky-800 border border-sky-300";
+                badge.innerText = "⚡ FOR HIM • TODAY'S HUSTLE QUOTE";
+            }
+            pushModalState('mood-quote-result');
+        }
+
+        function shareOnInstaStory() {
+            const shareText = `✨ ${activeQuoteText}\n\n💧 Pure Hydration by TARAL Water | "Nature's Flow, Health and Glow"`;
+            
+            navigator.clipboard.writeText(shareText).then(() => {
+                const toast = document.getElementById('copyToast');
+                toast.innerText = "✓ Quote Copied to Clipboard! Opening Instagram Story...";
+            }).catch(() => {});
+
+            setTimeout(() => {
+                window.location.href = "instagram://story-camera";
+                setTimeout(() => {
+                    window.open("https://www.instagram.com", "_blank");
+                }, 1000);
+            }, 300);
+        }
+
+        function visitOfficialWebsite() {
+            const overlay = document.getElementById('welcomeOverlay');
+            overlay.classList.add('modal-hidden');
+            pushModalState('main-website');
+        }
+
+        function openWelcomeOverlay() {
+            const overlay = document.getElementById('welcomeOverlay');
+            overlay.classList.remove('modal-hidden');
+            backToStep1();
+            pushModalState('welcome-modal');
+        }
+
+        window.addEventListener('load', function() {
+            pushModalState('welcome-modal');
+        });
+
+        var currentQuotationData = {};
+
+        function calculateHydration() {
+            var weight = parseInt(document.getElementById('userWeight').value) || 60;
+            var activity = parseFloat(document.getElementById('userActivity').value) || 1.0;
+            document.getElementById('weightVal').innerText = weight + " KG";
+
+            var Liters = ((weight * 35 * activity) / 1000).toFixed(1);
+            var bottle500Count = Math.round(Liters / 0.5);
+
+            document.getElementById('hydrationLiters').innerText = Liters + " Litres / Day";
+            document.getElementById('hydrationBottles').innerText = "~" + bottle500Count + "x 500ml Bottles";
+        }
+
+        function requestSample() {
+            fetch('/api/track/sample-request', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessionId: clientSessionId, source: 'Free Trial Button' })
+            }).catch(e => {});
+
+            var sampleText = "*FREE SAMPLE CASE / TRIAL BOTTLE REQUEST*%0A" +
+                             "------------------------------------%0A" +
+                             "Hello Ritik ji, I am a Retailer/Cafe/Club Owner and I want to order a Free Trial Sample Batch of TARAL Water.%0A" +
+                             "Please connect with me for delivery details.";
+            window.open("https://wa.me/917432057456?text=" + sampleText, '_blank');
+        }
+
+        function checkPincode() {
+            var pin = document.getElementById('pincodeInput').value;
+            var result = document.getElementById('pincodeResult');
+            if(pin.length === 6) {
+                result.innerText = "✓ Express 24-Hour Delivery Active in " + pin + " Region!";
+                result.className = "text-xs font-bold text-emerald-600 mt-1";
+            } else {
+                result.innerText = "Please enter a valid 6-digit Pincode.";
+                result.className = "text-xs font-bold text-rose-600 mt-1";
+            }
+        }
+
+        function toggleFaq(faqId) {
+            var answer = document.getElementById(faqId);
+            var btn = document.getElementById(faqId + '-btn');
+            var icon = document.getElementById(faqId + '-icon');
+
+            if (answer.classList.contains('hidden')) {
+                answer.classList.remove('hidden');
+                btn.classList.remove('bg-sky-100', 'text-sky-700');
+                btn.classList.add('bg-sky-600', 'text-white');
+                icon.className = "fa-solid fa-chevron-up text-xs sm:text-sm";
+            } else {
+                answer.classList.add('hidden');
+                btn.classList.remove('bg-sky-600', 'text-white');
+                btn.classList.add('bg-sky-100', 'text-sky-700');
+                icon.className = "fa-solid fa-chevron-down text-xs sm:text-sm";
+            }
+        }
+
+        function syncCasesSlider(val) {
+            document.getElementById('customCasesInput').value = val;
+            calculateProfit();
+        }
+
+        function adjustCases(amount) {
+            var input = document.getElementById('customCasesInput');
+            var current = parseInt(input.value) || 0;
+            var newVal = current + amount;
+            if (newVal < 1) newVal = 1;
+            if (newVal > 5000) newVal = 5000;
+            input.value = newVal;
+            calculateProfit();
+        }
+
+        window.onload = function() {
+            calculateProfit();
+            calculateHydration();
+        };
+
+        function calculateProfit() {
+            var role = document.getElementById('calcRole').value;
+            var size = document.getElementById('calcSize').value;
+            
+            var customCases = parseInt(document.getElementById('customCasesInput').value);
+            if (isNaN(customCases) || customCases <= 0) customCases = 1;
+            
+            document.getElementById('calcCases').value = customCases > 1000 ? 1000 : customCases;
+            document.getElementById('caseVal').innerText = customCases + " Cases Selected";
+
+            var costPerCase = 0;
+            var profitPerCase = 0;
+            var marginPercentText = "";
+            var itemName = "";
+
+            if (size === '500ml') {
+                itemName = "TARAL 500ml Packaged Water Cases (24 Bottles/Case)";
+                if (role === 'distributor') {
+                    costPerCase = 7 * 24; 
+                    profitPerCase = (8 - 7) * 24; 
+                    marginPercentText = "14.29% Margin";
+                } else { 
+                    costPerCase = 8 * 24; 
+                    profitPerCase = (10 - 8) * 24; 
+                    marginPercentText = "25.00% Margin";
+                }
+            } else {
+                itemName = "TARAL 1000ml (1 Litre) Packaged Water Cases (12 Bottles/Case)";
+                if (role === 'distributor') {
+                    costPerCase = 10 * 12; 
+                    profitPerCase = (13 - 10) * 12; 
+                    marginPercentText = "30.00% Margin";
+                } else { 
+                    costPerCase = 13 * 12; 
+                    profitPerCase = (20 - 13) * 12; 
+                    marginPercentText = "53.85% Margin";
+                }
+            }
+
+            var totalInvestment = customCases * costPerCase;
+            var totalEarnings = customCases * profitPerCase;
+            var advance30 = (totalInvestment * 0.30).toFixed(2);
+
+            document.getElementById('outMargin').innerText = marginPercentText;
+            document.getElementById('outEarnings').innerText = "₹" + totalEarnings.toLocaleString('en-IN') + " Profit";
+
+            currentQuotationData = {
+                role: role,
+                size: size,
+                itemName: itemName,
+                cases: customCases,
+                costPerCase: costPerCase,
+                totalValue: totalInvestment,
+                totalEarnings: totalEarnings,
+                marginStr: marginPercentText,
+                advanceAmount: advance30
+            };
+
+            fetch('/api/track/quotation', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sessionId: clientSessionId,
+                    role: role,
+                    size: size,
+                    cases: customCases,
+                    totalValue: totalInvestment,
+                    margin: marginPercentText
+                })
+            }).catch(e => {});
+        }
+
+        function printInvoicePDF() {
+            var data = currentQuotationData;
+            var today = new Date().toISOString().split('T')[0];
+            var refNo = 'EST-' + Math.floor(10000 + Math.random() * 90000);
+
+            var printWin = window.open('', '', 'width=850,height=950');
+            printWin.document.write(`
+                <!DOCTYPE html>
+                <html>
+                <head>
+                    <title>TARAL_Proforma_Quotation_${refNo}</title>
+                    <style>
+                        body { font-family: 'Helvetica Neue', Helvetica, Arial, sans-serif; padding: 30px; color: #111; line-height: 1.5; position: relative; }
+                        .watermark {
+                            position: fixed; top: 38%; left: 5%; transform: rotate(-30deg);
+                            font-size: 38px; color: rgba(225, 29, 72, 0.12); font-weight: 900;
+                            border: 5px dashed rgba(225, 29, 72, 0.2); padding: 15px 25px; border-radius: 12px;
+                            text-align: center; pointer-events: none; z-index: 1000; text-transform: uppercase;
+                        }
+                        .header { border-bottom: 2px solid #0f766e; padding-bottom: 12px; margin-bottom: 15px; display: flex; justify-content: space-between; }
+                        .title { font-size: 20px; font-weight: bold; color: #0f766e; }
+                        .sub { font-size: 11px; color: #555; }
+                        .warning-box { background: #fef2f2; border: 1px solid #fca5a5; padding: 8px 12px; border-radius: 6px; font-size: 11px; color: #991b1b; font-weight: bold; margin-bottom: 15px; text-align: center; }
+                        .details { margin-bottom: 15px; font-size: 12px; background: #f0fdfa; padding: 10px; border-radius: 6px; }
+                        table { width: 100%; border-collapse: collapse; margin-top: 10px; }
+                        th, td { border: 1px solid #ddd; padding: 9px; text-align: left; font-size: 12px; }
+                        th { background-color: #f1f5f9; font-weight: bold; }
+                        .text-right { text-align: right; }
+                        .text-center { text-align: center; }
+                        .payment-section { margin-top: 20px; display: flex; justify-content: space-between; border: 1px dashed #0f766e; padding: 15px; border-radius: 8px; background: #f0fdfa; }
+                        .total-box { width: 280px; font-size: 12px; }
+                        .grand { font-size: 14px; font-weight: bold; border-top: 2px solid #111; padding-top: 5px; color: #0f766e; }
+                        .advance-highlight { font-weight: bold; color: #b45309; font-size: 13px; }
+                        .footer-notice { margin-top: 35px; font-size: 10px; color: #777; border-top: 1px solid #ddd; padding-top: 10px; text-align: center; }
+                    </style>
+                </head>
+                <body>
+                    <div class="watermark">PROFORMA ESTIMATE<br>UNPAID - NOT A TAX INVOICE</div>
+                    <div class="header">
+                        <div>
+                            <div class="title">TARAL PACKAGED DRINKING WATER</div>
+                            <div class="sub">Corporate Hub: Pari Chowk, Greater Noida, UP - 201315</div>
+                            <div class="sub">Phone: +91 7432057456 | Email: taral09@gmail.com</div>
+                            <div class="sub"><b>FSSAI Certified Unit</b></div>
+                        </div>
+                        <div style="text-align: right;">
+                            <h3 style="margin:0; color:#dc2626;">PROFORMA ESTIMATE</h3>
+                            <p style="margin:4px 0 0 0; font-size:12px;"><b>Quote Ref:</b> ${refNo}</p>
+                            <p style="margin:2px 0 0 0; font-size:12px;"><b>Date:</b> ${today}</p>
+                        </div>
+                    </div>
+                    <div class="warning-box">⚠️ NOTICE: THIS IS A TEMPORARY ESTIMATE SLIP FOR QUOTATION PURPOSES ONLY (NOT A PAKKA TAX INVOICE).</div>
+                    <div class="details"><b>Partner Role:</b> ${data.role.toUpperCase()} | <b>Fulfillment Center:</b> Pari Chowk, Greater Noida Hub</div>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Item Description</th>
+                                <th class="text-center">Cases Qty</th>
+                                <th class="text-center">Rate / Case</th>
+                                <th class="text-right">Estimated Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><b>${data.itemName}</b></td>
+                                <td class="text-center"><b>${data.cases} Cases</b></td>
+                                <td class="text-center">₹${data.costPerCase.toFixed(2)}</td>
+                                <td class="text-right">₹${data.totalValue.toLocaleString('en-IN')}.00</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    <div class="payment-section">
+                        <div>
+                            <h4 style="margin:0 0 5px 0; color:#0f766e;">30% Advance Required for Booking:</h4>
+                            <p style="margin:2px 0; font-size:11px;"><b>UPI Pay ID:</b> taral09@paytm / 7432057456@ybl</p>
+                            <p style="margin:2px 0; font-size:11px;"><b>Bank:</b> HDFC Bank | A/C: TARAL WATER</p>
+                            <p style="margin:6px 0 0 0;" class="advance-highlight">Advance Amount (30%): ₹${Number(data.advanceAmount).toLocaleString('en-IN')}</p>
+                        </div>
+                        <div class="total-box">
+                            <div class="total-row grand"><span>Total Order Estimate:</span> <span>₹${data.totalValue.toLocaleString('en-IN')}.00</span></div>
+                        </div>
+                    </div>
+                    <div style="margin-top:15px; background:#ccfbf1; padding:8px; border-radius:5px; font-size:11px; color:#0f766e; text-align:center;">
+                        <b>Estimated Profit Margin:</b> ${data.marginStr} (Net Earnings: ₹${data.totalEarnings.toLocaleString('en-IN')})
+                    </div>
+                    <div class="footer-notice">
+                        <b>Note:</b> Official Printed GST Tax Invoice & Booking Receipt will be issued only AFTER 30% advance payment verification in bank account.<br>
+                        Promoter / Founder: Ritik Pathak | Contact: +91 7432057456
+                    </div>
+                </body>
+                </html>
+            `);
+            printWin.document.close();
+            printWin.focus();
+            setTimeout(function(){ printWin.print(); }, 400);
+        }
+
+        function shareInvoiceWhatsApp() {
+            var data = currentQuotationData;
+            var text = "*TARAL OFFICIAL PROFORMA ESTIMATE (UNPAID)*%0A" +
+                       "------------------------------------%0A" +
+                       "*Partner Role:* " + encodeURIComponent(data.role.toUpperCase()) + "%0A" +
+                       "*Product:* " + encodeURIComponent(data.itemName) + "%0A" +
+                       "*Quantity:* " + data.cases + " Cases%0A" +
+                       "*Total Order Value:* ₹" + data.totalValue.toLocaleString('en-IN') + "%0A" +
+                       "*Required 30% Advance:* ₹" + Number(data.advanceAmount).toLocaleString('en-IN') + "%0A" +
+                       "*Estimated Margin:* " + data.marginStr + "%0A" +
+                       "------------------------------------%0A" +
+                       "_Note: Hello Ritik Ji, I have checked the estimate. Please guide me for 30% advance payment & booking._";
+            window.open("https://wa.me/917432057456?text=" + text, '_blank').focus();
+        }
+
+        function sendToWhatsApp(e) {
+            e.preventDefault();
+            var name = document.getElementById('name').value;
+            var phone = document.getElementById('phone').value;
+            var type = document.getElementById('type').value;
+            var location = document.getElementById('location').value;
+            var bottleSize = document.getElementById('bottleSize').value;
+            var quantity = document.getElementById('quantity').value;
+            var message = document.getElementById('message').value;
+
+            fetch('/api/track/inquiry', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sessionId: clientSessionId,
+                    name, phone, type, location, bottleSize, quantity, message
+                })
+            }).catch(err => {});
+
+            var text = "*TARAL OFFICIAL B2B INQUIRY*%0A" +
+                       "------------------------------------%0A" +
+                       "*Name:* " + encodeURIComponent(name) + "%0A" +
+                       "*Phone:* " + encodeURIComponent(phone) + "%0A" +
+                       "*Role:* " + encodeURIComponent(type) + "%0A" +
+                       "*Location:* " + encodeURIComponent(location) + "%0A" +
+                       "*Bottle Size:* " + encodeURIComponent(bottleSize) + "%0A" +
+                       "*Quantity:* " + encodeURIComponent(quantity) + " Cases%0A" +
+                       "*Message:* " + encodeURIComponent(message) + "%0A" +
+                       "------------------------------------%0A" +
+                       "_Sent via TARAL Official Web App_";
+
+            window.open("https://wa.me/917432057456?text=" + text, '_blank').focus();
+        }
+    </script>
+</body>
+</html>
