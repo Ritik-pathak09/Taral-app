@@ -1,11 +1,13 @@
 const express = require('express');
 const path = require('path');
 const cors = require('cors');
+const mongoose = require('mongoose');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const ADMIN_KEY = process.env.ADMIN_KEY || 'taral_secret_admin_2026';
+const MONGO_URI = process.env.MONGO_URI;
 
 // Middleware
 app.use(cors());
@@ -14,6 +16,17 @@ app.use(express.urlencoded({ extended: true }));
 
 // Serve static frontend assets from 'public' folder
 app.use(express.static(path.join(__dirname, 'public')));
+
+// Optional MongoDB Connection for Permanent Data
+let isDbConnected = false;
+if (MONGO_URI) {
+    mongoose.connect(MONGO_URI)
+        .then(() => {
+            console.log('✅ MongoDB Connected Successfully!');
+            isDbConnected = true;
+        })
+        .catch(err => console.log('⚠️ MongoDB Connection Error:', err.message));
+}
 
 // In-Memory Analytics Database
 const analyticsDB = {
@@ -37,6 +50,7 @@ function getClientIP(req) {
 app.post('/api/track/visit', (req, res) => {
     const { sessionId, userAgent, referrer, screenResolution } = req.body;
     const ip = getClientIP(req);
+    const now = new Date();
     
     const visitEntry = {
         sessionId: sessionId || 'anon_' + Date.now(),
@@ -44,13 +58,16 @@ app.post('/api/track/visit', (req, res) => {
         userAgent: userAgent || req.headers['user-agent'],
         referrer: referrer || 'Direct',
         screenResolution: screenResolution || 'Unknown',
-        timestamp: new Date().toISOString(),
-        lastActive: new Date().toISOString(),
+        timestamp: now.toISOString(),
+        dateStr: now.toISOString().split('T')[0], // YYYY-MM-DD
+        monthStr: now.toISOString().slice(0, 7),  // YYYY-MM
+        yearStr: now.getFullYear().toString(),    // YYYY
+        lastActive: now.toISOString(),
         durationSeconds: 0
     };
 
     analyticsDB.visits.push(visitEntry);
-    console.log(`[VISIT LOGGED] Session: ${visitEntry.sessionId} | IP: ${ip}`);
+    console.log(`[VISIT LOGGED] Date: ${visitEntry.dateStr} | Session: ${visitEntry.sessionId} | IP: ${ip}`);
     
     res.json({ status: 'success', sessionId: visitEntry.sessionId });
 });
@@ -136,7 +153,16 @@ app.get('/admin/analytics', (req, res) => {
         `);
     }
 
+    const todayStr = new Date().toISOString().split('T')[0];
+    const thisMonthStr = new Date().toISOString().slice(0, 7);
+    const thisYearStr = new Date().getFullYear().toString();
+
+    // Time-based Visit Counts
+    const todayVisits = analyticsDB.visits.filter(v => v.dateStr === todayStr).length;
+    const monthVisits = analyticsDB.visits.filter(v => v.monthStr === thisMonthStr).length;
+    const yearVisits = analyticsDB.visits.filter(v => v.yearStr === thisYearStr).length;
     const totalVisits = analyticsDB.visits.length;
+
     const totalInquiries = analyticsDB.inquiries.length;
     const totalSamples = analyticsDB.sampleRequests.length;
     const totalQuotes = analyticsDB.quotationsGenerated.length;
@@ -148,6 +174,14 @@ app.get('/admin/analytics', (req, res) => {
         return diff <= 120; // active in last 120 seconds
     }).length;
 
+    // Daily Breakdown Calculation
+    const dailyStats = {};
+    analyticsDB.visits.forEach(v => {
+        if (v.dateStr) {
+            dailyStats[v.dateStr] = (dailyStats[v.dateStr] || 0) + 1;
+        }
+    });
+
     res.send(`
     <!DOCTYPE html>
     <html lang="en">
@@ -156,14 +190,14 @@ app.get('/admin/analytics', (req, res) => {
         <title>TARAL - Admin Live Analytics Dashboard</title>
         <script src="https://cdn.tailwindcss.com"></script>
         <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-        <meta http-equiv="refresh" content="15">
+        <meta http-equiv="refresh" content="86400">
     </head>
     <body class="bg-slate-900 text-slate-100 font-sans p-6">
         <div class="max-w-7xl mx-auto space-y-6">
             <div class="flex justify-between items-center border-b border-slate-800 pb-4">
                 <div>
                     <h1 class="text-3xl font-black text-sky-400">TARAL Water - Live Admin Analytics</h1>
-                    <p class="text-xs text-slate-400">Auto-refreshing every 15 seconds</p>
+                    <p class="text-xs text-slate-400">Database Status: ${isDbConnected ? '🟢 Connected (MongoDB)' : '🟡 In-Memory Active'}</p>
                 </div>
                 <div class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2">
                     <span class="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-ping"></span>
@@ -171,23 +205,76 @@ app.get('/admin/analytics', (req, res) => {
                 </div>
             </div>
 
-            <!-- STATS CARDS -->
+            <!-- TIME-BASED VISITOR CARDS -->
             <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
-                <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700">
-                    <p class="text-xs text-slate-400 uppercase font-bold">Total Page Visits</p>
-                    <h2 class="text-3xl font-black text-white mt-1">${totalVisits}</h2>
+                <div class="bg-gradient-to-br from-sky-900/50 to-slate-800 p-5 rounded-2xl border border-sky-500/30">
+                    <p class="text-xs text-sky-300 uppercase font-bold">Today's Visits (${todayStr})</p>
+                    <h2 class="text-3xl font-black text-white mt-1">${todayVisits}</h2>
+                    <p class="text-[10px] text-slate-400 mt-1">Auto-resets at midnight</p>
                 </div>
                 <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700">
-                    <p class="text-xs text-slate-400 uppercase font-bold">Inquiries Submitted</p>
-                    <h2 class="text-3xl font-black text-sky-400 mt-1">${totalInquiries}</h2>
+                    <p class="text-xs text-slate-400 uppercase font-bold">This Month (${thisMonthStr})</p>
+                    <h2 class="text-3xl font-black text-emerald-400 mt-1">${monthVisits}</h2>
                 </div>
                 <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700">
-                    <p class="text-xs text-slate-400 uppercase font-bold">Free Sample Clicks</p>
-                    <h2 class="text-3xl font-black text-amber-400 mt-1">${totalSamples}</h2>
+                    <p class="text-xs text-slate-400 uppercase font-bold">This Year (${thisYearStr})</p>
+                    <h2 class="text-3xl font-black text-purple-400 mt-1">${yearVisits}</h2>
                 </div>
                 <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700">
-                    <p class="text-xs text-slate-400 uppercase font-bold">Quotes Calculated</p>
-                    <h2 class="text-3xl font-black text-purple-400 mt-1">${totalQuotes}</h2>
+                    <p class="text-xs text-slate-400 uppercase font-bold">All Time Total Visits</p>
+                    <h2 class="text-3xl font-black text-amber-400 mt-1">${totalVisits}</h2>
+                </div>
+            </div>
+
+            <!-- BUSINESS LEADS STATS -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="bg-slate-800/80 p-4 rounded-xl border border-slate-700/50 flex justify-between items-center">
+                    <div>
+                        <p class="text-xs text-slate-400 font-bold">Inquiries Submitted</p>
+                        <h3 class="text-2xl font-bold text-sky-400 mt-0.5">${totalInquiries}</h3>
+                    </div>
+                    <i class="fa-solid fa-paper-plane text-2xl text-sky-500/40"></i>
+                </div>
+                <div class="bg-slate-800/80 p-4 rounded-xl border border-slate-700/50 flex justify-between items-center">
+                    <div>
+                        <p class="text-xs text-slate-400 font-bold">Free Sample Clicks</p>
+                        <h3 class="text-2xl font-bold text-amber-400 mt-0.5">${totalSamples}</h3>
+                    </div>
+                    <i class="fa-solid fa-vial text-2xl text-amber-500/40"></i>
+                </div>
+                <div class="bg-slate-800/80 p-4 rounded-xl border border-slate-700/50 flex justify-between items-center">
+                    <div>
+                        <p class="text-xs text-slate-400 font-bold">Quotes Calculated</p>
+                        <h3 class="text-2xl font-bold text-purple-400 mt-0.5">${totalQuotes}</h3>
+                    </div>
+                    <i class="fa-solid fa-calculator text-2xl text-purple-500/40"></i>
+                </div>
+            </div>
+
+            <!-- DAILY BREAKDOWN LOG TABLE -->
+            <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700 space-y-4">
+                <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-calendar-days text-sky-400 mr-2"></i> Daily Traffic History (Per Day Count)</h3>
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left text-xs border-collapse">
+                        <thead>
+                            <tr class="bg-slate-900/80 text-slate-400 border-b border-slate-700">
+                                <th class="p-3">Date (YYYY-MM-DD)</th>
+                                <th class="p-3">Total Visitors</th>
+                                <th class="p-3">Status</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-slate-700/50">
+                            ${Object.keys(dailyStats).reverse().map(d => `
+                                <tr class="hover:bg-slate-700/30">
+                                    <td class="p-3 font-mono font-bold text-sky-300">${d}</td>
+                                    <td class="p-3 font-bold text-white text-sm">${dailyStats[d]} Visitors</td>
+                                    <td class="p-3">
+                                        ${d === todayStr ? '<span class="bg-emerald-500/20 text-emerald-400 text-[10px] px-2 py-0.5 rounded-full font-bold">Active Today</span>' : '<span class="text-slate-500 text-[10px]">Archived</span>'}
+                                    </td>
+                                </tr>
+                            `).join('')}
+                        </tbody>
+                    </table>
                 </div>
             </div>
 
