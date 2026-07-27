@@ -23,9 +23,10 @@ const analyticsDB = {
     quotationsGenerated: []
 };
 
-// HELPER: Extract Client IP
+// HELPER: Extract Client IP safely for Cloud Hosts like Render
 function getClientIP(req) {
-    return req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
+    const rawIp = req.headers['x-forwarded-for'] || req.socket.remoteAddress || '127.0.0.1';
+    return rawIp.split(',')[0].trim();
 }
 
 // ==========================================
@@ -33,7 +34,7 @@ function getClientIP(req) {
 // ==========================================
 
 // 1. Log Website Visit
-app.post('/api/track/visit', (req, me) => {
+app.post('/api/track/visit', (req, res) => {
     const { sessionId, userAgent, referrer, screenResolution } = req.body;
     const ip = getClientIP(req);
     
@@ -51,11 +52,11 @@ app.post('/api/track/visit', (req, me) => {
     analyticsDB.visits.push(visitEntry);
     console.log(`[VISIT LOGGED] Session: ${visitEntry.sessionId} | IP: ${ip}`);
     
-    me.json({ status: 'success', sessionId: visitEntry.sessionId });
+    res.json({ status: 'success', sessionId: visitEntry.sessionId });
 });
 
 // 2. Active Ping / Heartbeat (Tracks how long user stayed active)
-app.post('/api/track/ping', (req, me) => {
+app.post('/api/track/ping', (req, res) => {
     const { sessionId } = req.body;
     const visit = analyticsDB.visits.find(v => v.sessionId === sessionId);
 
@@ -64,14 +65,14 @@ app.post('/api/track/ping', (req, me) => {
         const start = new Date(visit.timestamp);
         const end = new Date(visit.lastActive);
         visit.durationSeconds = Math.round((end - start) / 1000);
-        return me.json({ status: 'active', durationSeconds: visit.durationSeconds });
+        return res.json({ status: 'active', durationSeconds: visit.durationSeconds });
     }
 
-    me.json({ status: 'session_not_found' });
+    res.json({ status: 'session_not_found' });
 });
 
 // 3. Log Sample Request
-app.post('/api/track/sample-request', (req, me) => {
+app.post('/api/track/sample-request', (req, res) => {
     const { sessionId, source } = req.body;
     const entry = {
         sessionId,
@@ -81,11 +82,11 @@ app.post('/api/track/sample-request', (req, me) => {
     };
     analyticsDB.sampleRequests.push(entry);
     console.log(`[SAMPLE REQUEST] Session: ${sessionId}`);
-    me.json({ status: 'success' });
+    res.json({ status: 'success' });
 });
 
 // 4. Log Proforma Quotation Generated
-app.post('/api/track/quotation', (req, me) => {
+app.post('/api/track/quotation', (req, res) => {
     const { sessionId, role, size, cases, totalValue, margin } = req.body;
     const quoteEntry = {
         sessionId,
@@ -99,11 +100,11 @@ app.post('/api/track/quotation', (req, me) => {
     };
     analyticsDB.quotationsGenerated.push(quoteEntry);
     console.log(`[QUOTATION] ${cases} cases calculated by ${role}`);
-    me.json({ status: 'success' });
+    res.json({ status: 'success' });
 });
 
 // 5. Log Form Inquiries
-app.post('/api/track/inquiry', (req, me) => {
+app.post('/api/track/inquiry', (req, res) => {
     const { sessionId, name, phone, type, location, bottleSize, quantity, message } = req.body;
     const inquiryData = {
         sessionId,
@@ -119,16 +120,16 @@ app.post('/api/track/inquiry', (req, me) => {
     };
     analyticsDB.inquiries.push(inquiryData);
     console.log(`[NEW B2B INQUIRY] From: ${name} (${phone}) - ${type}`);
-    me.json({ status: 'success' });
+    res.json({ status: 'success' });
 });
 
 // ==========================================
 // ADMIN DASHBOARD ENDPOINT
 // ==========================================
-app.get('/admin/analytics', (req, me) => {
+app.get('/admin/analytics', (req, res) => {
     const key = req.query.key;
     if (key !== ADMIN_KEY) {
-        return me.status(403).send(`
+        return res.status(403).send(`
             <h2 style="color:red; font-family:sans-serif; text-align:center; margin-top:50px;">
                 403 Access Denied: Invalid Security Key
             </h2>
@@ -147,7 +148,7 @@ app.get('/admin/analytics', (req, me) => {
         return diff <= 120; // active in last 120 seconds
     }).length;
 
-    me.send(`
+    res.send(`
     <!DOCTYPE html>
     <html lang="en">
     <head>
