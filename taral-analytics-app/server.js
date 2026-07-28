@@ -2,12 +2,16 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');
 const mongoose = require('mongoose');
+const fs = require('fs');
 require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 const ADMIN_KEY = process.env.ADMIN_KEY || 'taral_secret_admin_2026';
 const MONGO_URI = process.env.MONGO_URI;
+
+// Local Permanent Storage File Path
+const DATA_FILE = path.join(__dirname, 'analytics_store.json');
 
 // Middleware
 app.use(cors());
@@ -28,13 +32,36 @@ if (MONGO_URI) {
         .catch(err => console.log('⚠️ MongoDB Connection Error:', err.message));
 }
 
-// In-Memory Analytics Database
-const analyticsDB = {
-    visits: [],
-    inquiries: [],
-    sampleRequests: [],
-    quotationsGenerated: []
-};
+// HELPER: Load persistent analytics data from JSON file
+function loadAnalyticsData() {
+    try {
+        if (fs.existsSync(DATA_FILE)) {
+            const raw = fs.readFileSync(DATA_FILE, 'utf8');
+            const data = JSON.parse(raw);
+            return {
+                visits: data.visits || [],
+                inquiries: data.inquiries || [],
+                sampleRequests: data.sampleRequests || [],
+                quotationsGenerated: data.quotationsGenerated || []
+            };
+        }
+    } catch (err) {
+        console.error('⚠️ Error loading analytics file:', err.message);
+    }
+    return { visits: [], inquiries: [], sampleRequests: [], quotationsGenerated: [] };
+}
+
+// HELPER: Save analytics data to JSON file
+function saveAnalyticsData() {
+    try {
+        fs.writeFileSync(DATA_FILE, JSON.stringify(analyticsDB, null, 2), 'utf8');
+    } catch (err) {
+        console.error('⚠️ Error writing analytics file:', err.message);
+    }
+}
+
+// Permanent Analytics Store Initialization
+const analyticsDB = loadAnalyticsData();
 
 // HELPER: Extract Client IP safely for Cloud Hosts like Render
 function getClientIP(req) {
@@ -67,8 +94,9 @@ app.post('/api/track/visit', (req, res) => {
     };
 
     analyticsDB.visits.push(visitEntry);
+    saveAnalyticsData(); // Instant save to permanent storage
+
     console.log(`[VISIT LOGGED] Date: ${visitEntry.dateStr} | Session: ${visitEntry.sessionId} | IP: ${ip}`);
-    
     res.json({ status: 'success', sessionId: visitEntry.sessionId });
 });
 
@@ -82,6 +110,7 @@ app.post('/api/track/ping', (req, res) => {
         const start = new Date(visit.timestamp);
         const end = new Date(visit.lastActive);
         visit.durationSeconds = Math.round((end - start) / 1000);
+        saveAnalyticsData(); // Save updated duration
         return res.json({ status: 'active', durationSeconds: visit.durationSeconds });
     }
 
@@ -98,6 +127,7 @@ app.post('/api/track/sample-request', (req, res) => {
         timestamp: new Date().toISOString()
     };
     analyticsDB.sampleRequests.push(entry);
+    saveAnalyticsData();
     console.log(`[SAMPLE REQUEST] Session: ${sessionId}`);
     res.json({ status: 'success' });
 });
@@ -116,6 +146,7 @@ app.post('/api/track/quotation', (req, res) => {
         timestamp: new Date().toISOString()
     };
     analyticsDB.quotationsGenerated.push(quoteEntry);
+    saveAnalyticsData();
     console.log(`[QUOTATION] ${cases} cases calculated by ${role}`);
     res.json({ status: 'success' });
 });
@@ -136,6 +167,7 @@ app.post('/api/track/inquiry', (req, res) => {
         timestamp: new Date().toISOString()
     };
     analyticsDB.inquiries.push(inquiryData);
+    saveAnalyticsData();
     console.log(`[NEW B2B INQUIRY] From: ${name} (${phone}) - ${type}`);
     res.json({ status: 'success' });
 });
@@ -157,6 +189,10 @@ app.get('/admin/analytics', (req, res) => {
     const thisMonthStr = new Date().toISOString().slice(0, 7);
     const thisYearStr = new Date().getFullYear().toString();
 
+    // Filters for Year & Month
+    const filterYear = req.query.year || '';
+    const filterMonth = req.query.month || '';
+
     // Time-based Visit Counts
     const todayVisits = analyticsDB.visits.filter(v => v.dateStr === todayStr).length;
     const monthVisits = analyticsDB.visits.filter(v => v.monthStr === thisMonthStr).length;
@@ -174,10 +210,16 @@ app.get('/admin/analytics', (req, res) => {
         return diff <= 120; // active in last 120 seconds
     }).length;
 
-    // Daily Breakdown Calculation
+    // Collect Unique Years and Months for Drill-Down Filter Buttons
+    const availableYears = [...new Set(analyticsDB.visits.map(v => v.yearStr).filter(Boolean))].sort().reverse();
+    const availableMonths = [...new Set(analyticsDB.visits.map(v => v.monthStr).filter(Boolean))].sort().reverse();
+
+    // Daily Breakdown Calculation (Filtered if year/month clicked)
     const dailyStats = {};
     analyticsDB.visits.forEach(v => {
         if (v.dateStr) {
+            if (filterYear && v.yearStr !== filterYear) return;
+            if (filterMonth && v.monthStr !== filterMonth) return;
             dailyStats[v.dateStr] = (dailyStats[v.dateStr] || 0) + 1;
         }
     });
@@ -197,7 +239,7 @@ app.get('/admin/analytics', (req, res) => {
             <div class="flex justify-between items-center border-b border-slate-800 pb-4">
                 <div>
                     <h1 class="text-3xl font-black text-sky-400">TARAL Water - Live Admin Analytics</h1>
-                    <p class="text-xs text-slate-400">Database Status: ${isDbConnected ? '🟢 Connected (MongoDB)' : '🟡 In-Memory Active'}</p>
+                    <p class="text-xs text-slate-400">Database Status: ${isDbConnected ? '🟢 Connected (MongoDB)' : '🟢 Permanent File Storage Active'}</p>
                 </div>
                 <div class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2">
                     <span class="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-ping"></span>
@@ -251,9 +293,38 @@ app.get('/admin/analytics', (req, res) => {
                 </div>
             </div>
 
+            <!-- CLICKABLE YEAR & MONTH DRILL-DOWN FILTERS -->
+            <div class="bg-slate-800 rounded-2xl p-5 border border-slate-700 space-y-3">
+                <div class="flex flex-wrap items-center justify-between gap-3">
+                    <h3 class="text-sm font-bold text-slate-300"><i class="fa-solid fa-filter text-sky-400 mr-2"></i> Clickable History Filters:</h3>
+                    <a href="/admin/analytics?key=${ADMIN_KEY}" class="text-xs font-bold text-sky-400 hover:underline">Clear Filters (Show All)</a>
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-700/60">
+                    <span class="text-xs text-slate-400 font-bold mr-1">Select Year:</span>
+                    ${availableYears.length ? availableYears.map(y => `
+                        <a href="/admin/analytics?key=${ADMIN_KEY}&year=${y}" class="px-3 py-1 rounded-lg text-xs font-bold transition ${filterYear === y ? 'bg-purple-600 text-white shadow-md' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}">
+                            📅 ${y}
+                        </a>
+                    `).join('') : '<span class="text-xs text-slate-500">No years recorded yet</span>'}
+                </div>
+
+                <div class="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-700/60">
+                    <span class="text-xs text-slate-400 font-bold mr-1">Select Month:</span>
+                    ${availableMonths.length ? availableMonths.map(m => `
+                        <a href="/admin/analytics?key=${ADMIN_KEY}&month=${m}" class="px-3 py-1 rounded-lg text-xs font-bold transition ${filterMonth === m ? 'bg-emerald-600 text-white shadow-md' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}">
+                            🗓️ ${m}
+                        </a>
+                    `).join('') : '<span class="text-xs text-slate-500">No months recorded yet</span>'}
+                </div>
+            </div>
+
             <!-- DAILY BREAKDOWN LOG TABLE -->
             <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700 space-y-4">
-                <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-calendar-days text-sky-400 mr-2"></i> Daily Traffic History (Per Day Count)</h3>
+                <div class="flex justify-between items-center">
+                    <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-calendar-days text-sky-400 mr-2"></i> Daily Traffic History (Per Day Count)</h3>
+                    ${filterYear || filterMonth ? `<span class="text-xs font-bold bg-sky-500/20 text-sky-300 px-3 py-1 rounded-full border border-sky-400/30">Showing Filter: ${filterYear || filterMonth}</span>` : ''}
+                </div>
                 <div class="overflow-x-auto">
                     <table class="w-full text-left text-xs border-collapse">
                         <thead>
@@ -264,7 +335,7 @@ app.get('/admin/analytics', (req, res) => {
                             </tr>
                         </thead>
                         <tbody class="divide-y divide-slate-700/50">
-                            ${Object.keys(dailyStats).reverse().map(d => `
+                            ${Object.keys(dailyStats).length ? Object.keys(dailyStats).reverse().map(d => `
                                 <tr class="hover:bg-slate-700/30">
                                     <td class="p-3 font-mono font-bold text-sky-300">${d}</td>
                                     <td class="p-3 font-bold text-white text-sm">${dailyStats[d]} Visitors</td>
@@ -272,7 +343,7 @@ app.get('/admin/analytics', (req, res) => {
                                         ${d === todayStr ? '<span class="bg-emerald-500/20 text-emerald-400 text-[10px] px-2 py-0.5 rounded-full font-bold">Active Today</span>' : '<span class="text-slate-500 text-[10px]">Archived</span>'}
                                     </td>
                                 </tr>
-                            `).join('')}
+                            `).join('') : '<tr><td colspan="3" class="p-4 text-center text-slate-500">No records found for selected filter.</td></tr>'}
                         </tbody>
                     </table>
                 </div>
