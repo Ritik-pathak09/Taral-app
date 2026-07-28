@@ -12,6 +12,8 @@
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
     <!-- QRCode JS Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+    <!-- HTML2Canvas Library for HD Quote Card Capture -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <script>
         tailwind.config = {
@@ -178,9 +180,23 @@
                 </div>
 
                 <div class="space-y-2.5">
-                    <button onclick="shareOnInstaStory()" class="w-full insta-gradient text-white py-3.5 px-5 rounded-2xl font-bold text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-md hover:scale-[1.02] transition cursor-pointer">
-                        <i class="fa-brands fa-instagram text-lg"></i> Share on Instagram Story / Copy
-                    </button>
+                    <!-- 3 OPTION BUTTONS: INSTAGRAM STORY, INSTAGRAM POST, WHATSAPP STATUS -->
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
+                        <!-- Instagram Story Option -->
+                        <button onclick="handleShare('insta_story')" class="w-full insta-gradient text-white py-3 px-2 rounded-2xl font-bold text-[11px] uppercase tracking-wider flex items-center justify-center gap-1 shadow-md hover:scale-[1.02] transition cursor-pointer">
+                            <i class="fa-brands fa-instagram text-sm"></i> Share Story
+                        </button>
+
+                        <!-- Instagram Post Option -->
+                        <button onclick="handleShare('insta_post')" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white py-3 px-2 rounded-2xl font-bold text-[11px] uppercase tracking-wider flex items-center justify-center gap-1 shadow-md hover:scale-[1.02] transition cursor-pointer">
+                            <i class="fa-solid fa-square-plus text-sm"></i> Share Post
+                        </button>
+
+                        <!-- WhatsApp Status Option -->
+                        <button onclick="handleShare('whatsapp')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 px-2 rounded-2xl font-bold text-[11px] uppercase tracking-wider flex items-center justify-center gap-1 shadow-md hover:scale-[1.02] transition cursor-pointer">
+                            <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp Status
+                        </button>
+                    </div>
 
                     <button onclick="visitOfficialWebsite()" class="w-full bg-sky-900 hover:bg-slate-900 text-white py-3.5 px-5 rounded-2xl font-bold text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-md transition cursor-pointer">
                         <span>🌐 Visit Official Website / Offers</span>
@@ -769,7 +785,7 @@
                         <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-sky-100 text-sky-600 flex items-center justify-center font-bold shrink-0 mt-0.5 text-sm sm:text-base">1</div>
                         <div>
                             <h4 class="text-slate-900 font-bold text-sm sm:text-base">Reverse Osmosis (RO) Purification</h4>
-                            <p class="text-slate-500 text-[11px] sm:text-xs mt-0.5">Strips harmful heavy metals, pesticides, micro-solts, and dissolved chemical residues.</p>
+                            <p class="text-slate-500 text-[11px] sm:text-xs mt-0.5">Strips harmful heavy metals, pesticides, micro-salts, and dissolved chemical residues.</p>
                         </div>
                     </div>
 
@@ -1146,20 +1162,79 @@
             pushModalState('mood-quote-result');
         }
 
-        function shareOnInstaStory() {
-            const shareText = `✨ ${activeQuoteText}\n\n💧 Pure Hydration by TARAL Water | "Nature's Flow, Health and Glow"`;
-            
-            navigator.clipboard.writeText(shareText).then(() => {
-                const toast = document.getElementById('copyToast');
-                toast.innerText = "✓ Quote Copied to Clipboard! Opening Instagram Story...";
-            }).catch(() => {});
+        // ==========================================
+        // COMBINED OPTION 1 & OPTION 2 SHARING FUNCTION
+        // ==========================================
+        async function handleShare(platform) {
+            const cardElement = document.getElementById('moodCardContainer');
+            const toast = document.getElementById('copyToast');
 
-            setTimeout(() => {
-                window.location.href = "instagram://story-camera";
-                setTimeout(() => {
-                    window.open("https://www.instagram.com", "_blank");
-                }, 1000);
-            }, 300);
+            if (toast) toast.innerText = "⏳ Generating HD Quote Card Image...";
+
+            try {
+                // 1. Convert Quote Card to Canvas & Blob Image
+                const canvas = await html2canvas(cardElement, { scale: 3, backgroundColor: null });
+                
+                canvas.toBlob(async (blob) => {
+                    if (!blob) return;
+
+                    const file = new File([blob], `TARAL_Quote_${Date.now()}.png`, { type: 'image/png' });
+
+                    // OPTION 1: Native Phone Share API (System Native Share Sheet)
+                    if (navigator.canShare && navigator.canShare({ files: [file] })) {
+                        try {
+                            await navigator.share({
+                                files: [file],
+                                title: 'TARAL Hydration Quote',
+                                text: `✨ ${activeQuoteText}\n\n💧 Pure Hydration by TARAL Water`
+                            });
+                            if (toast) toast.innerText = "✓ Shared Successfully!";
+                            return;
+                        } catch (shareErr) {
+                            console.log('Native share cancelled or falling back');
+                        }
+                    }
+
+                    // OPTION 2: Fallback - Auto Download HD Image + Direct App Launch
+                    const imageURL = URL.createObjectURL(blob);
+                    const downloadLink = document.createElement('a');
+                    downloadLink.href = imageURL;
+                    downloadLink.download = `TARAL_Quote_${Date.now()}.png`;
+                    document.body.appendChild(downloadLink);
+                    downloadLink.click();
+                    document.body.removeChild(downloadLink);
+
+                    if (toast) {
+                        if (platform === 'whatsapp') {
+                            toast.innerText = "📱 Quote Saved to Gallery! Opening WhatsApp...";
+                        } else if (platform === 'insta_story') {
+                            toast.innerText = "📸 Quote Saved to Gallery! Opening Instagram Story...";
+                        } else {
+                            toast.innerText = "🖼️ Quote Saved to Gallery! Opening Instagram Post...";
+                        }
+                    }
+
+                    // Direct App Launching Trigger
+                    setTimeout(() => {
+                        if (platform === 'whatsapp') {
+                            window.location.href = "whatsapp://send?text=" + encodeURIComponent(`✨ ${activeQuoteText}\n\n💧 TARAL Water - Nature's Flow, Health and Glow`);
+                        } else if (platform === 'insta_story') {
+                            window.location.href = "instagram://camera";
+                        } else {
+                            window.location.href = "instagram://app";
+                        }
+                    }, 1000);
+
+                }, 'image/png');
+
+            } catch (error) {
+                console.error("Error processing quote card:", error);
+                if (platform === 'whatsapp') {
+                    window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(`✨ ${activeQuoteText}\n\n💧 TARAL Water - Nature's Flow, Health and Glow`);
+                } else {
+                    window.location.href = "instagram://app";
+                }
+            }
         }
 
         function visitOfficialWebsite() {
