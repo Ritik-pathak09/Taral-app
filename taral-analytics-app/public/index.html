@@ -1046,7 +1046,7 @@
 
     <!-- JavaScript & Analytics Integration Logic -->
     <script>
-        // FIXED: Allow normal browser history navigation (Back button working properly)
+        // Back button support enabled properly
         if ('scrollRestoration' in history) {
             history.scrollRestoration = 'auto';
         }
@@ -1068,7 +1068,7 @@
         window.addEventListener('resize', handleDesktopMode);
         
         window.addEventListener('DOMContentLoaded', () => {
-            // FIXED: Scroll to top ONLY on fresh page load or manual refresh, not when using back button
+            // Scroll to top only on fresh page load or reload, preserving back button behavior
             if (!performance.navigation || performance.navigation.type === 1 || window.performance.getEntriesByType("navigation")[0]?.type === "reload") {
                 window.scrollTo(0, 0);
             }
