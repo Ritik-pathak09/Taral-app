@@ -111,10 +111,11 @@
             pointer-events: none !important;
         }
 
-        /* PERFECT DESKTOP SITE CENTERING & FULL WIDTH FIX */
+        /* ULTIMATE DESKTOP SITE FULL WIDTH & CENTERING FIX */
         body.desktop-mode-forced {
-            width: 1200px !important;
-            margin: 0 auto !important;
+            width: 100% !important;
+            max-width: 100% !important;
+            overflow-x: hidden !important;
         }
         body.desktop-mode-forced .lg\:flex { display: flex !important; }
         body.desktop-mode-forced .lg\:hidden { display: none !important; }
@@ -1046,12 +1047,12 @@
     <!-- JavaScript & Analytics Integration Logic -->
     <script>
         // ==========================================
-        // PERFECT DESKTOP SITE MODE SWITCHER (CENTERED & WIDE)
+        // SMART DESKTOP SITE MODE SWITCHER (FULL WIDTH FIX)
         // ==========================================
         function handleDesktopMode() {
             const meta = document.getElementById('viewportMeta');
             if (window.innerWidth >= 992) {
-                meta.setAttribute('content', 'width=1200');
+                meta.setAttribute('content', 'width=1200, initial-scale=1.0');
                 document.body.classList.add('desktop-mode-forced');
             } else {
                 meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
