@@ -1061,14 +1061,12 @@
         // ==========================================
         function handleDesktopMode() {
             const meta = document.getElementById('viewportMeta');
-            // Detect if it's a mobile device with Desktop Site requested (user agent check + screen width)
             const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
             
             if (isMobileDevice && window.innerWidth >= 992) {
                 meta.setAttribute('content', 'width=1200, initial-scale=1.0');
                 document.body.classList.add('mobile-desktop-mode');
             } else if (!isMobileDevice) {
-                // Real Laptop / Desktop screen
                 document.body.classList.remove('mobile-desktop-mode');
             } else {
                 meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
@@ -1212,9 +1210,6 @@
             pushModalState('mood-quote-result');
         }
 
-        // ==========================================
-        // COMBINED OPTION 1 & OPTION 2 SHARING FUNCTION
-        // ==========================================
         async function handleShare(platform) {
             const cardElement = document.getElementById('moodCardContainer');
             const toast = document.getElementById('copyToast');
@@ -1222,7 +1217,6 @@
             if (toast) toast.innerText = "⏳ Generating HD Quote Card Image...";
 
             try {
-                // 1. Convert Quote Card to Canvas & Blob Image
                 const canvas = await html2canvas(cardElement, { scale: 3, backgroundColor: null });
                 
                 canvas.toBlob(async (blob) => {
@@ -1230,7 +1224,6 @@
 
                     const file = new File([blob], `TARAL_Quote_${Date.now()}.png`, { type: 'image/png' });
 
-                    // OPTION 1: Native Phone Share API (System Native Share Sheet)
                     if (navigator.canShare && navigator.canShare({ files: [file] })) {
                         try {
                             await navigator.share({
@@ -1245,7 +1238,6 @@
                         }
                     }
 
-                    // OPTION 2: Fallback - Auto Download HD Image + Direct App Launch
                     const imageURL = URL.createObjectURL(blob);
                     const downloadLink = document.createElement('a');
                     downloadLink.href = imageURL;
@@ -1264,7 +1256,6 @@
                         }
                     }
 
-                    // Direct App Launching Trigger
                     setTimeout(() => {
                         if (platform === 'whatsapp') {
                             window.location.href = "whatsapp://send?text=" + encodeURIComponent(`✨ ${activeQuoteText}\n\n💧 TARAL Water - Nature's Flow, Health and Glow`);
@@ -1578,6 +1569,7 @@
             var quantity = document.getElementById('quantity').value;
             var message = document.getElementById('message').value;
 
+            // Server ko request bhejna taaki MongoDB, Email (ritikpathak8570@gmail.com) aur WhatsApp auto-reply trigger ho sake
             fetch('/api/track/inquiry', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1585,21 +1577,40 @@
                     sessionId: clientSessionId,
                     name, phone, type, location, bottleSize, quantity, message
                 })
-            }).catch(err => {});
+            })
+            .then(res => res.json())
+            .then(data => {
+                // 1. Admin (Aapke) WhatsApp par inquiry bhejne ka link
+                var adminText = "*TARAL OFFICIAL B2B INQUIRY*%0A" +
+                               "------------------------------------%0A" +
+                               "*Name:* " + encodeURIComponent(name) + "%0A" +
+                               "*Phone:* " + encodeURIComponent(phone) + "%0A" +
+                               "*Role:* " + encodeURIComponent(type) + "%0A" +
+                               "*Location:* " + encodeURIComponent(location) + "%0A" +
+                               "*Bottle Size:* " + encodeURIComponent(bottleSize) + "%0A" +
+                               "*Quantity:* " + encodeURIComponent(quantity) + " Cases%0A" +
+                               "*Message:* " + encodeURIComponent(message) + "%0A" +
+                               "------------------------------------%0A" +
+                               "_Sent via TARAL Official Web App_";
 
-            var text = "*TARAL OFFICIAL B2B INQUIRY*%0A" +
-                       "------------------------------------%0A" +
-                       "*Name:* " + encodeURIComponent(name) + "%0A" +
-                       "*Phone:* " + encodeURIComponent(phone) + "%0A" +
-                       "*Role:* " + encodeURIComponent(type) + "%0A" +
-                       "*Location:* " + encodeURIComponent(location) + "%0A" +
-                       "*Bottle Size:* " + encodeURIComponent(bottleSize) + "%0A" +
-                       "*Quantity:* " + encodeURIComponent(quantity) + " Cases%0A" +
-                       "*Message:* " + encodeURIComponent(message) + "%0A" +
-                       "------------------------------------%0A" +
-                       "_Sent via TARAL Official Web App_";
+                window.open("https://wa.me/917432057456?text=" + adminText, '_blank');
 
-            window.open("https://wa.me/917432057456?text=" + text, '_blank').focus();
+                // 2. Customer ke WhatsApp par automated instant Thank You message bhejna (with dynamic name, size, quantity & location)
+                if (phone && data.whatsappAutoReplyText) {
+                    setTimeout(() => {
+                        var cleanPhone = phone.replace(/[^0-9]/g, '');
+                        if (cleanPhone.length === 10) cleanPhone = '91' + cleanPhone;
+                        
+                        var customerWhatsAppUrl = `https://wa.me/${cleanPhone}?text=` + encodeURIComponent(data.whatsappAutoReplyText);
+                        window.open(customerWhatsAppUrl, '_blank');
+                    }, 1200);
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
+                var text = "*TARAL OFFICIAL B2B INQUIRY*%0A*Name:* " + encodeURIComponent(name) + "%0A*Phone:* " + encodeURIComponent(phone);
+                window.open("https://wa.me/917432057456?text=" + text, '_blank');
+            });
         }
     </script>
 </body>
