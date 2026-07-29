@@ -1019,7 +1019,7 @@
                 <div class="flex md:justify-end gap-3 pt-1 text-base text-white">
                     <a href="https://www.linkedin.com/company/the-taral/" target="_blank" class="hover:text-sky-400 transition" title="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
                     <a href="https://www.facebook.com/share/1EZ7kXudrS/" target="_blank" class="hover:text-teal-400 transition" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
-                    <a href="https://www.instagram.com/taral_.09?igsh=MWszMjl1bnZ1cjRpMg==" target="_blank" class="hover:text-pink-400 transition" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
+                    <a href="https://www.instagram.com/taral_.09?igsh=MWszMjl1bnZ1cjRpMg==" target="_blank" class="hover:text-instagram transition" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
                     <a href="https://wa.me/917432057456" target="_blank" class="hover:text-emerald-400 transition" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
                 </div>
             </div>
@@ -1032,19 +1032,19 @@
     <!-- JavaScript & Analytics Integration Logic -->
     <script>
         // ==========================================
-        // AUTO DESKTOP SITE MODE DETECTOR
+        // SMART DESKTOP SITE MODE SWITCHER
         // ==========================================
-        function checkDesktopMode() {
+        function handleDesktopMode() {
             const meta = document.getElementById('viewportMeta');
-            // Agar browser ka innerWidth 1024px se zyada ho (jo ki desktop site mode on hone par hota hai)
-            if (window.innerWidth >= 1024) {
+            // Agar browser window ki width 992px se zyada ho (jo ki mobile par Desktop Site check karne par milti hai)
+            if (window.innerWidth >= 992) {
                 meta.setAttribute('content', 'width=1200');
             } else {
                 meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
             }
         }
-        window.addEventListener('resize', checkDesktopMode);
-        window.addEventListener('DOMContentLoaded', checkDesktopMode);
+        window.addEventListener('resize', handleDesktopMode);
+        window.addEventListener('DOMContentLoaded', handleDesktopMode);
 
         // ==========================================
         // BACKEND ANALYTICS TRACKING SCRIPT
