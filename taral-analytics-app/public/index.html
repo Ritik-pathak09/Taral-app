@@ -1046,10 +1046,18 @@
 
     <!-- JavaScript & Analytics Integration Logic -->
     <script>
-        // Back button support enabled properly
-        if ('scrollRestoration' in history) {
-            history.scrollRestoration = 'auto';
-        }
+        // FIXED: History Trap to prevent mobile/laptop back button from exiting the page immediately
+        window.history.pushState({ page: 1 }, "", window.location.href);
+        window.addEventListener('popstate', function (event) {
+            window.history.pushState({ page: 1 }, "", window.location.href);
+            // Agar koi popup khula hai toh pehle woh band hoga, warna page top par scroll ho jayega
+            const overlay = document.getElementById('welcomeOverlay');
+            if (overlay && !overlay.classList.contains('modal-hidden')) {
+                overlay.classList.add('modal-hidden');
+            } else {
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
 
         function handleDesktopMode() {
             const meta = document.getElementById('viewportMeta');
@@ -1068,10 +1076,7 @@
         window.addEventListener('resize', handleDesktopMode);
         
         window.addEventListener('DOMContentLoaded', () => {
-            // Scroll to top only on fresh page load or reload, preserving back button behavior
-            if (!performance.navigation || performance.navigation.type === 1 || window.performance.getEntriesByType("navigation")[0]?.type === "reload") {
-                window.scrollTo(0, 0);
-            }
+            window.scrollTo(0, 0);
             handleDesktopMode();
         });
 
@@ -1272,6 +1277,7 @@
         }
 
         window.onload = function() {
+            window.scrollTo(0, 0);
             calculateProfit();
             calculateHydration();
         };
