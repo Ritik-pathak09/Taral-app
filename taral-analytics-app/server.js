@@ -86,6 +86,22 @@ function getClientIP(req) {
     return rawIp.split(',')[0].trim();
 }
 
+// HELPER: Get IST date strings to handle midnight updates correctly regardless of server timezone
+function getISTDateComponents(date = new Date()) {
+    const istDateStr = new Intl.DateTimeFormat('en-CA', {
+        timeZone: 'Asia/Kolkata',
+        year: 'numeric',
+        month: '2-digit',
+        day: '2-digit'
+    }).format(date); // Format: YYYY-MM-DD
+
+    return {
+        dateStr: istDateStr,
+        monthStr: istDateStr.slice(0, 7), // YYYY-MM
+        yearStr: istDateStr.slice(0, 4)   // YYYY
+    };
+}
+
 // ==========================================
 // API ENDPOINTS FOR FRONTEND TRACKING
 // ==========================================
@@ -96,6 +112,7 @@ app.post('/api/track/visit', async (req, res) => {
         const { sessionId, userAgent, referrer, screenResolution } = req.body;
         const ip = getClientIP(req);
         const now = new Date();
+        const istComponents = getISTDateComponents(now);
         
         const visitEntry = {
             sessionId: sessionId || 'anon_' + Date.now(),
@@ -104,9 +121,9 @@ app.post('/api/track/visit', async (req, res) => {
             referrer: referrer || 'Direct',
             screenResolution: screenResolution || 'Unknown',
             timestamp: now,
-            dateStr: now.toISOString().split('T')[0], // YYYY-MM-DD
-            monthStr: now.toISOString().slice(0, 7),  // YYYY-MM
-            yearStr: now.getFullYear().toString(),    // YYYY
+            dateStr: istComponents.dateStr,
+            monthStr: istComponents.monthStr,
+            yearStr: istComponents.yearStr,
             lastActive: now,
             durationSeconds: 0
         };
@@ -226,9 +243,11 @@ app.get('/admin/analytics', async (req, res) => {
     }
 
     try {
-        const todayStr = new Date().toISOString().split('T')[0];
-        const thisMonthStr = new Date().toISOString().slice(0, 7);
-        const thisYearStr = new Date().getFullYear().toString();
+        const now = new Date();
+        const istComponents = getISTDateComponents(now);
+        const todayStr = istComponents.dateStr;
+        const thisMonthStr = istComponents.monthStr;
+        const thisYearStr = istComponents.yearStr;
 
         // Filters for Year & Month
         const filterYear = req.query.year || '';
@@ -246,12 +265,14 @@ app.get('/admin/analytics', async (req, res) => {
         const yearVisits = visits.filter(v => v.yearStr === thisYearStr).length;
         const totalVisits = visits.length;
 
+        // Filter recent visits strictly for TODAY only so it resets fresh every new day
+        const todayVisitsLog = visits.filter(v => v.dateStr === todayStr);
+
         const totalInquiries = inquiries.length;
         const totalSamples = sampleRequests.length;
         const totalQuotes = quotationsGenerated.length;
 
         // Active users in last 2 minutes
-        const now = new Date();
         const activeNow = visits.filter(v => {
             const diff = (now - new Date(v.lastActive)) / 1000;
             return diff <= 120; // active in last 120 seconds
@@ -276,6 +297,7 @@ app.get('/admin/analytics', async (req, res) => {
         <html lang="en">
         <head>
             <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>TARAL - Admin Live Analytics Dashboard</title>
             <script src="https://cdn.tailwindcss.com"></script>
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -372,10 +394,10 @@ app.get('/admin/analytics', async (req, res) => {
                         <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-calendar-days text-sky-400 mr-2"></i> Daily Traffic History (Per Day Count)</h3>
                         ${filterYear || filterMonth ? `<span class="text-xs font-bold bg-sky-500/20 text-sky-300 px-3 py-1 rounded-full border border-sky-400/30">Showing Filter: ${filterYear || filterMonth}</span>` : ''}
                     </div>
-                    <div class="overflow-x-auto">
+                    <div class="overflow-x-auto max-h-[350px] overflow-y-auto">
                         <table class="w-full text-left text-xs border-collapse">
                             <thead>
-                                <tr class="bg-slate-900/80 text-slate-400 border-b border-slate-700">
+                                <tr class="bg-slate-900/80 text-slate-400 border-b border-slate-700 sticky top-0">
                                     <th class="p-3">Date (YYYY-MM-DD)</th>
                                     <th class="p-3">Total Visitors</th>
                                     <th class="p-3">Status</th>
@@ -398,11 +420,11 @@ app.get('/admin/analytics', async (req, res) => {
 
                 <!-- VISITOR LOG TABLE -->
                 <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700 space-y-4">
-                    <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-users text-sky-400 mr-2"></i> Recent Visitors Activity Log</h3>
-                    <div class="overflow-x-auto">
+                    <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-users text-sky-400 mr-2"></i> Recent Visitors Activity Log (Today: ${todayStr})</h3>
+                    <div class="overflow-x-auto max-h-[400px] overflow-y-auto">
                         <table class="w-full text-left text-xs border-collapse">
                             <thead>
-                                <tr class="bg-slate-900/80 text-slate-400 border-b border-slate-700">
+                                <tr class="bg-slate-900/80 text-slate-400 border-b border-slate-700 sticky top-0">
                                     <th class="p-3">Session ID</th>
                                     <th class="p-3">IP Address</th>
                                     <th class="p-3">Time Spent</th>
@@ -412,7 +434,7 @@ app.get('/admin/analytics', async (req, res) => {
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-700/50">
-                                ${visits.slice(0, 15).map(v => `
+                                ${todayVisitsLog.length ? todayVisitsLog.map(v => `
                                     <tr class="hover:bg-slate-700/30">
                                         <td class="p-3 font-mono text-sky-300">${(v.sessionId || '').substring(0, 18)}...</td>
                                         <td class="p-3">${v.ip}</td>
@@ -421,7 +443,7 @@ app.get('/admin/analytics', async (req, res) => {
                                         <td class="p-3 text-slate-400">${new Date(v.timestamp).toLocaleTimeString()}</td>
                                         <td class="p-3 text-slate-400">${new Date(v.lastActive).toLocaleTimeString()}</td>
                                     </tr>
-                                `).join('')}
+                                `).join('') : '<tr><td colspan="6" class="p-4 text-center text-slate-500">No visitor activity recorded for today yet.</td></tr>'}
                             </tbody>
                         </table>
                     </div>
@@ -430,10 +452,10 @@ app.get('/admin/analytics', async (req, res) => {
                 <!-- INQUIRIES LOG TABLE -->
                 <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700 space-y-4">
                     <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-paper-plane text-emerald-400 mr-2"></i> Received B2B Inquiries</h3>
-                    <div class="overflow-x-auto">
+                    <div class="overflow-x-auto max-h-[350px] overflow-y-auto">
                         <table class="w-full text-left text-xs border-collapse">
                             <thead>
-                                <tr class="bg-slate-900/80 text-slate-400 border-b border-slate-700">
+                                <tr class="bg-slate-900/80 text-slate-400 border-b border-slate-700 sticky top-0">
                                     <th class="p-3">Name</th>
                                     <th class="p-3">Phone</th>
                                     <th class="p-3">Role</th>
@@ -443,7 +465,7 @@ app.get('/admin/analytics', async (req, res) => {
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-700/50">
-                                ${inquiries.slice(0, 10).map(i => `
+                                ${inquiries.map(i => `
                                     <tr class="hover:bg-slate-700/30">
                                         <td class="p-3 font-bold text-white">${i.name}</td>
                                         <td class="p-3 text-sky-400">${i.phone}</td>
