@@ -277,6 +277,7 @@ app.get('/admin/analytics', async (req, res) => {
             <meta name="viewport" content="width=device-width, initial-scale=1.0">
             <title>TARAL - Admin Login</title>
             <script src="https://cdn.tailwindcss.com"></script>
+            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
         </head>
         <body class="bg-slate-900 text-slate-100 font-sans flex items-center justify-center h-screen">
             <div class="bg-slate-800 p-8 rounded-2xl border border-slate-700 shadow-xl max-w-md w-full space-y-6 text-center">
@@ -284,18 +285,45 @@ app.get('/admin/analytics', async (req, res) => {
                     <h1 class="text-2xl font-black text-sky-400">TARAL Admin Portal</h1>
                     <p class="text-xs text-slate-400 mt-1">Please enter your security key to access analytics</p>
                 </div>
+                
+                <div id="errorMsg" class="hidden bg-rose-500/20 border border-rose-500 text-rose-300 text-xs py-2 px-3 rounded-lg font-bold">
+                    ⚠️ Invalid Security Key! Please try again.
+                </div>
+
                 <form onsubmit="handleLogin(event)" class="space-y-4">
-                    <div>
-                        <input type="password" id="adminKeyInput" placeholder="Enter Admin Key..." required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-sky-500">
+                    <div class="relative">
+                        <input type="password" id="adminKeyInput" placeholder="Enter Admin Key..." required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-sky-500 pr-10">
+                        <button type="button" onclick="togglePassword()" class="absolute right-3 top-3.5 text-slate-400 hover:text-white text-sm">
+                            <i id="eyeIcon" class="fa-solid fa-eye"></i>
+                        </button>
                     </div>
-                    <button type="submit" class="w-full bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold py-3 rounded-xl transition text-sm">Access Dashboard</button>
+                    <button type="submit" class="w-full bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold py-3 rounded-xl transition text-sm shadow-lg">Access Dashboard</button>
                 </form>
             </div>
             <script>
+                function togglePassword() {
+                    const input = document.getElementById('adminKeyInput');
+                    const icon = document.getElementById('eyeIcon');
+                    if (input.type === 'password') {
+                        input.type = 'text';
+                        icon.classList.remove('fa-eye');
+                        icon.classList.add('fa-eye-slash');
+                    } else {
+                        input.type = 'password';
+                        icon.classList.remove('fa-eye-slash');
+                        icon.classList.add('fa-eye');
+                    }
+                }
+
                 function handleLogin(e) {
                     e.preventDefault();
                     const val = document.getElementById('adminKeyInput').value;
                     window.location.href = '/admin/analytics?key=' + encodeURIComponent(val);
+                }
+
+                const urlParams = new URLSearchParams(window.location.search);
+                if(urlParams.has('key') && urlParams.get('key') !== '') {
+                    document.getElementById('errorMsg').classList.remove('hidden');
                 }
             </script>
         </body>
