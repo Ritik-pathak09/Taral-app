@@ -111,11 +111,12 @@
             pointer-events: none !important;
         }
 
-        /* ULTIMATE DESKTOP SITE FULL WIDTH & CENTERING FIX */
+        /* 100% FULL SCREEN LAPTOP VIEW FIX FOR DESKTOP MODE */
         body.desktop-mode-forced {
-            width: 100% !important;
-            max-width: 100% !important;
-            overflow-x: hidden !important;
+            width: 1200px !important;
+            max-width: 1200px !important;
+            margin: 0 auto !important;
+            zoom: 1 !important;
         }
         body.desktop-mode-forced .lg\:flex { display: flex !important; }
         body.desktop-mode-forced .lg\:hidden { display: none !important; }
