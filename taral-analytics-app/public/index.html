@@ -184,11 +184,11 @@
 
             <!-- STEP 3 -->
             <div id="welcomeStep3" class="hidden space-y-5 pt-1">
-                <div id="moodCardContainer" class="p-6 rounded-2xl border text-left relative overflow-hidden shadow-inner space-y-3">
-                    <div id="moodBadge" class="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest"></div>
-                    <p id="moodQuoteText" class="text-sm sm:text-base font-extrabold text-slate-800 leading-relaxed italic font-heading"></p>
+                <div id="moodCardContainer" class="p-8 sm:p-10 rounded-3xl border text-left relative overflow-hidden shadow-inner space-y-4 w-[360px] sm:w-[400px] mx-auto">
+                    <div id="moodBadge" class="inline-block px-3.5 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest"></div>
+                    <p id="moodQuoteText" class="text-base sm:text-lg font-extrabold text-slate-800 leading-relaxed italic font-heading"></p>
 
-                    <div class="border-t border-slate-200/60 pt-2 flex justify-between items-center text-[10px] font-bold text-slate-400">
+                    <div class="border-t border-slate-200/60 pt-3 flex justify-between items-center text-[11px] font-bold text-slate-400">
                         <span>✨ Daily Compliment of the Day</span>
                         <span class="text-sky-600 font-extrabold uppercase">#TARALHydration</span>
                     </div>
@@ -1064,7 +1064,6 @@
             const ua = navigator.userAgent;
             const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(ua);
             
-            // Sirf tab trigger hoga jab user mobile par ho aur 'Desktop site' on kare
             if (isMobile && window.innerWidth >= 992) {
                 meta.setAttribute('content', 'width=1200, initial-scale=1.0');
                 document.body.classList.add('mobile-desktop-mode');
@@ -1192,16 +1191,16 @@
                 activeQuoteText = randomQuote;
                 quoteEl.innerText = `"${randomQuote}"`;
                 
-                container.className = "p-6 rounded-2xl border border-pink-200 bg-gradient-to-br from-pink-50 via-rose-50 to-white text-left relative overflow-hidden shadow-sm space-y-3";
-                badge.className = "inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-pink-100 text-pink-700 border border-pink-300";
+                container.className = "p-8 sm:p-10 rounded-3xl border border-pink-200 bg-gradient-to-br from-pink-50 via-rose-50 to-white text-left relative overflow-hidden shadow-sm space-y-4 w-[360px] sm:w-[400px] mx-auto";
+                badge.className = "inline-block px-3.5 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest bg-pink-100 text-pink-700 border border-pink-300";
                 badge.innerText = "🌸 FOR HER • TODAY'S GLOW QUOTE";
             } else {
                 const randomQuote = himQuotes[Math.floor(Math.random() * himQuotes.length)];
                 activeQuoteText = randomQuote;
                 quoteEl.innerText = `"${randomQuote}"`;
                 
-                container.className = "p-6 rounded-2xl border border-sky-200 bg-gradient-to-br from-sky-50 via-blue-50 to-white text-left relative overflow-hidden shadow-sm space-y-3";
-                badge.className = "inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-sky-100 text-sky-800 border border-sky-300";
+                container.className = "p-8 sm:p-10 rounded-3xl border border-sky-200 bg-gradient-to-br from-sky-50 via-blue-50 to-white text-left relative overflow-hidden shadow-sm space-y-4 w-[360px] sm:w-[400px] mx-auto";
+                badge.className = "inline-block px-3.5 py-1.5 rounded-full text-[11px] font-black uppercase tracking-widest bg-sky-100 text-sky-800 border border-sky-300";
                 badge.innerText = "⚡ FOR HIM • TODAY'S HUSTLE QUOTE";
             }
             pushModalState('mood-quote-result');
@@ -1544,7 +1543,7 @@
                        "*Partner Role:* " + encodeURIComponent(data.role.toUpperCase()) + "%0A" +
                        "*Product:* " + encodeURIComponent(data.itemName) + "%0A" +
                        "*Quantity:* " + data.cases + " Cases%0A" +
-                       "*Total Order Value:* ₹" + data.data?.totalValue ? data.totalValue.toLocaleString('en-IN') : data.totalValue + "%0A" +
+                       "*Total Order Value:* ₹" + (data.totalValue ? data.totalValue.toLocaleString('en-IN') : data.totalValue) + "%0A" +
                        "*Required 30% Advance:* ₹" + Number(data.advanceAmount).toLocaleString('en-IN') + "%0A" +
                        "*Estimated Margin:* " + data.marginStr + "%0A" +
                        "------------------------------------%0A" +
