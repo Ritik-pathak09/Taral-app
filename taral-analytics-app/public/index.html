@@ -2,7 +2,8 @@
 <html lang="hi" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <!-- Desktop Site Compatibility Fix: user-scalable and maximum-scale removed to allow smooth desktop mode scaling -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TARAL - Nature's Flow, Health and Glow | Packaged Drinking Water</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -47,6 +48,8 @@
             background-color: #f8fafc;
             color: #0f172a;
             -webkit-tap-highlight-color: transparent;
+            /* Ensures proper scaling when forced into desktop mode on mobile browsers */
+            min-width: 320px;
         }
         h1, h2, h3, h4, h5, h6 { font-family: 'Outfit', sans-serif; }
         
