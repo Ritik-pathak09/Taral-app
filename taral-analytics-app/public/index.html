@@ -4,15 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" id="viewportMeta" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TARAL - Nature's Flow, Health and Glow | Packaged Drinking Water</title>
-    <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
-    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Google Fonts -->
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Outfit:wght@500;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- QRCode JS Library -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
-    <!-- HTML2Canvas Library for HD Quote Card Capture -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/html2canvas/1.4.1/html2canvas.min.js"></script>
 
     <script>
@@ -129,7 +124,6 @@
 </head>
 <body class="overflow-x-hidden relative">
 
-    <!-- WELCOME LANDING OVERLAY -->
     <div id="welcomeOverlay" class="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-slate-950/80 backdrop-blur-md overflow-y-auto">
         <div class="relative w-full max-w-lg bg-white rounded-3xl shadow-2xl border border-sky-100 p-6 sm:p-8 text-center space-y-6 my-auto">
             
@@ -145,7 +139,6 @@
                 <p class="text-xs font-bold text-sky-600 tracking-widest uppercase">Nature's Flow, Health and Glow</p>
             </div>
 
-            <!-- STEP 1 -->
             <div id="welcomeStep1" class="space-y-4 pt-2">
                 <p class="text-sm text-slate-600 font-medium">Welcome! Refresh your mood today or explore our official website ✨</p>
                 
@@ -161,7 +154,6 @@
                 </div>
             </div>
 
-            <!-- STEP 2 -->
             <div id="welcomeStep2" class="hidden space-y-4 pt-2">
                 <p class="text-sm font-bold text-slate-800">Choose your vibe to unlock today's message:</p>
                 
@@ -182,7 +174,6 @@
                 </button>
             </div>
 
-            <!-- STEP 3 -->
             <div id="welcomeStep3" class="hidden space-y-5 pt-1">
                 <div id="moodCardContainer" class="p-6 rounded-2xl border text-left relative overflow-hidden shadow-inner space-y-3">
                     <div id="moodBadge" class="inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest"></div>
@@ -195,19 +186,15 @@
                 </div>
 
                 <div class="space-y-2.5">
-                    <!-- 3 OPTION BUTTONS: INSTAGRAM STORY, INSTAGRAM POST, WHATSAPP STATUS -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
-                        <!-- Instagram Story Option -->
                         <button onclick="handleShare('insta_story')" class="w-full insta-gradient text-white py-3 px-2 rounded-2xl font-bold text-[11px] uppercase tracking-wider flex items-center justify-center gap-1 shadow-md hover:scale-[1.02] transition cursor-pointer">
                             <i class="fa-brands fa-instagram text-sm"></i> Share Story
                         </button>
 
-                        <!-- Instagram Post Option -->
                         <button onclick="handleShare('insta_post')" class="w-full bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white py-3 px-2 rounded-2xl font-bold text-[11px] uppercase tracking-wider flex items-center justify-center gap-1 shadow-md hover:scale-[1.02] transition cursor-pointer">
                             <i class="fa-solid fa-square-plus text-sm"></i> Share Post
                         </button>
 
-                        <!-- WhatsApp Status Option -->
                         <button onclick="handleShare('whatsapp')" class="w-full bg-emerald-600 hover:bg-emerald-700 text-white py-3 px-2 rounded-2xl font-bold text-[11px] uppercase tracking-wider flex items-center justify-center gap-1 shadow-md hover:scale-[1.02] transition cursor-pointer">
                             <i class="fa-brands fa-whatsapp text-sm"></i> WhatsApp Status
                         </button>
@@ -233,13 +220,11 @@
         </div>
     </div>
 
-    <!-- FLOATING RE-OPEN MOOD POPUP BUTTON -->
     <button onclick="openWelcomeOverlay()" class="fixed bottom-4 left-4 z-50 bg-white hover:bg-sky-50 text-sky-800 px-3.5 py-2.5 rounded-full shadow-2xl border-2 border-sky-300 flex items-center gap-2 text-xs font-bold transition hover:scale-105 cursor-pointer">
         <span class="text-base">💖</span>
         <span class="hidden sm:inline">Refresh Mood</span>
     </button>
 
-    <!-- FLOATING SOCIAL WIDGETS -->
     <div class="fixed bottom-4 right-4 z-50 flex flex-col space-y-2.5 items-center">
         <button onclick="scrollToTop()" title="Go to Top" class="bg-white hover:bg-slate-100 text-sky-600 w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center shadow-xl border border-sky-200 transition hover:scale-110 cursor-pointer">
             <i class="fa-solid fa-arrow-up text-sm sm:text-base"></i>
@@ -262,14 +247,12 @@
         </a>
     </div>
 
-    <!-- Top Ribbon -->
     <div class="bg-gradient-to-r from-sky-700 via-blue-700 to-indigo-800 text-white text-[11px] sm:text-xs py-2 px-3 text-center border-b border-sky-600">
         <span class="font-bold bg-white text-sky-900 px-2 py-0.5 rounded-full text-[9px] sm:text-[10px] uppercase tracking-wider mr-1.5 inline-block">B2B Launch</span>
         <span>TARAL Water is accepting Distributors & Retailers!</span>
         <button onclick="scrollToSection('calculator')" class="underline ml-1.5 font-bold hover:text-sky-200 inline-block cursor-pointer">Calculate Margin &rarr;</button>
     </div>
 
-    <!-- Navigation Header -->
     <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-sky-100 px-4 sm:px-6 py-3 sm:py-4 shadow-sm">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
             <a href="#" onclick="scrollToTop()" class="flex items-center space-x-2.5">
@@ -298,7 +281,6 @@
         </div>
     </nav>
 
-    <!-- HERO SECTION -->
     <section id="home" class="relative min-h-[80vh] sm:min-h-[85vh] flex items-center justify-center pt-6 pb-12 sm:pt-8 sm:pb-16 px-4 sm:px-6 bg-gradient-to-b from-sky-50/80 via-white to-slate-50 overflow-hidden">
         <div class="bg-watermark-overlay"></div>
 
@@ -395,7 +377,6 @@
         </div>
     </section>
 
-    <!-- LIVE ASSURANCE STATS -->
     <section class="py-6 sm:py-8 px-4 sm:px-6 max-w-4xl mx-auto">
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
             <div class="clean-card p-4 sm:p-5 rounded-2xl border border-sky-100 text-center bg-white">
@@ -411,7 +392,6 @@
         </div>
     </section>
 
-    <!-- SAMPLE BOTTLE REQUEST SECTION -->
     <section id="sample" class="py-8 sm:py-12 px-4 sm:px-6 max-w-7xl mx-auto">
         <div class="clean-card p-6 sm:p-10 rounded-2xl sm:rounded-3xl border border-sky-200 relative overflow-hidden bg-gradient-to-r from-sky-500 to-blue-600 text-white shadow-xl">
             <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 sm:gap-8 items-center">
@@ -441,7 +421,6 @@
         </div>
     </section>
 
-    <!-- DELIVERY COVERAGE CHECKER SECTION -->
     <section class="py-6 sm:py-8 px-4 sm:px-6 max-w-4xl mx-auto">
         <div class="clean-card p-5 sm:p-8 rounded-2xl sm:rounded-3xl border border-sky-100 space-y-3 sm:space-y-4 bg-white">
             <div class="flex items-center space-x-3">
@@ -462,7 +441,6 @@
         </div>
     </section>
 
-    <!-- SECTION 1: BRAND VISION -->
     <section id="about" class="py-12 sm:py-16 px-4 sm:px-6 bg-white border-y border-slate-200">
         <div class="max-w-7xl mx-auto">
             <div class="text-center max-w-3xl mx-auto mb-10 sm:mb-16 space-y-2 sm:space-y-3">
@@ -541,7 +519,6 @@
         </div>
     </section>
 
-    <!-- SECTION 2: PRODUCTS & MARKET PRICING -->
     <section id="pricing" class="py-12 sm:py-16 px-4 sm:px-6 max-w-7xl mx-auto border-t border-slate-200 mt-6 sm:mt-10">
         <div class="text-center max-w-3xl mx-auto mb-10 sm:mb-16 space-y-2 sm:space-y-3">
             <span class="text-[10px] sm:text-xs font-bold text-sky-700 uppercase tracking-widest bg-sky-100 px-3.5 py-1.5 rounded-full border border-sky-200 inline-block">
@@ -556,7 +533,6 @@
         </div>
 
         <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 max-w-5xl mx-auto">
-            <!-- 500ml Bottle Card -->
             <div class="clean-card p-6 sm:p-8 rounded-2xl sm:rounded-3xl border border-teal-200 relative overflow-hidden bg-white shadow-lg">
                 <div class="absolute top-0 right-0 bg-teal-600 text-white font-black text-[9px] sm:text-[10px] uppercase px-3 py-1 sm:px-4 sm:py-1 rounded-bl-xl tracking-wider z-10 shadow-md">
                     High Volume Pickup
@@ -599,7 +575,6 @@
                 </button>
             </div>
 
-            <!-- 1 Litre Bottle Card -->
             <div class="clean-card p-6 sm:p-8 rounded-2xl sm:rounded-3xl border border-sky-100 relative overflow-hidden bg-white">
                 <div class="absolute top-0 right-0 bg-blue-600 text-white font-black text-[9px] sm:text-[10px] uppercase px-3 py-1 sm:px-4 sm:py-1 rounded-bl-xl tracking-wider z-10">
                     Daily Utility Standard
@@ -644,7 +619,6 @@
         </div>
     </section>
 
-    <!-- DAILY HYDRATION CALCULATOR -->
     <section id="hydration" class="py-8 sm:py-12 px-4 sm:px-6 max-w-5xl mx-auto">
         <div class="clean-card p-6 sm:p-10 rounded-2xl sm:rounded-3xl border border-sky-200 space-y-5 sm:space-y-6 bg-white">
             <div class="text-center max-w-2xl mx-auto space-y-2">
@@ -684,7 +658,6 @@
         </div>
     </section>
 
-    <!-- MARGIN CALCULATOR SECTION -->
     <section id="calculator" class="py-12 sm:py-16 px-4 sm:px-6 bg-white border-y border-slate-200 mt-6 sm:mt-10">
         <div class="max-w-5xl mx-auto space-y-6 sm:space-y-8">
             <div class="text-center max-w-3xl mx-auto space-y-2.5 sm:space-y-3">
@@ -781,7 +754,6 @@
         </div>
     </section>
 
-    <!-- SECTION 4: 5-STAGE FILTRATION -->
     <section id="filtration" class="py-12 sm:py-16 px-4 sm:px-6 max-w-7xl mx-auto">
         <div class="grid grid-cols-1 lg:grid-cols-12 gap-8 sm:gap-12 items-center">
             <div class="lg:col-span-6 space-y-4 sm:space-y-6">
@@ -854,7 +826,6 @@
         </div>
     </section>
 
-    <!-- SECTION 5: MERCHANT FAQ PLAYBOOK -->
     <section id="faqs" class="py-12 sm:py-16 px-4 sm:px-6 max-w-5xl mx-auto">
         <div class="text-center max-w-3xl mx-auto mb-8 sm:mb-12 space-y-2 sm:space-y-3">
             <span class="text-[10px] sm:text-xs font-bold text-sky-700 uppercase tracking-widest bg-sky-100 px-3.5 py-1.5 rounded-full border border-sky-200 inline-block">
@@ -869,7 +840,6 @@
         </div>
 
         <div class="space-y-3 sm:space-y-4">
-            <!-- Q1 -->
             <div class="clean-card rounded-xl sm:rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm hover:border-sky-300 transition">
                 <button onclick="toggleFaq('faq1')" class="w-full p-4 sm:p-6 text-left font-bold text-slate-900 font-heading flex justify-between items-center gap-3 bg-slate-50/50 hover:bg-sky-50/60 transition cursor-pointer">
                     <span class="flex items-start gap-2.5 text-sm sm:text-base md:text-lg">
@@ -886,7 +856,6 @@
                 </div>
             </div>
 
-            <!-- Q2 -->
             <div class="clean-card rounded-xl sm:rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm hover:border-sky-300 transition">
                 <button onclick="toggleFaq('faq2')" class="w-full p-4 sm:p-6 text-left font-bold text-slate-900 font-heading flex justify-between items-center gap-3 bg-slate-50/50 hover:bg-sky-50/60 transition cursor-pointer">
                     <span class="flex items-start gap-2.5 text-sm sm:text-base md:text-lg">
@@ -903,7 +872,6 @@
                 </div>
             </div>
 
-            <!-- Q3 -->
             <div class="clean-card rounded-xl sm:rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm hover:border-sky-300 transition">
                 <button onclick="toggleFaq('faq3')" class="w-full p-4 sm:p-6 text-left font-bold text-slate-900 font-heading flex justify-between items-center gap-3 bg-slate-50/50 hover:bg-sky-50/60 transition cursor-pointer">
                     <span class="flex items-start gap-2.5 text-sm sm:text-base md:text-lg">
@@ -920,7 +888,6 @@
                 </div>
             </div>
 
-            <!-- Q4 -->
             <div class="clean-card rounded-xl sm:rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm hover:border-sky-300 transition">
                 <button onclick="toggleFaq('faq4')" class="w-full p-4 sm:p-6 text-left font-bold text-slate-900 font-heading flex justify-between items-center gap-3 bg-slate-50/50 hover:bg-sky-50/60 transition cursor-pointer">
                     <span class="flex items-start gap-2.5 text-sm sm:text-base md:text-lg">
@@ -937,7 +904,6 @@
                 </div>
             </div>
 
-            <!-- Q5 -->
             <div class="clean-card rounded-xl sm:rounded-2xl bg-white border border-slate-200 overflow-hidden shadow-sm hover:border-sky-300 transition">
                 <button onclick="toggleFaq('faq5')" class="w-full p-4 sm:p-6 text-left font-bold text-slate-900 font-heading flex justify-between items-center gap-3 bg-slate-50/50 hover:bg-sky-50/60 transition cursor-pointer">
                     <span class="flex items-start gap-2.5 text-sm sm:text-base md:text-lg">
@@ -956,7 +922,6 @@
         </div>
     </section>
 
-    <!-- SECTION 7: WHATSAPP ORDER & PARTNER FORM -->
     <section id="contact" class="py-12 sm:py-16 px-4 sm:px-6 max-w-3xl mx-auto">
         <div class="clean-card p-6 sm:p-10 rounded-2xl sm:rounded-3xl border border-sky-200 shadow-xl bg-white">
             <div class="text-center mb-6 sm:mb-8 space-y-2">
@@ -1020,7 +985,6 @@
         </div>
     </section>
 
-    <!-- FOOTER -->
     <footer class="bg-slate-900 border-t border-slate-800 py-10 sm:py-12 px-4 sm:px-6 text-xs text-slate-400">
         <div class="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-12 gap-6 sm:gap-8 pb-8 border-b border-slate-800">
             <div class="md:col-span-6 space-y-2">
@@ -1044,12 +1008,44 @@
         </div>
     </footer>
 
-    <!-- JavaScript & Analytics Integration Logic -->
     <script>
-        // FIXED: Restore default browser back button and scroll restoration behavior
+        // FIXED: Browser History Management for Step-by-Step Back Navigation
         if ('scrollRestoration' in history) {
-            history.scrollRestoration = 'auto';
+            history.scrollRestoration = 'manual';
         }
+
+        window.addEventListener('DOMContentLoaded', () => {
+            window.scrollTo(0, 0);
+            handleDesktopMode();
+            if (!window.history.state || window.history.state.step !== 'main') {
+                window.history.replaceState({ step: 'main' }, '', window.location.href);
+            }
+        });
+
+        window.addEventListener('popstate', function (event) {
+            const overlay = document.getElementById('welcomeOverlay');
+            const step1 = document.getElementById('welcomeStep1');
+            const step2 = document.getElementById('welcomeStep2');
+            const step3 = document.getElementById('welcomeStep3');
+
+            if (overlay && !overlay.classList.contains('modal-hidden')) {
+                if (!step3.classList.contains('hidden')) {
+                    // Agar Quote screen par hai, toh back dabane par 'For Her/Him' (Step 2) par jayega
+                    step3.classList.add('hidden');
+                    step2.classList.remove('hidden');
+                } else if (!step2.classList.contains('hidden')) {
+                    // Agar 'For Her/Him' screen par hai, toh back dabane par main popup menu (Step 1) par jayega
+                    step2.classList.add('hidden');
+                    step1.classList.remove('hidden');
+                } else {
+                    // Agar Step 1 par hai, toh popup close ho jayega aur site normal scroll hogi
+                    overlay.classList.add('modal-hidden');
+                }
+            } else {
+                // Agar popup band hai, toh normal page scroll top par ho jayega bina site band hue
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }
+        });
 
         function handleDesktopMode() {
             const meta = document.getElementById('viewportMeta');
@@ -1066,14 +1062,6 @@
             }
         }
         window.addEventListener('resize', handleDesktopMode);
-        
-        window.addEventListener('DOMContentLoaded', () => {
-            // Scroll to top only on fresh page load or manual reload
-            if (!performance.navigation || performance.navigation.type === 1 || window.performance.getEntriesByType("navigation")[0]?.type === "reload") {
-                window.scrollTo(0, 0);
-            }
-            handleDesktopMode();
-        });
 
         let clientSessionId = localStorage.getItem('taral_session_id');
         if (!clientSessionId) {
@@ -1112,6 +1100,7 @@
             document.getElementById('welcomeStep1').classList.add('hidden');
             document.getElementById('welcomeStep2').classList.remove('hidden');
             document.getElementById('welcomeStep3').classList.add('hidden');
+            window.history.pushState({ step: 'step2' }, '', window.location.href);
         }
 
         function backToStep1() {
@@ -1128,6 +1117,7 @@
         function showMoodCard(gender) {
             document.getElementById('welcomeStep2').classList.add('hidden');
             document.getElementById('welcomeStep3').classList.remove('hidden');
+            window.history.pushState({ step: 'step3' }, '', window.location.href);
 
             const container = document.getElementById('moodCardContainer');
             const badge = document.getElementById('moodBadge');
@@ -1204,6 +1194,7 @@
         function openWelcomeOverlay() {
             document.getElementById('welcomeOverlay').classList.remove('modal-hidden');
             backToStep1();
+            window.history.pushState({ step: 'step1' }, '', window.location.href);
         }
 
         function calculateHydration() {
@@ -1483,12 +1474,12 @@
 
                 window.open("https://wa.me/917432057456?text=" + adminText, '_blank');
 
-                if (phone && data.whatsappAutoReplyText) {
+                if (phone && data.whatsappAutoReplyTest) {
                     setTimeout(() => {
                         var cleanPhone = phone.replace(/[^0-9]/g, '');
                         if (cleanPhone.length === 10) cleanPhone = '91' + cleanPhone;
                         
-                        var customerWhatsAppUrl = `https://wa.me/${cleanPhone}?text=` + encodeURIComponent(data.whatsappAutoReplyText);
+                        var customerWhatsAppUrl = `https://wa.me/${cleanPhone}?text=` + encodeURIComponent(data.whatsappAutoReplyTest);
                         window.open(customerWhatsAppUrl, '_blank');
                     }, 1200);
                 }
