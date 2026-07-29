@@ -365,7 +365,7 @@
             <div class="lg:col-span-5 relative flex justify-center">
                 <div class="clean-card p-2.5 sm:p-3 rounded-2xl sm:rounded-3xl shadow-xl sm:shadow-2xl relative animate-float max-w-md w-full overflow-hidden bg-white border border-teal-100">
                     <div class="relative rounded-xl sm:rounded-2xl overflow-hidden bg-slate-100 flex justify-center items-center h-[340px] sm:h-[450px]">
-                        <img src="/taral droppy.jpeg" alt="TARAL Premium Packaged Drinking Water Bottles" class="w-full h-full object-cover object-center hover:scale-105 transition duration-700">
+                        <img src="taral droppy.jpeg" alt="TARAL Premium Packaged Drinking Water Bottles" class="w-full h-full object-cover object-center hover:scale-105 transition duration-700">
                         
                         <div class="absolute bottom-0 inset-x-0 bg-gradient-to-t from-teal-950 via-teal-900/80 to-transparent p-4 sm:p-5 text-center">
                             <h3 class="text-xl sm:text-2xl font-black text-white font-heading tracking-wide">TARAL Premium Hydration</h3>
@@ -563,7 +563,7 @@
                 </div>
                 
                 <div class="h-52 sm:h-64 w-full mb-5 sm:mb-6 rounded-xl sm:rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 relative group">
-                    <img src="/taral water bottle.jpeg" alt="TARAL 500ml Bottle" class="w-full h-full object-cover object-center group-hover:scale-110 transition duration-700">
+                    <img src="taral water bottle.jpeg" alt="TARAL 500ml Bottle" class="w-full h-full object-cover object-center group-hover:scale-110 transition duration-700">
                     <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent flex items-end p-3.5 sm:p-4">
                         <span class="text-white font-bold text-base sm:text-lg font-heading tracking-wide">500ml Retail Pack</span>
                     </div>
@@ -606,7 +606,7 @@
                 </div>
                 
                 <div class="h-52 sm:h-64 w-full mb-5 sm:mb-6 rounded-xl sm:rounded-2xl overflow-hidden bg-slate-100 border border-slate-200 relative group">
-                    <img src="/taral water bottle.jpeg" alt="TARAL 1Ltr Bottle" class="w-full h-full object-cover object-center group-hover:scale-110 transition duration-700">
+                    <img src="taral water bottle.jpeg" alt="TARAL 1Ltr Bottle" class="w-full h-full object-cover object-center group-hover:scale-110 transition duration-700">
                     <div class="absolute inset-0 bg-gradient-to-t from-slate-900/60 to-transparent flex items-end p-3.5 sm:p-4">
                         <span class="text-white font-bold text-base sm:text-lg font-heading tracking-wide">1000ml (1 Litre) Pack</span>
                     </div>
@@ -1046,9 +1046,6 @@
 
     <!-- JavaScript & Analytics Integration Logic -->
     <script>
-        // ==========================================
-        // AUTO SCROLL TO TOP ON PAGE REFRESH
-        // ==========================================
         if ('scrollRestoration' in history) {
             history.scrollRestoration = 'manual';
         }
@@ -1056,9 +1053,6 @@
             window.scrollTo(0, 0);
         });
 
-        // ==========================================
-        // SMART DESKTOP SITE MODE SWITCHER (FIXED FOR LAPTOP & MOBILE)
-        // ==========================================
         function handleDesktopMode() {
             const meta = document.getElementById('viewportMeta');
             const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -1079,39 +1073,12 @@
             handleDesktopMode();
         });
 
-        // ==========================================
-        // BACKEND ANALYTICS TRACKING SCRIPT
-        // ==========================================
         let clientSessionId = localStorage.getItem('taral_session_id');
         if (!clientSessionId) {
             clientSessionId = 'taral_user_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
             localStorage.setItem('taral_session_id', clientSessionId);
         }
 
-        // Init Visit Log
-        fetch('/api/track/visit', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                sessionId: clientSessionId,
-                userAgent: navigator.userAgent,
-                referrer: document.referrer || 'Direct',
-                screenResolution: `${window.screen.width}x${window.screen.height}`
-            })
-        }).catch(err => console.log('Tracking initialized'));
-
-        // Ping Heartbeat every 10 seconds
-        setInterval(() => {
-            fetch('/api/track/ping', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sessionId: clientSessionId })
-            }).catch(e => {});
-        }, 10000);
-
-        // ==========================================
-        // ORIGINAL WEBSITE LOGIC
-        // ==========================================
         const herQuotes = [
             "Hey Beautiful! You're working so hard today. Remember to pause, take a deep breath, and drink enough water. You've got this! ✨ Stay Hydrated & Keep Glowing 🌸",
             "Hey Queen! Your glow is unmatched today. Take a quick hydration break and rule the world! 👑 Stay Hydrated & Keep Shining ✨",
@@ -1139,36 +1106,10 @@
             }
         }
 
-        window.addEventListener('popstate', function(event) {
-            const overlay = document.getElementById('welcomeOverlay');
-            const step3 = document.getElementById('welcomeStep3');
-            const step2 = document.getElementById('welcomeStep2');
-
-            if (!overlay.classList.contains('modal-hidden')) {
-                if (!step3.classList.contains('hidden')) {
-                    step3.classList.add('hidden');
-                    step2.classList.remove('hidden');
-                } else if (!step2.classList.contains('hidden')) {
-                    step2.classList.add('hidden');
-                    document.getElementById('welcomeStep1').classList.remove('hidden');
-                } else {
-                    overlay.classList.add('modal-hidden');
-                }
-            } else {
-                overlay.classList.remove('modal-hidden');
-                backToStep1();
-            }
-        });
-
-        function pushModalState(stepTag) {
-            history.pushState({ step: stepTag }, "", window.location.pathname);
-        }
-
         function openMoodSelector() {
             document.getElementById('welcomeStep1').classList.add('hidden');
             document.getElementById('welcomeStep2').classList.remove('hidden');
             document.getElementById('welcomeStep3').classList.add('hidden');
-            pushModalState('mood-gender-select');
         }
 
         function backToStep1() {
@@ -1207,7 +1148,6 @@
                 badge.className = "inline-block px-3 py-1 rounded-full text-[10px] font-black uppercase tracking-widest bg-sky-100 text-sky-800 border border-sky-300";
                 badge.innerText = "⚡ FOR HIM • TODAY'S HUSTLE QUOTE";
             }
-            pushModalState('mood-quote-result');
         }
 
         async function handleShare(platform) {
@@ -1234,7 +1174,7 @@
                             if (toast) toast.innerText = "✓ Shared Successfully!";
                             return;
                         } catch (shareErr) {
-                            console.log('Native share cancelled or falling back');
+                            console.log('Native share cancelled');
                         }
                     }
 
@@ -1247,56 +1187,22 @@
                     document.body.removeChild(downloadLink);
 
                     if (toast) {
-                        if (platform === 'whatsapp') {
-                            toast.innerText = "📱 Quote Saved to Gallery! Opening WhatsApp...";
-                        } else if (platform === 'insta_story') {
-                            toast.innerText = "📸 Quote Saved to Gallery! Opening Instagram Story...";
-                        } else {
-                            toast.innerText = "🖼️ Quote Saved to Gallery! Opening Instagram Post...";
-                        }
+                        toast.innerText = "✓ Quote Saved to Gallery!";
                     }
-
-                    setTimeout(() => {
-                        if (platform === 'whatsapp') {
-                            window.location.href = "whatsapp://send?text=" + encodeURIComponent(`✨ ${activeQuoteText}\n\n💧 TARAL Water - Nature's Flow, Health and Glow`);
-                        } else if (platform === 'insta_story') {
-                            window.location.href = "instagram://camera";
-                        } else {
-                            window.location.href = "instagram://app";
-                        }
-                    }, 1000);
-
                 }, 'image/png');
-
             } catch (error) {
                 console.error("Error processing quote card:", error);
-                if (platform === 'whatsapp') {
-                    window.location.href = "https://api.whatsapp.com/send?text=" + encodeURIComponent(`✨ ${activeQuoteText}\n\n💧 TARAL Water - Nature's Flow, Health and Glow`);
-                } else {
-                    window.location.href = "instagram://app";
-                }
             }
         }
 
         function visitOfficialWebsite() {
-            const overlay = document.getElementById('welcomeOverlay');
-            overlay.classList.add('modal-hidden');
-            pushModalState('main-website');
+            document.getElementById('welcomeOverlay').classList.add('modal-hidden');
         }
 
         function openWelcomeOverlay() {
-            const overlay = document.getElementById('welcomeOverlay');
-            overlay.classList.remove('modal-hidden');
+            document.getElementById('welcomeOverlay').classList.remove('modal-hidden');
             backToStep1();
-            pushModalState('welcome-modal');
         }
-
-        window.addEventListener('load', function() {
-            window.scrollTo(0, 0);
-            pushModalState('welcome-modal');
-        });
-
-        var currentQuotationData = {};
 
         function calculateHydration() {
             var weight = parseInt(document.getElementById('userWeight').value) || 60;
@@ -1311,12 +1217,6 @@
         }
 
         function requestSample() {
-            fetch('/api/track/sample-request', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ sessionId: clientSessionId, source: 'Free Trial Button' })
-            }).catch(e => {});
-
             var sampleText = "*FREE SAMPLE CASE / TRIAL BOTTLE REQUEST*%0A" +
                              "------------------------------------%0A" +
                              "Hello Ritik ji, I am a Retailer/Cafe/Club Owner and I want to order a Free Trial Sample Batch of TARAL Water.%0A" +
@@ -1375,6 +1275,8 @@
             calculateHydration();
         };
 
+        var currentQuotationData = {};
+
         function calculateProfit() {
             var role = document.getElementById('calcRole').value;
             var size = document.getElementById('calcSize').value;
@@ -1432,19 +1334,6 @@
                 marginStr: marginPercentText,
                 advanceAmount: advance30
             };
-
-            fetch('/api/track/quotation', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    sessionId: clientSessionId,
-                    role: role,
-                    size: size,
-                    cases: customCases,
-                    totalValue: totalInvestment,
-                    margin: marginPercentText
-                })
-            }).catch(e => {});
         }
 
         function printInvoicePDF() {
@@ -1559,6 +1448,9 @@
             window.open("https://wa.me/917432057456?text=" + text, '_blank').focus();
         }
 
+        // ==========================================
+        // UPDATED: API CALL FOR WEBHOOK & EMAIL INTEGRATION
+        // ==========================================
         function sendToWhatsApp(e) {
             e.preventDefault();
             var name = document.getElementById('name').value;
@@ -1569,7 +1461,7 @@
             var quantity = document.getElementById('quantity').value;
             var message = document.getElementById('message').value;
 
-            // Server ko request bhejna taaki MongoDB, Email (ritikpathak8570@gmail.com) aur WhatsApp auto-reply trigger ho sake
+            // Server ko request bhejna taaki Email (ritikpathak8570@gmail.com) aur WhatsApp auto-reply trigger ho sake
             fetch('/api/track/inquiry', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1582,20 +1474,20 @@
             .then(data => {
                 // 1. Admin (Aapke) WhatsApp par inquiry bhejne ka link
                 var adminText = "*TARAL OFFICIAL B2B INQUIRY*%0A" +
-                               "------------------------------------%0A" +
-                               "*Name:* " + encodeURIComponent(name) + "%0A" +
-                               "*Phone:* " + encodeURIComponent(phone) + "%0A" +
-                               "*Role:* " + encodeURIComponent(type) + "%0A" +
-                               "*Location:* " + encodeURIComponent(location) + "%0A" +
-                               "*Bottle Size:* " + encodeURIComponent(bottleSize) + "%0A" +
-                               "*Quantity:* " + encodeURIComponent(quantity) + " Cases%0A" +
-                               "*Message:* " + encodeURIComponent(message) + "%0A" +
-                               "------------------------------------%0A" +
-                               "_Sent via TARAL Official Web App_";
+                                "------------------------------------%0A" +
+                                "*Name:* " + encodeURIComponent(name) + "%0A" +
+                                "*Phone:* " + encodeURIComponent(phone) + "%0A" +
+                                "*Role:* " + encodeURIComponent(type) + "%0A" +
+                                "*Location:* " + encodeURIComponent(location) + "%0A" +
+                                "*Bottle Size:* " + encodeURIComponent(bottleSize) + "%0A" +
+                                "*Quantity:* " + encodeURIComponent(quantity) + " Cases%0A" +
+                                "*Message:* " + encodeURIComponent(message) + "%0A" +
+                                "------------------------------------%0A" +
+                                "_Sent via TARAL Official Web App_";
 
                 window.open("https://wa.me/917432057456?text=" + adminText, '_blank');
 
-                // 2. Customer ke WhatsApp par automated instant Thank You message bhejna (with dynamic name, size, quantity & location)
+                // 2. Customer ke WhatsApp par automated instant Thank You message bhejna
                 if (phone && data.whatsappAutoReplyText) {
                     setTimeout(() => {
                         var cleanPhone = phone.replace(/[^0-9]/g, '');
