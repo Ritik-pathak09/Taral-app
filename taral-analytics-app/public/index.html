@@ -1046,9 +1046,6 @@
 
     <!-- JavaScript & Analytics Integration Logic -->
     <script>
-        // ==========================================
-        // AUTO SCROLL TO TOP ON PAGE REFRESH
-        // ==========================================
         if ('scrollRestoration' in history) {
             history.scrollRestoration = 'manual';
         }
@@ -1056,9 +1053,6 @@
             window.scrollTo(0, 0);
         });
 
-        // ==========================================
-        // SMART DESKTOP SITE MODE SWITCHER (FIXED FOR LAPTOP & MOBILE)
-        // ==========================================
         function handleDesktopMode() {
             const meta = document.getElementById('viewportMeta');
             const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
@@ -1079,16 +1073,12 @@
             handleDesktopMode();
         });
 
-        // ==========================================
-        // BACKEND ANALYTICS TRACKING SCRIPT
-        // ==========================================
         let clientSessionId = localStorage.getItem('taral_session_id');
         if (!clientSessionId) {
             clientSessionId = 'taral_user_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
             localStorage.setItem('taral_session_id', clientSessionId);
         }
 
-        // Init Visit Log
         fetch('/api/track/visit', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
@@ -1100,7 +1090,6 @@
             })
         }).catch(err => console.log('Tracking initialized'));
 
-        // Ping Heartbeat every 10 seconds
         setInterval(() => {
             fetch('/api/track/ping', {
                 method: 'POST',
@@ -1109,9 +1098,6 @@
             }).catch(e => {});
         }, 10000);
 
-        // ==========================================
-        // ORIGINAL WEBSITE LOGIC
-        // ==========================================
         const herQuotes = [
             "Hey Beautiful! You're working so hard today. Remember to pause, take a deep breath, and drink enough water. You've got this! ✨ Stay Hydrated & Keep Glowing 🌸",
             "Hey Queen! Your glow is unmatched today. Take a quick hydration break and rule the world! 👑 Stay Hydrated & Keep Shining ✨",
