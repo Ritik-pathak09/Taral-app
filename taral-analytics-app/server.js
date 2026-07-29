@@ -233,13 +233,8 @@ app.post('/api/track/inquiry', async (req, res) => {
 // ADMIN DASHBOARD & EXPORT ENDPOINTS
 // ==========================================
 
-// EXCEL / CSV EXPORT ENDPOINT FOR LEADS
+// EXCEL / CSV EXPORT ENDPOINT FOR LEADS (Bina Password ke Direct Download)
 app.get('/admin/export-inquiries', async (req, res) => {
-    const key = req.query.key;
-    if (key !== ADMIN_KEY) {
-        return res.status(403).send('Access Denied');
-    }
-
     try {
         const inquiries = isDbConnected ? await Inquiry.find({}).sort({ timestamp: -1 }) : [];
         
@@ -266,71 +261,6 @@ app.get('/admin/export-inquiries', async (req, res) => {
 });
 
 app.get('/admin/analytics', async (req, res) => {
-    const key = req.query.key;
-
-    if (key !== ADMIN_KEY) {
-        return res.send(`
-        <!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>TARAL - Admin Login</title>
-            <script src="https://cdn.tailwindcss.com"></script>
-            <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-        </head>
-        <body class="bg-slate-900 text-slate-100 font-sans flex items-center justify-center h-screen">
-            <div class="bg-slate-800 p-8 rounded-2xl border border-slate-700 shadow-xl max-w-md w-full space-y-6 text-center">
-                <div>
-                    <h1 class="text-2xl font-black text-sky-400">TARAL Admin Portal</h1>
-                    <p class="text-xs text-slate-400 mt-1">Please enter your security key to access analytics</p>
-                </div>
-                
-                <div id="errorMsg" class="hidden bg-rose-500/20 border border-rose-500 text-rose-300 text-xs py-2 px-3 rounded-lg font-bold">
-                    ⚠️ Invalid Security Key! Please try again.
-                </div>
-
-                <form onsubmit="handleLogin(event)" class="space-y-4">
-                    <div class="relative">
-                        <input type="password" id="adminKeyInput" placeholder="Enter Admin Key..." required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-sky-500 pr-10">
-                        <button type="button" onclick="togglePassword()" class="absolute right-3 top-3.5 text-slate-400 hover:text-white text-sm">
-                            <i id="eyeIcon" class="fa-solid fa-eye"></i>
-                        </button>
-                    </div>
-                    <button type="submit" class="w-full bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold py-3 rounded-xl transition text-sm shadow-lg">Access Dashboard</button>
-                </form>
-            </div>
-            <script>
-                function togglePassword() {
-                    const input = document.getElementById('adminKeyInput');
-                    const icon = document.getElementById('eyeIcon');
-                    if (input.type === 'password') {
-                        input.type = 'text';
-                        icon.classList.remove('fa-eye');
-                        icon.classList.add('fa-eye-slash');
-                    } else {
-                        input.type = 'password';
-                        icon.classList.remove('fa-eye-slash');
-                        icon.classList.add('fa-eye');
-                    }
-                }
-
-                function handleLogin(e) {
-                    e.preventDefault();
-                    const val = document.getElementById('adminKeyInput').value;
-                    window.location.href = '/admin/analytics?key=' + encodeURIComponent(val);
-                }
-
-                const urlParams = new URLSearchParams(window.location.search);
-                if(urlParams.has('key') && urlParams.get('key') !== '') {
-                    document.getElementById('errorMsg').classList.remove('hidden');
-                }
-            </script>
-        </body>
-        </html>
-        `);
-    }
-
     try {
         const now = new Date();
         const istComponents = getISTDateComponents(now);
@@ -400,7 +330,7 @@ app.get('/admin/analytics', async (req, res) => {
                         <p class="text-xs text-slate-400">Database Status: ${isDbConnected ? '🟢 Connected (MongoDB Permanent Database)' : '🟡 Connecting to DB...'}</p>
                     </div>
                     <div class="flex items-center gap-3">
-                        <a href="/admin/export-inquiries?key=${ADMIN_KEY}" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-lg">
+                        <a href="/admin/export-inquiries" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-lg">
                             <i class="fa-solid fa-file-excel"></i> Export Leads to Excel
                         </a>
                         <div class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2">
@@ -460,13 +390,13 @@ app.get('/admin/analytics', async (req, res) => {
                 <div class="bg-slate-800 rounded-2xl p-5 border border-slate-700 space-y-3">
                     <div class="flex flex-wrap items-center justify-between gap-3">
                         <h3 class="text-sm font-bold text-slate-300"><i class="fa-solid fa-filter text-sky-400 mr-2"></i> Clickable History Filters:</h3>
-                        <a href="/admin/analytics?key=${ADMIN_KEY}" class="text-xs font-bold text-sky-400 hover:underline">Clear Filters (Show All)</a>
+                        <a href="/admin/analytics" class="text-xs font-bold text-sky-400 hover:underline">Clear Filters (Show All)</a>
                     </div>
 
                     <div class="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-700/60">
                         <span class="text-xs text-slate-400 font-bold mr-1">Select Year:</span>
                         ${availableYears.length ? availableYears.map(y => `
-                            <a href="/admin/analytics?key=${ADMIN_KEY}&year=${y}" class="px-3 py-1 rounded-lg text-xs font-bold transition ${filterYear === y ? 'bg-purple-600 text-white shadow-md' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}">
+                            <a href="/admin/analytics?year=${y}" class="px-3 py-1 rounded-lg text-xs font-bold transition ${filterYear === y ? 'bg-purple-600 text-white shadow-md' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}">
                                 📅 ${y}
                             </a>
                         `).join('') : '<span class="text-xs text-slate-500">No years recorded yet</span>'}
@@ -475,7 +405,7 @@ app.get('/admin/analytics', async (req, res) => {
                     <div class="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-700/60">
                         <span class="text-xs text-slate-400 font-bold mr-1">Select Month:</span>
                         ${availableMonths.length ? availableMonths.map(m => `
-                            <a href="/admin/analytics?key=${ADMIN_KEY}&month=${m}" class="px-3 py-1 rounded-lg text-xs font-bold transition ${filterMonth === m ? 'bg-emerald-600 text-white shadow-md' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}">
+                            <a href="/admin/analytics?month=${m}" class="px-3 py-1 rounded-lg text-xs font-bold transition ${filterMonth === m ? 'bg-emerald-600 text-white shadow-md' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}">
                                 🗓️ ${m}
                             </a>
                         `).join('') : '<span class="text-xs text-slate-500">No months recorded yet</span>'}
@@ -593,6 +523,6 @@ app.listen(PORT, () => {
     console.log(`\n==================================================`);
     console.log(`🚀 TARAL Server running on port: ${PORT}`);
     console.log(`🌐 Website URL: http://localhost:${PORT}`);
-    console.log(`📊 Admin Analytics URL: http://localhost:${PORT}/admin/analytics?key=${ADMIN_KEY}`);
+    console.log(`📊 Admin Analytics URL: http://localhost:${PORT}/admin/analytics`);
     console.log(`==================================================\n`);
 });
