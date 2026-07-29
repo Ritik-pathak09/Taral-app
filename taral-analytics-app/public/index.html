@@ -42,11 +42,6 @@
     </script>
 
     <style>
-        @media screen and (min-width: 768px) {
-            html {
-                min-width: 1200px;
-            }
-        }
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background-color: #f8fafc;
@@ -1036,6 +1031,20 @@
 
     <!-- JavaScript & Analytics Integration Logic -->
     <script>
+        // ==========================================
+        // DESKTOP MODE TOGGLE DETECTOR & FORCER
+        // ==========================================
+        function checkDesktopMode() {
+            const meta = document.querySelector('meta[name="viewport"]');
+            if (window.innerWidth > 768 && window.screen.width < 768) {
+                meta.content = 'width=1280';
+            } else {
+                meta.content = 'width=device-width, initial-scale=1.0, maximum-scale=5.0, minimum-scale=0.5';
+            }
+        }
+        window.addEventListener('resize', checkDesktopMode);
+        window.addEventListener('load', checkDesktopMode);
+
         // ==========================================
         // BACKEND ANALYTICS TRACKING SCRIPT
         // ==========================================
