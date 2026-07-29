@@ -6,7 +6,7 @@ require('dotenv').config();
 
 const app = express();
 const PORT = process.env.PORT || 3000;
-const ADMIN_KEY = process.env.ADMIN_KEY || 'taral_secret_admin_2026';
+const ADMIN_KEY = process.env.ADMIN_KEY || 'Ritik@123';
 const MONGO_URI = process.env.MONGO_URI;
 
 // Middleware
@@ -230,15 +230,76 @@ app.post('/api/track/inquiry', async (req, res) => {
 });
 
 // ==========================================
-// ADMIN DASHBOARD ENDPOINT
+// ADMIN DASHBOARD & EXPORT ENDPOINTS
 // ==========================================
-app.get('/admin/analytics', async (req, res) => {
+
+// EXCEL / CSV EXPORT ENDPOINT FOR LEADS
+app.get('/admin/export-inquiries', async (req, res) => {
     const key = req.query.key;
     if (key !== ADMIN_KEY) {
-        return res.status(403).send(`
-            <h2 style="color:red; font-family:sans-serif; text-align:center; margin-top:50px;">
-                403 Access Denied: Invalid Security Key
-            </h2>
+        return res.status(403).send('Access Denied');
+    }
+
+    try {
+        const inquiries = isDbConnected ? await Inquiry.find({}).sort({ timestamp: -1 }) : [];
+        
+        let csv = 'Name,Phone,Role,Location,Bottle Size,Cases,Message,Timestamp\n';
+        inquiries.forEach(i => {
+            const name = `"${(i.name || '').replace(/"/g, '""')}"`;
+            const phone = `"${(i.phone || '').replace(/"/g, '""')}"`;
+            const type = `"${(i.type || '').replace(/"/g, '""')}"`;
+            const location = `"${(i.location || '').replace(/"/g, '""')}"`;
+            const bottleSize = `"${(i.bottleSize || '').replace(/"/g, '""')}"`;
+            const quantity = `"${(i.quantity || '').replace(/"/g, '""')}"`;
+            const message = `"${(i.message || '').replace(/"/g, '""')}"`;
+            const timestamp = `"${new Date(i.timestamp).toLocaleString()}"`;
+
+            csv += `${name},${phone},${type},${location},${bottleSize},${quantity},${message},${timestamp}\n`;
+        });
+
+        res.setHeader('Content-Type', 'text/csv');
+        res.setHeader('Content-Disposition', 'attachment; filename=taral_b2b_inquiries.csv');
+        res.status(200).send(csv);
+    } catch (err) {
+        res.status(500).send('Error exporting data');
+    }
+});
+
+app.get('/admin/analytics', async (req, res) => {
+    const key = req.query.key;
+
+    if (key !== ADMIN_KEY) {
+        return res.send(`
+        <!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>TARAL - Admin Login</title>
+            <script src="https://cdn.tailwindcss.com"></script>
+        </head>
+        <body class="bg-slate-900 text-slate-100 font-sans flex items-center justify-center h-screen">
+            <div class="bg-slate-800 p-8 rounded-2xl border border-slate-700 shadow-xl max-w-md w-full space-y-6 text-center">
+                <div>
+                    <h1 class="text-2xl font-black text-sky-400">TARAL Admin Portal</h1>
+                    <p class="text-xs text-slate-400 mt-1">Please enter your security key to access analytics</p>
+                </div>
+                <form onsubmit="handleLogin(event)" class="space-y-4">
+                    <div>
+                        <input type="password" id="adminKeyInput" placeholder="Enter Admin Key..." required class="w-full bg-slate-900 border border-slate-700 rounded-xl px-4 py-3 text-sm text-white focus:outline-none focus:border-sky-500">
+                    </div>
+                    <button type="submit" class="w-full bg-sky-500 hover:bg-sky-600 text-slate-950 font-bold py-3 rounded-xl transition text-sm">Access Dashboard</button>
+                </form>
+            </div>
+            <script>
+                function handleLogin(e) {
+                    e.preventDefault();
+                    const val = document.getElementById('adminKeyInput').value;
+                    window.location.href = '/admin/analytics?key=' + encodeURIComponent(val);
+                }
+            </script>
+        </body>
+        </html>
         `);
     }
 
@@ -310,9 +371,14 @@ app.get('/admin/analytics', async (req, res) => {
                         <h1 class="text-3xl font-black text-sky-400">TARAL Water - Live Admin Analytics</h1>
                         <p class="text-xs text-slate-400">Database Status: ${isDbConnected ? '🟢 Connected (MongoDB Permanent Database)' : '🟡 Connecting to DB...'}</p>
                     </div>
-                    <div class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2">
-                        <span class="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-ping"></span>
-                        Live Active Users: ${activeNow}
+                    <div class="flex items-center gap-3">
+                        <a href="/admin/export-inquiries?key=${ADMIN_KEY}" class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2 transition shadow-lg">
+                            <i class="fa-solid fa-file-excel"></i> Export Leads to Excel
+                        </a>
+                        <div class="bg-emerald-500/20 text-emerald-400 border border-emerald-500/40 px-4 py-2 rounded-xl text-xs font-bold flex items-center gap-2">
+                            <span class="w-2.5 h-2.5 bg-emerald-400 rounded-full animate-ping"></span>
+                            Live Active Users: ${activeNow}
+                        </div>
                     </div>
                 </div>
 
