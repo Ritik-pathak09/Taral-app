@@ -2,7 +2,6 @@ const express = require('express');
 const path = require('path');
 const cors = require('cors');
 const mongoose = require('mongoose');
-const nodemailer = require('nodemailer');
 require('dotenv').config();
 
 const app = express();
@@ -17,18 +16,6 @@ app.use(express.urlencoded({ extended: true }));
 
 // Serve static frontend assets from 'public' folder
 app.use(express.static(path.join(__dirname, 'public')));
-
-// ==========================================
-// NODEMAILER TRANSPORTER SETUP FOR EMAIL ALERTS
-// ==========================================
-// Note: Apne Gmail account ka 'App Password' yahan ya .env file mein (EMAIL_USER / EMAIL_PASS) daalna hoga
-const transporter = nodemailer.createTransport({
-    service: 'gmail',
-    auth: {
-        user: process.env.EMAIL_USER || 'ritikpathak8570@gmail.com',
-        pass: process.env.EMAIL_PASS || '' // Yahan Gmail App Password aayega
-    }
-});
 
 // ==========================================
 // MONGODB SCHEMAS & MODELS (Permanent Storage)
@@ -217,11 +204,10 @@ app.post('/api/track/quotation', async (req, res) => {
     }
 });
 
-// 5. Log Form Inquiries (Updated with Email Notification & WhatsApp Auto-Reply Text)
+// 5. Log Form Inquiries
 app.post('/api/track/inquiry', async (req, res) => {
     try {
         const { sessionId, name, phone, type, location, bottleSize, quantity, message } = req.body;
-        
         if (isDbConnected) {
             await Inquiry.create({
                 sessionId,
@@ -237,40 +223,8 @@ app.post('/api/track/inquiry', async (req, res) => {
             });
         }
         console.log(`[NEW B2B INQUIRY] From: ${name} (${phone}) - ${type}`);
-
-        // Send Email Alert to ritikpathak8570@gmail.com
-        const mailOptions = {
-            from: process.env.EMAIL_USER || 'ritikpathak8570@gmail.com',
-            to: 'ritikpathak8570@gmail.com',
-            subject: `🚨 New B2B Order/Inquiry: ${name} (${type})`,
-            html: `
-                <h2>New B2B Inquiry Received on TARAL Water Website</h2>
-                <p><b>Name:</b> ${name}</p>
-                <p><b>Phone:</b> ${phone}</p>
-                <p><b>Role:</b> ${type}</p>
-                <p><b>Location:</b> ${location}</p>
-                <p><b>Bottle Size:</b> ${bottleSize}</p>
-                <p><b>Quantity:</b> ${quantity} Cases</p>
-                <p><b>Message:</b> ${message || 'N/A'}</p>
-                <hr>
-                <p style="color: gray; font-size: 12px;">TARAL Automated Notification System</p>
-            `
-        };
-
-        transporter.sendMail(mailOptions, (error, info) => {
-            if (error) {
-                console.log('⚠️ Email send error:', error.message);
-            } else {
-                console.log('📧 Alert Email sent successfully to ritikpathak8570@gmail.com');
-            }
-        });
-
-        // Dynamic Customer WhatsApp Auto-Reply Text requested by user
-        const whatsappAutoReplyText = `Hello ${name}, 👋\nThank you for reaching out to TARAL Water! We have successfully received your inquiry regarding ${bottleSize} / ${quantity} Cases for ${location}.\nOur sales team is reviewing your requirements and will connect with you shortly to share the best quotation and sample details.  Team TARAL`;
-
-        res.json({ status: 'success', whatsappAutoReplyText });
+        res.json({ status: 'success' });
     } catch (err) {
-        console.error('Inquiry error:', err);
         res.status(500).json({ status: 'error' });
     }
 });
@@ -279,7 +233,7 @@ app.post('/api/track/inquiry', async (req, res) => {
 // ADMIN DASHBOARD & EXPORT ENDPOINTS
 // ==========================================
 
-// EXCEL / CSV EXPORT ENDPOINT FOR LEADS
+// EXCEL / CSV EXPORT ENDPOINT FOR LEADS (Bina Password ke Direct Download)
 app.get('/admin/export-inquiries', async (req, res) => {
     try {
         const inquiries = isDbConnected ? await Inquiry.find({}).sort({ timestamp: -1 }) : [];
@@ -314,33 +268,40 @@ app.get('/admin/analytics', async (req, res) => {
         const thisMonthStr = istComponents.monthStr;
         const thisYearStr = istComponents.yearStr;
 
+        // Filters for Year & Month
         const filterYear = req.query.year || '';
         const filterMonth = req.query.month || '';
 
+        // Fetch all data from MongoDB
         const visits = isDbConnected ? await Visit.find({}).sort({ timestamp: -1 }) : [];
         const inquiries = isDbConnected ? await Inquiry.find({}).sort({ timestamp: -1 }) : [];
         const sampleRequests = isDbConnected ? await SampleRequest.find({}) : [];
         const quotationsGenerated = isDbConnected ? await Quotation.find({}) : [];
 
+        // Time-based Visit Counts
         const todayVisits = visits.filter(v => v.dateStr === todayStr).length;
         const monthVisits = visits.filter(v => v.monthStr === thisMonthStr).length;
         const yearVisits = visits.filter(v => v.yearStr === thisYearStr).length;
         const totalVisits = visits.length;
 
+        // Filter recent visits strictly for TODAY only so it resets fresh every new day
         const todayVisitsLog = visits.filter(v => v.dateStr === todayStr);
 
         const totalInquiries = inquiries.length;
         const totalSamples = sampleRequests.length;
         const totalQuotes = quotationsGenerated.length;
 
+        // Active users in last 2 minutes
         const activeNow = visits.filter(v => {
             const diff = (now - new Date(v.lastActive)) / 1000;
-            return diff <= 120;
+            return diff <= 120; // active in last 120 seconds
         }).length;
 
+        // Collect Unique Years and Months for Drill-Down Filter Buttons
         const availableYears = [...new Set(visits.map(v => v.yearStr).filter(Boolean))].sort().reverse();
         const availableMonths = [...new Set(visits.map(v => v.monthStr).filter(Boolean))].sort().reverse();
 
+        // Daily Breakdown Calculation (Filtered if year/month clicked)
         const dailyStats = {};
         visits.forEach(v => {
             if (v.dateStr) {
