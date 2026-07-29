@@ -1046,12 +1046,10 @@
 
     <!-- JavaScript & Analytics Integration Logic -->
     <script>
+        // FIXED: Allow normal browser history navigation (Back button working properly)
         if ('scrollRestoration' in history) {
-            history.scrollRestoration = 'manual';
+            history.scrollRestoration = 'auto';
         }
-        window.addEventListener('beforeunload', function () {
-            window.scrollTo(0, 0);
-        });
 
         function handleDesktopMode() {
             const meta = document.getElementById('viewportMeta');
@@ -1068,8 +1066,12 @@
             }
         }
         window.addEventListener('resize', handleDesktopMode);
+        
         window.addEventListener('DOMContentLoaded', () => {
-            window.scrollTo(0, 0);
+            // FIXED: Scroll to top ONLY on fresh page load or manual refresh, not when using back button
+            if (!performance.navigation || performance.navigation.type === 1 || window.performance.getEntriesByType("navigation")[0]?.type === "reload") {
+                window.scrollTo(0, 0);
+            }
             handleDesktopMode();
         });
 
@@ -1218,9 +1220,9 @@
 
         function requestSample() {
             var sampleText = "*FREE SAMPLE CASE / TRIAL BOTTLE REQUEST*%0A" +
-                             "------------------------------------%0A" +
-                             "Hello Ritik ji, I am a Retailer/Cafe/Club Owner and I want to order a Free Trial Sample Batch of TARAL Water.%0A" +
-                             "Please connect with me for delivery details.";
+                           "------------------------------------%0A" +
+                           "Hello Ritik ji, I am a Retailer/Cafe/Club Owner and I want to order a Free Trial Sample Batch of TARAL Water.%0A" +
+                           "Please connect with me for delivery details.";
             window.open("https://wa.me/917432057456?text=" + sampleText, '_blank');
         }
 
@@ -1270,7 +1272,6 @@
         }
 
         window.onload = function() {
-            window.scrollTo(0, 0);
             calculateProfit();
             calculateHydration();
         };
@@ -1448,9 +1449,6 @@
             window.open("https://wa.me/917432057456?text=" + text, '_blank').focus();
         }
 
-        // ==========================================
-        // UPDATED: API CALL FOR WEBHOOK & EMAIL INTEGRATION
-        // ==========================================
         function sendToWhatsApp(e) {
             e.preventDefault();
             var name = document.getElementById('name').value;
@@ -1461,7 +1459,6 @@
             var quantity = document.getElementById('quantity').value;
             var message = document.getElementById('message').value;
 
-            // Server ko request bhejna taaki Email (ritikpathak8570@gmail.com) aur WhatsApp auto-reply trigger ho sake
             fetch('/api/track/inquiry', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1472,7 +1469,6 @@
             })
             .then(res => res.json())
             .then(data => {
-                // 1. Admin (Aapke) WhatsApp par inquiry bhejne ka link
                 var adminText = "*TARAL OFFICIAL B2B INQUIRY*%0A" +
                                 "------------------------------------%0A" +
                                 "*Name:* " + encodeURIComponent(name) + "%0A" +
@@ -1487,7 +1483,6 @@
 
                 window.open("https://wa.me/917432057456?text=" + adminText, '_blank');
 
-                // 2. Customer ke WhatsApp par automated instant Thank You message bhejna
                 if (phone && data.whatsappAutoReplyText) {
                     setTimeout(() => {
                         var cleanPhone = phone.replace(/[^0-9]/g, '');
