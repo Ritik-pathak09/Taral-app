@@ -111,7 +111,11 @@
             pointer-events: none !important;
         }
 
-        /* FORCE DESKTOP / LAPTOP VIEW WHEN DESKTOP SITE MODE IS TOGGLED ON PHONE */
+        /* PERFECT DESKTOP SITE CENTERING & FULL WIDTH FIX */
+        body.desktop-mode-forced {
+            width: 1200px !important;
+            margin: 0 auto !important;
+        }
         body.desktop-mode-forced .lg\:flex { display: flex !important; }
         body.desktop-mode-forced .lg\:hidden { display: none !important; }
         body.desktop-mode-forced .lg\:col-span-7 { grid-column: span 7 / span 7 !important; }
@@ -1042,11 +1046,10 @@
     <!-- JavaScript & Analytics Integration Logic -->
     <script>
         // ==========================================
-        // SMART DESKTOP SITE MODE SWITCHER (FIXED)
+        // PERFECT DESKTOP SITE MODE SWITCHER (CENTERED & WIDE)
         // ==========================================
         function handleDesktopMode() {
             const meta = document.getElementById('viewportMeta');
-            // Check if mobile desktop site mode is checked (window width becomes large like a desktop)
             if (window.innerWidth >= 992) {
                 meta.setAttribute('content', 'width=1200');
                 document.body.classList.add('desktop-mode-forced');
