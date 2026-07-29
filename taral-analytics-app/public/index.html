@@ -2,7 +2,7 @@
 <html lang="hi" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" id="viewportMeta" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TARAL - Nature's Flow, Health and Glow | Packaged Drinking Water</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -1031,6 +1031,21 @@
 
     <!-- JavaScript & Analytics Integration Logic -->
     <script>
+        // ==========================================
+        // AUTO DESKTOP SITE MODE DETECTOR
+        // ==========================================
+        function checkDesktopMode() {
+            const meta = document.getElementById('viewportMeta');
+            // Agar browser ka innerWidth 1024px se zyada ho (jo ki desktop site mode on hone par hota hai)
+            if (window.innerWidth >= 1024) {
+                meta.setAttribute('content', 'width=1200');
+            } else {
+                meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
+            }
+        }
+        window.addEventListener('resize', checkDesktopMode);
+        window.addEventListener('DOMContentLoaded', checkDesktopMode);
+
         // ==========================================
         // BACKEND ANALYTICS TRACKING SCRIPT
         // ==========================================
