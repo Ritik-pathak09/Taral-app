@@ -1046,6 +1046,7 @@
 
     <!-- JavaScript & Analytics Integration Logic -->
     <script>
+        // FIXED: Complete History State Management for Popup Steps AND Website Back-Navigation
         if ('scrollRestoration' in history) {
             history.scrollRestoration = 'manual';
         }
@@ -1064,18 +1065,27 @@
             const step2 = document.getElementById('welcomeStep2');
             const step3 = document.getElementById('welcomeStep3');
 
+            // Agar popup khula hua hai, toh steps ke mutabiq back chalein
             if (overlay && !overlay.classList.contains('modal-hidden')) {
                 if (!step3.classList.contains('hidden')) {
+                    // Quote screen se 'For Her/Him' (Step 2) par jayein
                     step3.classList.add('hidden');
                     step2.classList.remove('hidden');
                 } else if (!step2.classList.contains('hidden')) {
+                    // Step 2 se Main Popup Menu (Step 1) par jayein
                     step2.classList.add('hidden');
                     step1.classList.remove('hidden');
                 } else {
+                    // Step 1 se popup close ho jaye
                     overlay.classList.add('modal-hidden');
                 }
             } else {
-                window.scrollTo({ top: 0, behavior: 'smooth' });
+                // Agar popup band hai aur user website par hai, toh back dabane par wapas Welcome Popup khul jaye taaki site seedha cut na ho
+                if (overlay) {
+                    overlay.classList.remove('modal-hidden');
+                    backToStep1();
+                    window.history.pushState({ step: 'step1' }, '', window.location.href);
+                }
             }
         });
 
@@ -1221,6 +1231,7 @@
 
         function visitOfficialWebsite() {
             document.getElementById('welcomeOverlay').classList.add('modal-hidden');
+            window.history.pushState({ step: 'main' }, '', window.location.href);
         }
 
         function openWelcomeOverlay() {
