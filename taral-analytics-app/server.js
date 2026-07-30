@@ -21,12 +21,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ==========================================
 // NODEMAILER TRANSPORTER SETUP FOR EMAIL ALERTS
 // ==========================================
-// Note: Apne Gmail account ka 'App Password' yahan ya .env file mein (EMAIL_USER / EMAIL_PASS) daalna hoga
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: process.env.EMAIL_USER || 'ritikpathak8570@gmail.com',
-        pass: process.env.EMAIL_PASS || '' // Yahan Gmail App Password aayega
+        pass: process.env.EMAIL_PASS || ''
     }
 });
 
@@ -99,7 +98,7 @@ function getClientIP(req) {
     return rawIp.split(',')[0].trim();
 }
 
-// HELPER: Get IST date strings to handle midnight updates correctly regardless of server timezone
+// HELPER: Get IST date and time components accurately
 function getISTDateComponents(date = new Date()) {
     const istDateStr = new Intl.DateTimeFormat('en-CA', {
         timeZone: 'Asia/Kolkata',
@@ -115,6 +114,14 @@ function getISTDateComponents(date = new Date()) {
     };
 }
 
+// HELPER: Get exact current IST Date object for correct timestamp display
+function getISTCurrentDate() {
+    const now = new Date();
+    // Convert to IST offset (+5 hours 30 minutes)
+    const istOffset = 5.5 * 60 * 60 * 1000;
+    return new Date(now.getTime() + (now.getTimezoneOffset() * 60 * 1000) + istOffset);
+}
+
 // ==========================================
 // API ENDPOINTS FOR FRONTEND TRACKING
 // ==========================================
@@ -124,8 +131,8 @@ app.post('/api/track/visit', async (req, res) => {
     try {
         const { sessionId, userAgent, referrer, screenResolution } = req.body;
         const ip = getClientIP(req);
-        const now = new Date();
-        const istComponents = getISTDateComponents(now);
+        const nowIST = getISTCurrentDate();
+        const istComponents = getISTDateComponents(nowIST);
         
         const visitEntry = {
             sessionId: sessionId || 'anon_' + Date.now(),
@@ -133,11 +140,11 @@ app.post('/api/track/visit', async (req, res) => {
             userAgent: userAgent || req.headers['user-agent'],
             referrer: referrer || 'Direct',
             screenResolution: screenResolution || 'Unknown',
-            timestamp: now,
+            timestamp: nowIST,
             dateStr: istComponents.dateStr,
             monthStr: istComponents.monthStr,
             yearStr: istComponents.yearStr,
-            lastActive: now,
+            lastActive: nowIST,
             durationSeconds: 0
         };
 
@@ -161,7 +168,7 @@ app.post('/api/track/ping', async (req, res) => {
 
         const visit = await Visit.findOne({ sessionId }).sort({ timestamp: -1 });
         if (visit) {
-            visit.lastActive = new Date();
+            visit.lastActive = getISTCurrentDate();
             const start = new Date(visit.timestamp);
             const end = new Date(visit.lastActive);
             visit.durationSeconds = Math.round((end - start) / 1000);
@@ -184,7 +191,7 @@ app.post('/api/track/sample-request', async (req, res) => {
                 sessionId,
                 source: source || 'Free Sample Button',
                 ip: getClientIP(req),
-                timestamp: new Date()
+                timestamp: getISTCurrentDate()
             });
         }
         console.log(`[SAMPLE REQUEST] Session: ${sessionId}`);
@@ -207,7 +214,7 @@ app.post('/api/track/quotation', async (req, res) => {
                 totalValue,
                 margin,
                 ip: getClientIP(req),
-                timestamp: new Date()
+                timestamp: getISTCurrentDate()
             });
         }
         console.log(`[QUOTATION] ${cases} cases calculated by ${role}`);
@@ -233,7 +240,7 @@ app.post('/api/track/inquiry', async (req, res) => {
                 quantity,
                 message,
                 ip: getClientIP(req),
-                timestamp: new Date()
+                timestamp: getISTCurrentDate()
             });
         }
         console.log(`[NEW B2B INQUIRY] From: ${name} (${phone}) - ${type}`);
@@ -293,7 +300,7 @@ app.get('/admin/export-inquiries', async (req, res) => {
             const bottleSize = `"${(i.bottleSize || '').replace(/"/g, '""')}"`;
             const quantity = `"${(i.quantity || '').replace(/"/g, '""')}"`;
             const message = `"${(i.message || '').replace(/"/g, '""')}"`;
-            const timestamp = `"${new Date(i.timestamp).toLocaleString()}"`;
+            const timestamp = `"${new Date(i.timestamp).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}"`;
 
             csv += `${name},${phone},${type},${location},${bottleSize},${quantity},${message},${timestamp}\n`;
         });
@@ -308,8 +315,8 @@ app.get('/admin/export-inquiries', async (req, res) => {
 
 app.get('/admin/analytics', async (req, res) => {
     try {
-        const now = new Date();
-        const istComponents = getISTDateComponents(now);
+        const nowIST = getISTCurrentDate();
+        const istComponents = getISTDateComponents(nowIST);
         const todayStr = istComponents.dateStr;
         const thisMonthStr = istComponents.monthStr;
         const thisYearStr = istComponents.yearStr;
@@ -334,7 +341,7 @@ app.get('/admin/analytics', async (req, res) => {
         const totalQuotes = quotationsGenerated.length;
 
         const activeNow = visits.filter(v => {
-            const diff = (now - new Date(v.lastActive)) / 1000;
+            const diff = (nowIST - new Date(v.lastActive)) / 1000;
             return diff <= 120;
         }).length;
 
@@ -359,7 +366,7 @@ app.get('/admin/analytics', async (req, res) => {
             <title>TARAL - Admin Live Analytics Dashboard</title>
             <script src="https://cdn.tailwindcss.com"></script>
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-            <meta http-equiv="refresh" content="86400">
+            <meta http-equiv="refresh" content="60">
         </head>
         <body class="bg-slate-900 text-slate-100 font-sans p-6">
             <div class="max-w-7xl mx-auto space-y-6">
@@ -503,8 +510,8 @@ app.get('/admin/analytics', async (req, res) => {
                                         <td class="p-3">${v.ip}</td>
                                         <td class="p-3 font-bold text-emerald-400">${v.durationSeconds || 0}s</td>
                                         <td class="p-3 text-slate-400">${v.referrer}</td>
-                                        <td class="p-3 text-slate-400">${new Date(v.timestamp).toLocaleTimeString()}</td>
-                                        <td class="p-3 text-slate-400">${new Date(v.lastActive).toLocaleTimeString()}</td>
+                                        <td class="p-3 text-slate-400">${new Date(v.timestamp).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' })}</td>
+                                        <td class="p-3 text-slate-400">${new Date(v.lastActive).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' })}</td>
                                     </tr>
                                 `).join('') : '<tr><td colspan="6" class="p-4 text-center text-slate-500">No visitor activity recorded for today yet.</td></tr>'}
                             </tbody>
@@ -524,7 +531,7 @@ app.get('/admin/analytics', async (req, res) => {
                                     <th class="p-3">Role</th>
                                     <th class="p-3">Location</th>
                                     <th class="p-3">Bottle / Cases</th>
-                                    <th class="p-3">Time</th>
+                                    <th class="P-3">Time</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-700/50">
@@ -535,7 +542,7 @@ app.get('/admin/analytics', async (req, res) => {
                                         <td class="p-3">${i.type}</td>
                                         <td class="p-3">${i.location}</td>
                                         <td class="p-3">${i.bottleSize} (${i.quantity} Cases)</td>
-                                        <td class="p-3 text-slate-400">${new Date(i.timestamp).toLocaleString()}</td>
+                                        <td class="p-3 text-slate-400">${new Date(i.timestamp).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</td>
                                     </tr>
                                 `).join('')}
                             </tbody>
@@ -557,7 +564,7 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Start Express Server (Updated with '0.0.0.0' for Render binding)
+// Start Express Server
 app.listen(PORT, '0.0.0.0', () => {
     console.log(`\n==================================================`);
     console.log(`🚀 TARAL Server running on port: ${PORT}`);
