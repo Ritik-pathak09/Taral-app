@@ -1057,6 +1057,18 @@
             if (!window.history.state || window.history.state.step !== 'main') {
                 window.history.replaceState({ step: 'main' }, '', window.location.href);
             }
+
+            // AUTO TRACK VISIT ON PAGE LOAD
+            fetch('/api/track/visit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sessionId: clientSessionId,
+                    userAgent: navigator.userAgent,
+                    referrer: document.referrer || 'Direct',
+                    screenResolution: window.screen.width + 'x' + window.screen.height
+                })
+            }).catch(err => console.log('Visit tracking error:', err));
         });
 
         window.addEventListener('popstate', function (event) {
