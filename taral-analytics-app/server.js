@@ -557,8 +557,8 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Start Express Server
-app.listen(PORT, () => {
+// Start Express Server (Updated with '0.0.0.0' for Render binding)
+app.listen(PORT, '0.0.0.0', () => {
     console.log(`\n==================================================`);
     console.log(`🚀 TARAL Server running on port: ${PORT}`);
     console.log(`🌐 Website URL: http://localhost:${PORT}`);
