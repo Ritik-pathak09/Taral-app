@@ -43,7 +43,8 @@ const visitSchema = new mongoose.Schema({
     monthStr: String,
     yearStr: String,
     lastActive: { type: Date, default: Date.now },
-    durationSeconds: { type: Number, default: 0 }
+    durationSeconds: { type: Number, default: 0 },
+    visitCount: { type: Number, default: 1 }
 });
 
 const inquirySchema = new mongoose.Schema({
@@ -118,7 +119,7 @@ function getISTDateComponents(date = new Date()) {
 // API ENDPOINTS FOR FRONTEND TRACKING
 // ==========================================
 
-// 1. Log Website Visit (FIXED: Always creates a fresh visit entry so Today's Visits increments correctly)
+// 1. Log Website Visit (FIXED: Unique session per day with proper hit counting & duration tracking)
 app.post('/api/track/visit', async (req, res) => {
     try {
         const { sessionId, userAgent, referrer, screenResolution } = req.body;
@@ -128,19 +129,42 @@ app.post('/api/track/visit', async (req, res) => {
         const currentSessionId = sessionId || 'anon_' + Date.now();
 
         if (isDbConnected) {
-            await Visit.create({
-                sessionId: currentSessionId,
-                ip: ip,
-                userAgent: userAgent || req.headers['user-agent'],
-                referrer: referrer || 'Direct',
-                screenResolution: screenResolution || 'Unknown',
-                timestamp: now,
-                dateStr: istComponents.dateStr,
-                monthStr: istComponents.monthStr,
-                yearStr: istComponents.yearStr,
-                lastActive: now,
-                durationSeconds: 0
+            const existingVisit = await Visit.findOne({ 
+                sessionId: currentSessionId, 
+                dateStr: istComponents.dateStr 
             });
+
+            if (existingVisit) {
+                const start = new Date(existingVisit.timestamp);
+                const duration = Math.max(0, Math.round((now - start) / 1000));
+                
+                await Visit.updateOne(
+                    { _id: existingVisit._id },
+                    { 
+                        $set: { 
+                            lastActive: now, 
+                            durationSeconds: duration,
+                            ip: ip 
+                        },
+                        $inc: { visitCount: 1 }
+                    }
+                );
+            } else {
+                await Visit.create({
+                    sessionId: currentSessionId,
+                    ip: ip,
+                    userAgent: userAgent || req.headers['user-agent'],
+                    referrer: referrer || 'Direct',
+                    screenResolution: screenResolution || 'Unknown',
+                    timestamp: now,
+                    dateStr: istComponents.dateStr,
+                    monthStr: istComponents.monthStr,
+                    yearStr: istComponents.yearStr,
+                    lastActive: now,
+                    durationSeconds: 0,
+                    visitCount: 1
+                });
+            }
         }
 
         console.log(`[VISIT LOGGED] Date: ${istComponents.dateStr} | Session: ${currentSessionId} | IP: ${ip}`);
@@ -158,12 +182,14 @@ app.post('/api/track/ping', async (req, res) => {
         if (!isDbConnected) return res.json({ status: 'db_not_connected' });
         if (!sessionId) return res.json({ status: 'session_not_found' });
 
-        const visit = await Visit.findOne({ sessionId }).sort({ timestamp: -1 });
+        const istComponents = getISTDateComponents(new Date());
+        const visit = await Visit.findOne({ sessionId, dateStr: istComponents.dateStr }).sort({ timestamp: -1 });
+        
         if (visit) {
-            visit.lastActive = new Date();
+            const now = new Date();
+            visit.lastActive = now;
             const start = new Date(visit.timestamp);
-            const end = new Date(visit.lastActive);
-            visit.durationSeconds = Math.max(0, Math.round((end - start) / 1000));
+            visit.durationSeconds = Math.max(0, Math.round((now - start) / 1000));
             await visit.save();
             return res.json({ status: 'active', durationSeconds: visit.durationSeconds });
         }
@@ -313,20 +339,20 @@ app.get('/admin/analytics', async (req, res) => {
         const filterYear = req.query.year || '';
         const filterMonth = req.query.month || '';
 
-        // Safe Start and End timestamps for Today in IST
         const startOfDay = new Date();
         startOfDay.setHours(0, 0, 0, 0);
 
         const endOfDay = new Date();
         endOfDay.setHours(23, 59, 59, 999);
 
-        // Robust MongoDB count queries matching both dateStr and timestamp ranges
-        const todayVisits = isDbConnected ? await Visit.countDocuments({
+        const todayVisitsDocs = isDbConnected ? await Visit.find({
             $or: [
                 { dateStr: todayStr },
                 { timestamp: { $gte: startOfDay, $lte: endOfDay } }
             ]
-        }) : 0;
+        }) : [];
+
+        const todayVisits = todayVisitsDocs.reduce((acc, v) => acc + (v.visitCount || 1), 0);
 
         const monthVisits = isDbConnected ? await Visit.countDocuments({
             $or: [
@@ -344,12 +370,7 @@ app.get('/admin/analytics', async (req, res) => {
 
         const totalVisits = isDbConnected ? await Visit.countDocuments({}) : 0;
 
-        const todayVisitsLog = isDbConnected ? await Visit.find({
-            $or: [
-                { dateStr: todayStr },
-                { timestamp: { $gte: startOfDay, $lte: endOfDay } }
-            ]
-        }).sort({ timestamp: -1 }) : [];
+        const todayVisitsLog = todayVisitsDocs.sort((a, b) => new Date(b.lastActive) - new Date(a.lastActive));
 
         const visits = isDbConnected ? await Visit.find({}).sort({ timestamp: -1 }) : [];
         const inquiries = isDbConnected ? await Inquiry.find({}).sort({ timestamp: -1 }) : [];
@@ -373,11 +394,12 @@ app.get('/admin/analytics', async (req, res) => {
             const dStr = v.dateStr || new Date(v.timestamp).toISOString().split('T')[0];
             const yStr = v.yearStr || new Date(v.timestamp).getFullYear().toString();
             const mStr = v.monthStr || dStr.slice(0, 7);
+            const count = v.visitCount || 1;
 
             if (dStr) {
                 if (filterYear && yStr !== filterYear) return;
                 if (filterMonth && mStr !== filterMonth) return;
-                dailyStats[dStr] = (dailyStats[dStr] || 0) + 1;
+                dailyStats[dStr] = (dailyStats[dStr] || 0) + count;
             }
         });
 
