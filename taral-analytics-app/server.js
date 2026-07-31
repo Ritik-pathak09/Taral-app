@@ -353,7 +353,8 @@ app.get('/admin/analytics', async (req, res) => {
         // All Time Total Visits calculation (Summing all visitCounts safely)
         const totalVisits = allVisits.reduce((acc, v) => acc + (Number(v.visitCount) || 1), 0);
 
-        const todayVisitsLog = todayVisitsDocs.sort((a, b) => new Date(b.lastActive || b.timestamp) - new Date(a.lastActive || a.timestamp));
+        // FIXED: Explicitly sorted in descending order of timestamp so the latest visit appears at the top
+        const todayVisitsLog = todayVisitsDocs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
 
         const inquiries = isDbConnected ? await Inquiry.find({}).sort({ timestamp: -1 }) : [];
         const sampleRequests = isDbConnected ? await SampleRequest.find({}) : [];
