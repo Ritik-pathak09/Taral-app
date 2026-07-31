@@ -280,6 +280,22 @@ app.post('/api/track/inquiry', async (req, res) => {
 // ADMIN DASHBOARD & EXPORT ENDPOINTS
 // ==========================================
 
+// Delete B2B Inquiry Endpoint
+app.post('/admin/delete-inquiry', async (req, res) => {
+    try {
+        const { id } = req.body;
+        if (isDbConnected && id) {
+            await Inquiry.findByIdAndDelete(id);
+            console.log(`[INQUIRY DELETED] ID: ${id}`);
+            return res.json({ status: 'success' });
+        }
+        res.json({ status: 'error', message: 'DB not connected or invalid ID' });
+    } catch (err) {
+        console.error('Delete inquiry error:', err);
+        res.status(500).json({ status: 'error' });
+    }
+});
+
 app.get('/admin/export-inquiries', async (req, res) => {
     try {
         const inquiries = isDbConnected ? await Inquiry.find({}).sort({ timestamp: -1 }) : [];
@@ -511,7 +527,7 @@ app.get('/admin/analytics', async (req, res) => {
                     </div>
                 </div>
 
-                <!-- ENHANCED CLICKABLE HISTORY FILTERS (Year Columns & Readable Month Names) -->
+                <!-- ENHANCED CLICKABLE HISTORY FILTERS -->
                 <div class="bg-slate-800 rounded-2xl p-5 border border-slate-700 space-y-4">
                     <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-700/60 pb-3">
                         <h3 class="text-sm font-bold text-slate-300"><i class="fa-solid fa-filter text-sky-400 mr-2"></i> Clickable History Filters:</h3>
@@ -532,7 +548,7 @@ app.get('/admin/analytics', async (req, res) => {
                                     <div class="space-y-1.5 pt-1 border-t border-slate-800">
                                         ${monthsInYear.map(m => {
                                             const monthTraffic = monthlyTrafficCounts[m] || 0;
-                                            const monthName = formatMonthName(m); // Jaise: July, August
+                                            const monthName = formatMonthName(m);
                                             const isMonthSelected = filterMonth === m;
                                             return `
                                             <a href="/admin/analytics?month=${m}" class="flex justify-between items-center px-3 py-2 rounded-lg text-xs font-bold transition ${isMonthSelected ? 'bg-emerald-600 text-white shadow' : 'bg-slate-800/80 text-slate-300 hover:bg-slate-700'}">
@@ -610,7 +626,7 @@ app.get('/admin/analytics', async (req, res) => {
                     </div>
                 </div>
 
-                <!-- INQUIRIES LOG TABLE -->
+                <!-- INQUIRIES LOG TABLE (With Delete Option) -->
                 <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700 space-y-4">
                     <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-paper-plane text-emerald-400 mr-2"></i> Received B2B Inquiries</h3>
                     <div class="overflow-x-auto max-h-[350px] overflow-y-auto">
@@ -623,17 +639,23 @@ app.get('/admin/analytics', async (req, res) => {
                                     <th class="p-3">Location</th>
                                     <th class="p-3">Bottle / Cases</th>
                                     <th class="p-3">Time</th>
+                                    <th class="p-3 text-center">Action</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-700/50">
                                 ${inquiries.map(i => `
-                                    <tr class="hover:bg-slate-700/30">
+                                    <tr class="hover:bg-slate-700/30" id="inquiry-row-${i._id}">
                                         <td class="p-3 font-bold text-white">${i.name}</td>
                                         <td class="p-3 text-sky-400">${i.phone}</td>
                                         <td class="p-3">${i.type}</td>
                                         <td class="p-3">${i.location}</td>
                                         <td class="p-3">${i.bottleSize} (${i.quantity} Cases)</td>
                                         <td class="p-3 text-slate-400">${new Date(i.timestamp).toLocaleString()}</td>
+                                        <td class="p-3 text-center">
+                                            <button onclick="deleteInquiry('${i._id}')" class="bg-rose-500/20 hover:bg-rose-500 text-rose-400 hover:text-white px-2.5 py-1 rounded-lg font-bold text-[10px] transition border border-rose-500/30 cursor-pointer" title="Delete Inquiry">
+                                                <i class="fa-solid fa-trash"></i> Delete
+                                            </button>
+                                        </td>
                                     </tr>
                                 `).join('')}
                             </tbody>
@@ -641,6 +663,29 @@ app.get('/admin/analytics', async (req, res) => {
                     </div>
                 </div>
             </div>
+
+            <!-- JavaScript for deleting inquiry dynamically -->
+            <script>
+                function deleteInquiry(id) {
+                    if (confirm('Kya aap sach mein is inquiry ko delete karna chahte hain?')) {
+                        fetch('/admin/delete-inquiry', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id: id })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.status === 'success') {
+                                const row = document.getElementById('inquiry-row-' + id);
+                                if (row) row.remove();
+                            } else {
+                                alert('Delete karne mein kuch samasya aayi.');
+                            }
+                        })
+                        .catch(err => console.error('Error deleting inquiry:', err));
+                    }
+                }
+            </script>
         </body>
         </html>
         `);
