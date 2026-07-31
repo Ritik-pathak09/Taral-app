@@ -320,17 +320,17 @@ app.get('/admin/analytics', async (req, res) => {
         const filterYear = req.query.year || '';
         const filterMonth = req.query.month || '';
 
+        // FIXED: Using direct MongoDB countDocuments for real-time accurate dashboard counts
+        const todayVisits = isDbConnected ? await Visit.countDocuments({ dateStr: todayStr }) : 0;
+        const monthVisits = isDbConnected ? await Visit.countDocuments({ monthStr: thisMonthStr }) : 0;
+        const yearVisits = isDbConnected ? await Visit.countDocuments({ yearStr: thisYearStr }) : 0;
+        const totalVisits = isDbConnected ? await Visit.countDocuments({}) : 0;
+
+        const todayVisitsLog = isDbConnected ? await Visit.find({ dateStr: todayStr }).sort({ timestamp: -1 }) : [];
         const visits = isDbConnected ? await Visit.find({}).sort({ timestamp: -1 }) : [];
         const inquiries = isDbConnected ? await Inquiry.find({}).sort({ timestamp: -1 }) : [];
         const sampleRequests = isDbConnected ? await SampleRequest.find({}) : [];
         const quotationsGenerated = isDbConnected ? await Quotation.find({}) : [];
-
-        const todayVisits = visits.filter(v => v.dateStr === todayStr).length;
-        const monthVisits = visits.filter(v => v.monthStr === thisMonthStr).length;
-        const yearVisits = visits.filter(v => v.yearStr === thisYearStr).length;
-        const totalVisits = visits.length;
-
-        const todayVisitsLog = visits.filter(v => v.dateStr === todayStr);
 
         const totalInquiries = inquiries.length;
         const totalSamples = sampleRequests.length;
