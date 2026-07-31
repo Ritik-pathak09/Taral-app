@@ -1057,6 +1057,33 @@
             if (!window.history.state || window.history.state.step !== 'main') {
                 window.history.replaceState({ step: 'main' }, '', window.location.href);
             }
+
+            // ========================================================
+            // ADDED: Automatic Visit Tracking Fetch Call to Backend
+            // ========================================================
+            let clientSessionId = localStorage.getItem('taral_session_id');
+            if (!clientSessionId) {
+                clientSessionId = 'taral_user_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
+                localStorage.setItem('taral_session_id', clientSessionId);
+            }
+
+            fetch('/api/track/visit', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    sessionId: clientSessionId,
+                    userAgent: navigator.userAgent,
+                    referrer: document.referrer || 'Direct',
+                    screenResolution: window.innerWidth + 'x' + window.innerHeight
+                })
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log('✓ Visit logged to backend successfully:', data);
+            })
+            .catch(err => {
+                console.error('⚠️ Visit tracking error:', err);
+            });
         });
 
         window.addEventListener('popstate', function (event) {
@@ -1065,22 +1092,17 @@
             const step2 = document.getElementById('welcomeStep2');
             const step3 = document.getElementById('welcomeStep3');
 
-            // Agar popup khula hua hai, toh steps ke mutabiq back chalein
             if (overlay && !overlay.classList.contains('modal-hidden')) {
                 if (!step3.classList.contains('hidden')) {
-                    // Quote screen se 'For Her/Him' (Step 2) par jayein
                     step3.classList.add('hidden');
                     step2.classList.remove('hidden');
                 } else if (!step2.classList.contains('hidden')) {
-                    // Step 2 se Main Popup Menu (Step 1) par jayein
                     step2.classList.add('hidden');
                     step1.classList.remove('hidden');
                 } else {
-                    // Step 1 se popup close ho jaye
                     overlay.classList.add('modal-hidden');
                 }
             } else {
-                // Agar popup band hai aur user website par hai, toh back dabane par wapas Welcome Popup khul jaye taaki site seedha cut na ho
                 if (overlay) {
                     overlay.classList.remove('modal-hidden');
                     backToStep1();
@@ -1254,9 +1276,9 @@
 
         function requestSample() {
             var sampleText = "*FREE SAMPLE CASE / TRIAL BOTTLE REQUEST*%0A" +
-                           "------------------------------------%0A" +
-                           "Hello Ritik ji, I am a Retailer/Cafe/Club Owner and I want to order a Free Trial Sample Batch of TARAL Water.%0A" +
-                           "Please connect with me for delivery details.";
+                            "------------------------------------%0A" +
+                            "Hello Ritik ji, I am a Retailer/Cafe/Club Owner and I want to order a Free Trial Sample Batch of TARAL Water.%0A" +
+                            "Please connect with me for delivery details.";
             window.open("https://wa.me/917432057456?text=" + sampleText, '_blank');
         }
 
