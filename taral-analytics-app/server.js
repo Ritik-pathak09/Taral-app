@@ -118,7 +118,7 @@ function getISTDateComponents(date = new Date()) {
 // API ENDPOINTS FOR FRONTEND TRACKING
 // ==========================================
 
-// 1. Log Website Visit (Fixed with Upsert/FindOneAndUpdate to properly update today's stats)
+// 1. Log Website Visit (FIXED: Always creates a fresh visit entry so Today's Visits increments correctly)
 app.post('/api/track/visit', async (req, res) => {
     try {
         const { sessionId, userAgent, referrer, screenResolution } = req.body;
@@ -128,26 +128,19 @@ app.post('/api/track/visit', async (req, res) => {
         const currentSessionId = sessionId || 'anon_' + Date.now();
 
         if (isDbConnected) {
-            // Check if this session already exists for today, update it or create a new tracking record
-            await Visit.findOneAndUpdate(
-                { sessionId: currentSessionId, dateStr: istComponents.dateStr },
-                {
-                    $set: {
-                        ip: ip,
-                        userAgent: userAgent || req.headers['user-agent'],
-                        referrer: referrer || 'Direct',
-                        screenResolution: screenResolution || 'Unknown',
-                        lastActive: now,
-                        monthStr: istComponents.monthStr,
-                        yearStr: istComponents.yearStr
-                    },
-                    $setOnInsert: {
-                        timestamp: now,
-                        durationSeconds: 0
-                    }
-                },
-                { upsert: true, new: true }
-            );
+            await Visit.create({
+                sessionId: currentSessionId,
+                ip: ip,
+                userAgent: userAgent || req.headers['user-agent'],
+                referrer: referrer || 'Direct',
+                screenResolution: screenResolution || 'Unknown',
+                timestamp: now,
+                dateStr: istComponents.dateStr,
+                monthStr: istComponents.monthStr,
+                yearStr: istComponents.yearStr,
+                lastActive: now,
+                durationSeconds: 0
+            });
         }
 
         console.log(`[VISIT LOGGED] Date: ${istComponents.dateStr} | Session: ${currentSessionId} | IP: ${ip}`);
