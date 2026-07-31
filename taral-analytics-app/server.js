@@ -374,12 +374,12 @@ app.get('/admin/analytics', async (req, res) => {
         // All Time Total Visits
         const totalVisits = allVisits.reduce((acc, v) => acc + (Number(v.visitCount) || 1), 0);
 
-        // Recent Visitors Log
+        // Recent Visitors Log (FIXED: Shows true individual session lastActive time without global over-writing)
         const displayVisitsLog = (filterYear || filterMonth) ? filteredVisits : todayVisitsDocs;
         const visitsLogFormatted = displayVisitsLog.map(v => {
             const t = new Date(v.timestamp);
             const l = v.lastActive ? new Date(v.lastActive) : t;
-            let duration = v.durationSeconds || Math.max(0, Math.round((now - t) / 1000));
+            let duration = v.durationSeconds || Math.max(0, Math.round((l - t) / 1000));
             if (duration > 86400) duration = 0;
 
             const timeFormatter = new Intl.DateTimeFormat('en-IN', {
@@ -394,7 +394,7 @@ app.get('/admin/analytics', async (req, res) => {
                 ...v.toObject(),
                 durationSeconds: duration,
                 firstTimeStr: timeFormatter.format(t),
-                lastTimeStr: timeFormatter.format(now > l ? now : l)
+                lastTimeStr: timeFormatter.format(l)
             };
         }).sort((a, b) => b._id.getTimestamp() - a._id.getTimestamp());
 
