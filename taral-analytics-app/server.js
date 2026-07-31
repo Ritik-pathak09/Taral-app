@@ -118,7 +118,6 @@ function getISTDateComponents(date = new Date()) {
 // HELPER: Get exact current IST Date object synchronized with Asia/Kolkata timezone
 function getISTCurrentDate() {
     const now = new Date();
-    // Format options to extract exact IST year, month, day, hour, minute, second
     const options = {
         timeZone: 'Asia/Kolkata',
         year: 'numeric',
@@ -137,10 +136,8 @@ function getISTCurrentDate() {
             dateParts[p.type] = parseInt(p.value, 10);
         }
     });
-    // Handle 24-hour conversion if hour is 24
     if (dateParts.hour === 24) dateParts.hour = 0;
     
-    // Construct a correct local JS Date representing the exact IST wall-clock time
     return new Date(
         dateParts.year,
         dateParts.month - 1,
@@ -155,7 +152,7 @@ function getISTCurrentDate() {
 // API ENDPOINTS FOR FRONTEND TRACKING
 // ==========================================
 
-// 1. Log Website Visit
+// 1. Log Website Visit (Updated with Upsert to prevent duplicates & maintain proper First/Last times)
 app.post('/api/track/visit', async (req, res) => {
     try {
         const { sessionId, userAgent, referrer, screenResolution } = req.body;
@@ -163,26 +160,36 @@ app.post('/api/track/visit', async (req, res) => {
         const nowIST = getISTCurrentDate();
         const istComponents = getISTDateComponents(nowIST);
         
-        const visitEntry = {
-            sessionId: sessionId || 'anon_' + Date.now(),
-            ip: ip,
-            userAgent: userAgent || req.headers['user-agent'],
-            referrer: referrer || 'Direct',
-            screenResolution: screenResolution || 'Unknown',
-            timestamp: nowIST,
-            dateStr: istComponents.dateStr,
-            monthStr: istComponents.monthStr,
-            yearStr: istComponents.yearStr,
-            lastActive: nowIST,
-            durationSeconds: 0
-        };
+        const currentSessionId = sessionId || 'anon_' + Date.now();
 
         if (isDbConnected) {
-            await Visit.create(visitEntry);
+            await Visit.findOneAndUpdate(
+                { 
+                    sessionId: currentSessionId, 
+                    dateStr: istComponents.dateStr 
+                },
+                { 
+                    $set: {
+                        ip: ip,
+                        userAgent: userAgent || req.headers['user-agent'],
+                        referrer: referrer || 'Direct',
+                        screenResolution: screenResolution || 'Unknown',
+                        dateStr: istComponents.dateStr,
+                        monthStr: istComponents.monthStr,
+                        yearStr: istComponents.yearStr,
+                        lastActive: nowIST
+                    },
+                    $setOnInsert: {
+                        timestamp: nowIST, // First visit time stays permanent for the session
+                        durationSeconds: 0
+                    }
+                },
+                { upsert: true, new: true, setDefaultsOnInsert: true }
+            );
         }
 
-        console.log(`[VISIT LOGGED] Date: ${visitEntry.dateStr} | Session: ${visitEntry.sessionId} | IP: ${ip}`);
-        res.json({ status: 'success', sessionId: visitEntry.sessionId });
+        console.log(`[VISIT LOGGED/UPDATED] Date: ${istComponents.dateStr} | Session: ${currentSessionId} | IP: ${ip}`);
+        res.json({ status: 'success', sessionId: currentSessionId });
     } catch (err) {
         console.error('Visit log error:', err);
         res.status(500).json({ status: 'error' });
@@ -301,7 +308,6 @@ app.post('/api/track/inquiry', async (req, res) => {
             }
         });
 
-        // Dynamic Customer WhatsApp Auto-Reply Text requested by user
         const whatsappAutoReplyText = `Hello ${name}, 👋\nThank you for reaching out to TARAL Water! We have successfully received your inquiry regarding ${bottleSize} / ${quantity} Cases for ${location}.\nOur sales team is reviewing your requirements and will connect with you shortly to share the best quotation and sample details.  Team TARAL`;
 
         res.json({ status: 'success', whatsappAutoReplyText });
