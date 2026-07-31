@@ -1046,9 +1046,14 @@
 
     <!-- JavaScript & Analytics Integration Logic -->
     <script>
-        // FIXED: Complete History State Management for Popup Steps AND Website Back-Navigation
         if ('scrollRestoration' in history) {
             history.scrollRestoration = 'manual';
+        }
+
+        let clientSessionId = localStorage.getItem('taral_session_id');
+        if (!clientSessionId) {
+            clientSessionId = 'taral_user_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
+            localStorage.setItem('taral_session_id', clientSessionId);
         }
 
         window.addEventListener('DOMContentLoaded', () => {
@@ -1058,15 +1063,7 @@
                 window.history.replaceState({ step: 'main' }, '', window.location.href);
             }
 
-            // ========================================================
-            // ADDED: Automatic Visit Tracking Fetch Call to Backend
-            // ========================================================
-            let clientSessionId = localStorage.getItem('taral_session_id');
-            if (!clientSessionId) {
-                clientSessionId = 'taral_user_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
-                localStorage.setItem('taral_session_id', clientSessionId);
-            }
-
+            // Log initial visit
             fetch('/api/track/visit', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
@@ -1079,11 +1076,29 @@
             })
             .then(res => res.json())
             .then(data => {
-                console.log('✓ Visit logged to backend successfully:', data);
+                console.log('✓ Visit logged successfully:', data);
             })
             .catch(err => {
                 console.error('⚠️ Visit tracking error:', err);
             });
+
+            // ========================================================
+            // FIXED: Live Heartbeat Ping Interval for Real-time Time Spent
+            // ========================================================
+            setInterval(() => {
+                if (clientSessionId) {
+                    fetch('/api/track/ping', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ sessionId: clientSessionId })
+                    })
+                    .then(res => res.json())
+                    .then(data => {
+                        console.log('Ping active, duration:', data.durationSeconds);
+                    })
+                    .catch(err => console.error('Ping error:', err));
+                }
+            }, 15000); // Har 15 seconds mein server ko update bhejega
         });
 
         window.addEventListener('popstate', function (event) {
@@ -1126,12 +1141,6 @@
             }
         }
         window.addEventListener('resize', handleDesktopMode);
-
-        let clientSessionId = localStorage.getItem('taral_session_id');
-        if (!clientSessionId) {
-            clientSessionId = 'taral_user_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
-            localStorage.setItem('taral_session_id', clientSessionId);
-        }
 
         const herQuotes = [
             "Hey Beautiful! You're working so hard today. Remember to pause, take a deep breath, and drink enough water. You've got this! ✨ Stay Hydrated & Keep Glowing 🌸",
