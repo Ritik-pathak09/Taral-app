@@ -98,14 +98,15 @@ function getClientIP(req) {
     return rawIp.split(',')[0].trim();
 }
 
-// HELPER: Get IST date and time components accurately
+// HELPER: Get IST date and time components accurately using Intl to avoid offset mismatches
 function getISTDateComponents(date = new Date()) {
-    const istDateStr = new Intl.DateTimeFormat('en-CA', {
+    const formatter = new Intl.DateTimeFormat('en-CA', {
         timeZone: 'Asia/Kolkata',
         year: 'numeric',
         month: '2-digit',
         day: '2-digit'
-    }).format(date); // Format: YYYY-MM-DD
+    });
+    const istDateStr = formatter.format(date); // Format: YYYY-MM-DD
 
     return {
         dateStr: istDateStr,
@@ -114,12 +115,40 @@ function getISTDateComponents(date = new Date()) {
     };
 }
 
-// HELPER: Get exact current IST Date object for correct timestamp display
+// HELPER: Get exact current IST Date object synchronized with Asia/Kolkata timezone
 function getISTCurrentDate() {
     const now = new Date();
-    // Convert to IST offset (+5 hours 30 minutes)
-    const istOffset = 5.5 * 60 * 60 * 1000;
-    return new Date(now.getTime() + (now.getTimezoneOffset() * 60 * 1000) + istOffset);
+    // Format options to extract exact IST year, month, day, hour, minute, second
+    const options = {
+        timeZone: 'Asia/Kolkata',
+        year: 'numeric',
+        month: 'numeric',
+        day: 'numeric',
+        hour: 'numeric',
+        minute: 'numeric',
+        second: 'numeric',
+        hour12: false
+    };
+    const formatter = new Intl.DateTimeFormat('en-US', options);
+    const parts = formatter.formatToParts(now);
+    const dateParts = {};
+    parts.forEach(p => {
+        if (p.type !== 'literal') {
+            dateParts[p.type] = parseInt(p.value, 10);
+        }
+    });
+    // Handle 24-hour conversion if hour is 24
+    if (dateParts.hour === 24) dateParts.hour = 0;
+    
+    // Construct a correct local JS Date representing the exact IST wall-clock time
+    return new Date(
+        dateParts.year,
+        dateParts.month - 1,
+        dateParts.day,
+        dateParts.hour,
+        dateParts.minute,
+        dateParts.second
+    );
 }
 
 // ==========================================
