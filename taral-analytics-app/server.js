@@ -183,7 +183,12 @@ app.post('/api/track/ping', async (req, res) => {
         if (!sessionId) return res.json({ status: 'session_not_found' });
 
         const istComponents = getISTDateComponents(new Date());
-        const visit = await Visit.findOne({ sessionId, dateStr: istComponents.dateStr }).sort({ timestamp: -1 });
+        let visit = await Visit.findOne({ sessionId, dateStr: istComponents.dateStr }).sort({ timestamp: -1 });
+        
+        // Fallback: agar aaj ki dateStr ka session na mile toh sessionId se latest fetch karein
+        if (!visit) {
+            visit = await Visit.findOne({ sessionId }).sort({ timestamp: -1 });
+        }
         
         if (visit) {
             const now = new Date();
@@ -196,6 +201,7 @@ app.post('/api/track/ping', async (req, res) => {
 
         res.json({ status: 'session_not_found' });
     } catch (err) {
+        console.error('Ping error:', err);
         res.status(500).json({ status: 'error' });
     }
 });
