@@ -21,12 +21,11 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ==========================================
 // NODEMAILER TRANSPORTER SETUP FOR EMAIL ALERTS
 // ==========================================
-// Note: Apne Gmail account ka 'App Password' yahan ya .env file mein (EMAIL_USER / EMAIL_PASS) daalna hoga
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: process.env.EMAIL_USER || 'ritikpathak8570@gmail.com',
-        pass: process.env.EMAIL_PASS || '' // Yahan Gmail App Password aayega
+        pass: process.env.EMAIL_PASS || ''
     }
 });
 
@@ -119,34 +118,40 @@ function getISTDateComponents(date = new Date()) {
 // API ENDPOINTS FOR FRONTEND TRACKING
 // ==========================================
 
-// 1. Log Website Visit
+// 1. Log Website Visit (Fixed with Upsert/FindOneAndUpdate to properly update today's stats)
 app.post('/api/track/visit', async (req, res) => {
     try {
         const { sessionId, userAgent, referrer, screenResolution } = req.body;
         const ip = getClientIP(req);
         const now = new Date();
         const istComponents = getISTDateComponents(now);
-        
-        const visitEntry = {
-            sessionId: sessionId || 'anon_' + Date.now(),
-            ip: ip,
-            userAgent: userAgent || req.headers['user-agent'],
-            referrer: referrer || 'Direct',
-            screenResolution: screenResolution || 'Unknown',
-            timestamp: now,
-            dateStr: istComponents.dateStr,
-            monthStr: istComponents.monthStr,
-            yearStr: istComponents.yearStr,
-            lastActive: now,
-            durationSeconds: 0
-        };
+        const currentSessionId = sessionId || 'anon_' + Date.now();
 
         if (isDbConnected) {
-            await Visit.create(visitEntry);
+            // Check if this session already exists for today, update it or create a new tracking record
+            await Visit.findOneAndUpdate(
+                { sessionId: currentSessionId, dateStr: istComponents.dateStr },
+                {
+                    $set: {
+                        ip: ip,
+                        userAgent: userAgent || req.headers['user-agent'],
+                        referrer: referrer || 'Direct',
+                        screenResolution: screenResolution || 'Unknown',
+                        lastActive: now,
+                        monthStr: istComponents.monthStr,
+                        yearStr: istComponents.yearStr
+                    },
+                    $setOnInsert: {
+                        timestamp: now,
+                        durationSeconds: 0
+                    }
+                },
+                { upsert: true, new: true }
+            );
         }
 
-        console.log(`[VISIT LOGGED] Date: ${visitEntry.dateStr} | Session: ${visitEntry.sessionId} | IP: ${ip}`);
-        res.json({ status: 'success', sessionId: visitEntry.sessionId });
+        console.log(`[VISIT LOGGED] Date: ${istComponents.dateStr} | Session: ${currentSessionId} | IP: ${ip}`);
+        res.json({ status: 'success', sessionId: currentSessionId });
     } catch (err) {
         console.error('Visit log error:', err);
         res.status(500).json({ status: 'error' });
@@ -158,13 +163,14 @@ app.post('/api/track/ping', async (req, res) => {
     try {
         const { sessionId } = req.body;
         if (!isDbConnected) return res.json({ status: 'db_not_connected' });
+        if (!sessionId) return res.json({ status: 'session_not_found' });
 
         const visit = await Visit.findOne({ sessionId }).sort({ timestamp: -1 });
         if (visit) {
             visit.lastActive = new Date();
             const start = new Date(visit.timestamp);
             const end = new Date(visit.lastActive);
-            visit.durationSeconds = Math.round((end - start) / 1000);
+            visit.durationSeconds = Math.max(0, Math.round((end - start) / 1000));
             await visit.save();
             return res.json({ status: 'active', durationSeconds: visit.durationSeconds });
         }
@@ -217,7 +223,7 @@ app.post('/api/track/quotation', async (req, res) => {
     }
 });
 
-// 5. Log Form Inquiries (Updated with Email Notification & WhatsApp Auto-Reply Text)
+// 5. Log Form Inquiries
 app.post('/api/track/inquiry', async (req, res) => {
     try {
         const { sessionId, name, phone, type, location, bottleSize, quantity, message } = req.body;
@@ -238,7 +244,6 @@ app.post('/api/track/inquiry', async (req, res) => {
         }
         console.log(`[NEW B2B INQUIRY] From: ${name} (${phone}) - ${type}`);
 
-        // Send Email Alert to ritikpathak8570@gmail.com
         const mailOptions = {
             from: process.env.EMAIL_USER || 'ritikpathak8570@gmail.com',
             to: 'ritikpathak8570@gmail.com',
@@ -265,7 +270,6 @@ app.post('/api/track/inquiry', async (req, res) => {
             }
         });
 
-        // Dynamic Customer WhatsApp Auto-Reply Text requested by user
         const whatsappAutoReplyText = `Hello ${name}, 👋\nThank you for reaching out to TARAL Water! We have successfully received your inquiry regarding ${bottleSize} / ${quantity} Cases for ${location}.\nOur sales team is reviewing your requirements and will connect with you shortly to share the best quotation and sample details.  Team TARAL`;
 
         res.json({ status: 'success', whatsappAutoReplyText });
@@ -279,7 +283,6 @@ app.post('/api/track/inquiry', async (req, res) => {
 // ADMIN DASHBOARD & EXPORT ENDPOINTS
 // ==========================================
 
-// EXCEL / CSV EXPORT ENDPOINT FOR LEADS
 app.get('/admin/export-inquiries', async (req, res) => {
     try {
         const inquiries = isDbConnected ? await Inquiry.find({}).sort({ timestamp: -1 }) : [];
@@ -359,7 +362,7 @@ app.get('/admin/analytics', async (req, res) => {
             <title>TARAL - Admin Live Analytics Dashboard</title>
             <script src="https://cdn.tailwindcss.com"></script>
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-            <meta http-equiv="refresh" content="86400">
+            <meta http-equiv="refresh" content="60">
         </head>
         <body class="bg-slate-900 text-slate-100 font-sans p-6">
             <div class="max-w-7xl mx-auto space-y-6">
