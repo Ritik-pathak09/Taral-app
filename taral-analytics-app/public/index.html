@@ -1033,7 +1033,7 @@
                 <p><i class="fa-solid fa-envelope text-teal-400 mr-2"></i> taral09@gmail.com</p>
                 <div class="flex md:justify-end gap-3 pt-1 text-base text-white">
                     <a href="https://www.linkedin.com/company/the-taral/" target="_blank" class="hover:text-sky-400 transition" title="LinkedIn"><i class="fa-brands fa-linkedin-in"></i></a>
-                    <a href="https://www.facebook.com/share/1EZ7kXudrS/" target="_blank" class="hover:text-facebook transition" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
+                    <a href="https://www.facebook.com/share/1EZ7kXudrS/" target="_blank" class="hover:text-teal-400 transition" title="Facebook"><i class="fa-brands fa-facebook-f"></i></a>
                     <a href="https://www.instagram.com/taral_.09?igsh=MWszMjl1bnZ1cjRpMg==" target="_blank" class="hover:text-pink-400 transition" title="Instagram"><i class="fa-brands fa-instagram"></i></a>
                     <a href="https://wa.me/917432057456" target="_blank" class="hover:text-emerald-400 transition" title="WhatsApp"><i class="fa-brands fa-whatsapp"></i></a>
                 </div>
@@ -1051,43 +1051,13 @@
             history.scrollRestoration = 'manual';
         }
 
-        // Persistent Session ID implementation
-        let clientSessionId = localStorage.getItem('taral_session_id');
-        if (!clientSessionId) {
-            clientSessionId = 'taral_user_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
-            localStorage.setItem('taral_session_id', clientSessionId);
-        }
-
         window.addEventListener('DOMContentLoaded', () => {
             window.scrollTo(0, 0);
             handleDesktopMode();
             if (!window.history.state || window.history.state.step !== 'main') {
                 window.history.replaceState({ step: 'main' }, '', window.location.href);
             }
-
-            // AUTO TRACK VISIT ON PAGE LOAD (Sends request only once per unique session startup or refresh)
-            fetch('/api/track/visit', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    sessionId: clientSessionId,
-                    userAgent: navigator.userAgent,
-                    referrer: document.referrer || 'Direct',
-                    screenResolution: window.screen.width + 'x' + window.screen.height
-                })
-            }).catch(err => console.log('Visit tracking error:', err));
         });
-
-        // HEARTBEAT PING TO UPDATE LAST ACTIVE TIME & DURATION SECONDS
-        setInterval(() => {
-            if (clientSessionId) {
-                fetch('/api/track/ping', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ sessionId: clientSessionId })
-                }).catch(err => console.log('Ping error:', err));
-            }
-        }, 15000);
 
         window.addEventListener('popstate', function (event) {
             const overlay = document.getElementById('welcomeOverlay');
@@ -1134,6 +1104,12 @@
             }
         }
         window.addEventListener('resize', handleDesktopMode);
+
+        let clientSessionId = localStorage.getItem('taral_session_id');
+        if (!clientSessionId) {
+            clientSessionId = 'taral_user_' + Math.random().toString(36).substring(2, 11) + '_' + Date.now();
+            localStorage.setItem('taral_session_id', clientSessionId);
+        }
 
         const herQuotes = [
             "Hey Beautiful! You're working so hard today. Remember to pause, take a deep breath, and drink enough water. You've got this! ✨ Stay Hydrated & Keep Glowing 🌸",
