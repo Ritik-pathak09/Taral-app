@@ -353,12 +353,14 @@ app.get('/admin/analytics', async (req, res) => {
         // All Time Total Visits calculation (Summing all visitCounts safely)
         const totalVisits = allVisits.reduce((acc, v) => acc + (Number(v.visitCount) || 1), 0);
 
-        // FIXED: Explicitly map with IST Time Formatter ensuring First Visit and Last Active update live in real-time
+        // FIXED: Dynamically calculate time spent and live last active using current server time and IST formatter
         const todayVisitsLog = todayVisitsDocs.map(v => {
             const t = new Date(v.timestamp);
+            // Agar lastActive purana ya missing hai toh current time/now ko base maanein taaki live duration chale
             const l = v.lastActive ? new Date(v.lastActive) : t;
-            const duration = v.durationSeconds || Math.max(0, Math.round((l - t) / 1000));
-            
+            let duration = v.durationSeconds || Math.max(0, Math.round((now - t) / 1000));
+            if (duration > 86400) duration = 0;
+
             const timeFormatter = new Intl.DateTimeFormat('en-IN', {
                 timeZone: 'Asia/Kolkata',
                 hour: 'numeric',
@@ -371,7 +373,7 @@ app.get('/admin/analytics', async (req, res) => {
                 ...v.toObject(),
                 durationSeconds: duration,
                 firstTimeStr: timeFormatter.format(t),
-                lastTimeStr: timeFormatter.format(l)
+                lastTimeStr: timeFormatter.format(now > l ? now : l)
             };
         }).sort((a, b) => b._id.getTimestamp() - a._id.getTimestamp());
 
