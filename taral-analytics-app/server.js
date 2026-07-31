@@ -119,7 +119,7 @@ function getISTDateComponents(date = new Date()) {
 // API ENDPOINTS FOR FRONTEND TRACKING
 // ==========================================
 
-// 1. Log Website Visit (FIXED: Updates existing session duration/lastActive or creates new daily record)
+// 1. Log Website Visit (FIXED: Always creates a fresh visit entry so Recent Logs and Counts update instantly in real-time)
 app.post('/api/track/visit', async (req, res) => {
     try {
         const { sessionId, userAgent, referrer, screenResolution } = req.body;
@@ -129,42 +129,20 @@ app.post('/api/track/visit', async (req, res) => {
         const currentSessionId = sessionId || 'anon_' + Date.now();
 
         if (isDbConnected) {
-            let existingVisit = await Visit.findOne({ 
-                sessionId: currentSessionId, 
-                dateStr: istComponents.dateStr 
+            await Visit.create({
+                sessionId: currentSessionId,
+                ip: ip,
+                userAgent: userAgent || req.headers['user-agent'],
+                referrer: referrer || 'Direct',
+                screenResolution: screenResolution || 'Unknown',
+                timestamp: now,
+                dateStr: istComponents.dateStr,
+                monthStr: istComponents.monthStr,
+                yearStr: istComponents.yearStr,
+                lastActive: now,
+                durationSeconds: 0,
+                visitCount: 1
             });
-
-            if (existingVisit) {
-                const start = new Date(existingVisit.timestamp);
-                const duration = Math.max(0, Math.round((now - start) / 1000));
-                
-                await Visit.updateOne(
-                    { _id: existingVisit._id },
-                    { 
-                        $set: { 
-                            lastActive: now, 
-                            durationSeconds: duration,
-                            ip: ip 
-                        },
-                        $inc: { visitCount: 1 }
-                    }
-                );
-            } else {
-                await Visit.create({
-                    sessionId: currentSessionId,
-                    ip: ip,
-                    userAgent: userAgent || req.headers['user-agent'],
-                    referrer: referrer || 'Direct',
-                    screenResolution: screenResolution || 'Unknown',
-                    timestamp: now,
-                    dateStr: istComponents.dateStr,
-                    monthStr: istComponents.monthStr,
-                    yearStr: istComponents.yearStr,
-                    lastActive: now,
-                    durationSeconds: 0,
-                    visitCount: 1
-                });
-            }
         }
 
         console.log(`[VISIT LOGGED] Date: ${istComponents.dateStr} | Session: ${currentSessionId} | IP: ${ip}`);
@@ -182,13 +160,7 @@ app.post('/api/track/ping', async (req, res) => {
         if (!isDbConnected) return res.json({ status: 'db_not_connected' });
         if (!sessionId) return res.json({ status: 'session_not_found' });
 
-        const istComponents = getISTDateComponents(new Date());
-        let visit = await Visit.findOne({ sessionId, dateStr: istComponents.dateStr }).sort({ timestamp: -1 });
-        
-        // Fallback: agar aaj ki dateStr ka session na mile toh sessionId se latest fetch karein
-        if (!visit) {
-            visit = await Visit.findOne({ sessionId }).sort({ timestamp: -1 });
-        }
+        const visit = await Visit.findOne({ sessionId }).sort({ timestamp: -1 });
         
         if (visit) {
             const now = new Date();
