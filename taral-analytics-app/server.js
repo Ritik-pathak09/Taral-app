@@ -21,11 +21,12 @@ app.use(express.static(path.join(__dirname, 'public')));
 // ==========================================
 // NODEMAILER TRANSPORTER SETUP FOR EMAIL ALERTS
 // ==========================================
+// Note: Apne Gmail account ka 'App Password' yahan ya .env file mein (EMAIL_USER / EMAIL_PASS) daalna hoga
 const transporter = nodemailer.createTransport({
     service: 'gmail',
     auth: {
         user: process.env.EMAIL_USER || 'ritikpathak8570@gmail.com',
-        pass: process.env.EMAIL_PASS || ''
+        pass: process.env.EMAIL_PASS || '' // Yahan Gmail App Password aayega
     }
 });
 
@@ -98,15 +99,14 @@ function getClientIP(req) {
     return rawIp.split(',')[0].trim();
 }
 
-// HELPER: Get IST date and time components accurately using Intl to avoid offset mismatches
+// HELPER: Get IST date strings to handle midnight updates correctly regardless of server timezone
 function getISTDateComponents(date = new Date()) {
-    const formatter = new Intl.DateTimeFormat('en-CA', {
+    const istDateStr = new Intl.DateTimeFormat('en-CA', {
         timeZone: 'Asia/Kolkata',
         year: 'numeric',
         month: '2-digit',
         day: '2-digit'
-    });
-    const istDateStr = formatter.format(date); // Format: YYYY-MM-DD
+    }).format(date); // Format: YYYY-MM-DD
 
     return {
         dateStr: istDateStr,
@@ -115,81 +115,38 @@ function getISTDateComponents(date = new Date()) {
     };
 }
 
-// HELPER: Get exact current IST Date object synchronized with Asia/Kolkata timezone
-function getISTCurrentDate() {
-    const now = new Date();
-    const options = {
-        timeZone: 'Asia/Kolkata',
-        year: 'numeric',
-        month: 'numeric',
-        day: 'numeric',
-        hour: 'numeric',
-        minute: 'numeric',
-        second: 'numeric',
-        hour12: false
-    };
-    const formatter = new Intl.DateTimeFormat('en-US', options);
-    const parts = formatter.formatToParts(now);
-    const dateParts = {};
-    parts.forEach(p => {
-        if (p.type !== 'literal') {
-            dateParts[p.type] = parseInt(p.value, 10);
-        }
-    });
-    if (dateParts.hour === 24) dateParts.hour = 0;
-    
-    return new Date(
-        dateParts.year,
-        dateParts.month - 1,
-        dateParts.day,
-        dateParts.hour,
-        dateParts.minute,
-        dateParts.second
-    );
-}
-
 // ==========================================
 // API ENDPOINTS FOR FRONTEND TRACKING
 // ==========================================
 
-// 1. Log Website Visit (Updated with Upsert to prevent duplicates & maintain proper First/Last times)
+// 1. Log Website Visit
 app.post('/api/track/visit', async (req, res) => {
     try {
         const { sessionId, userAgent, referrer, screenResolution } = req.body;
         const ip = getClientIP(req);
-        const nowIST = getISTCurrentDate();
-        const istComponents = getISTDateComponents(nowIST);
+        const now = new Date();
+        const istComponents = getISTDateComponents(now);
         
-        const currentSessionId = sessionId || 'anon_' + Date.now();
+        const visitEntry = {
+            sessionId: sessionId || 'anon_' + Date.now(),
+            ip: ip,
+            userAgent: userAgent || req.headers['user-agent'],
+            referrer: referrer || 'Direct',
+            screenResolution: screenResolution || 'Unknown',
+            timestamp: now,
+            dateStr: istComponents.dateStr,
+            monthStr: istComponents.monthStr,
+            yearStr: istComponents.yearStr,
+            lastActive: now,
+            durationSeconds: 0
+        };
 
         if (isDbConnected) {
-            await Visit.findOneAndUpdate(
-                { 
-                    sessionId: currentSessionId, 
-                    dateStr: istComponents.dateStr 
-                },
-                { 
-                    $set: {
-                        ip: ip,
-                        userAgent: userAgent || req.headers['user-agent'],
-                        referrer: referrer || 'Direct',
-                        screenResolution: screenResolution || 'Unknown',
-                        dateStr: istComponents.dateStr,
-                        monthStr: istComponents.monthStr,
-                        yearStr: istComponents.yearStr,
-                        lastActive: nowIST
-                    },
-                    $setOnInsert: {
-                        timestamp: nowIST, // First visit time stays permanent for the session
-                        durationSeconds: 0
-                    }
-                },
-                { upsert: true, new: true, setDefaultsOnInsert: true }
-            );
+            await Visit.create(visitEntry);
         }
 
-        console.log(`[VISIT LOGGED/UPDATED] Date: ${istComponents.dateStr} | Session: ${currentSessionId} | IP: ${ip}`);
-        res.json({ status: 'success', sessionId: currentSessionId });
+        console.log(`[VISIT LOGGED] Date: ${visitEntry.dateStr} | Session: ${visitEntry.sessionId} | IP: ${ip}`);
+        res.json({ status: 'success', sessionId: visitEntry.sessionId });
     } catch (err) {
         console.error('Visit log error:', err);
         res.status(500).json({ status: 'error' });
@@ -204,7 +161,7 @@ app.post('/api/track/ping', async (req, res) => {
 
         const visit = await Visit.findOne({ sessionId }).sort({ timestamp: -1 });
         if (visit) {
-            visit.lastActive = getISTCurrentDate();
+            visit.lastActive = new Date();
             const start = new Date(visit.timestamp);
             const end = new Date(visit.lastActive);
             visit.durationSeconds = Math.round((end - start) / 1000);
@@ -227,7 +184,7 @@ app.post('/api/track/sample-request', async (req, res) => {
                 sessionId,
                 source: source || 'Free Sample Button',
                 ip: getClientIP(req),
-                timestamp: getISTCurrentDate()
+                timestamp: new Date()
             });
         }
         console.log(`[SAMPLE REQUEST] Session: ${sessionId}`);
@@ -250,7 +207,7 @@ app.post('/api/track/quotation', async (req, res) => {
                 totalValue,
                 margin,
                 ip: getClientIP(req),
-                timestamp: getISTCurrentDate()
+                timestamp: new Date()
             });
         }
         console.log(`[QUOTATION] ${cases} cases calculated by ${role}`);
@@ -276,7 +233,7 @@ app.post('/api/track/inquiry', async (req, res) => {
                 quantity,
                 message,
                 ip: getClientIP(req),
-                timestamp: getISTCurrentDate()
+                timestamp: new Date()
             });
         }
         console.log(`[NEW B2B INQUIRY] From: ${name} (${phone}) - ${type}`);
@@ -308,6 +265,7 @@ app.post('/api/track/inquiry', async (req, res) => {
             }
         });
 
+        // Dynamic Customer WhatsApp Auto-Reply Text requested by user
         const whatsappAutoReplyText = `Hello ${name}, 👋\nThank you for reaching out to TARAL Water! We have successfully received your inquiry regarding ${bottleSize} / ${quantity} Cases for ${location}.\nOur sales team is reviewing your requirements and will connect with you shortly to share the best quotation and sample details.  Team TARAL`;
 
         res.json({ status: 'success', whatsappAutoReplyText });
@@ -335,7 +293,7 @@ app.get('/admin/export-inquiries', async (req, res) => {
             const bottleSize = `"${(i.bottleSize || '').replace(/"/g, '""')}"`;
             const quantity = `"${(i.quantity || '').replace(/"/g, '""')}"`;
             const message = `"${(i.message || '').replace(/"/g, '""')}"`;
-            const timestamp = `"${new Date(i.timestamp).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}"`;
+            const timestamp = `"${new Date(i.timestamp).toLocaleString()}"`;
 
             csv += `${name},${phone},${type},${location},${bottleSize},${quantity},${message},${timestamp}\n`;
         });
@@ -350,8 +308,8 @@ app.get('/admin/export-inquiries', async (req, res) => {
 
 app.get('/admin/analytics', async (req, res) => {
     try {
-        const nowIST = getISTCurrentDate();
-        const istComponents = getISTDateComponents(nowIST);
+        const now = new Date();
+        const istComponents = getISTDateComponents(now);
         const todayStr = istComponents.dateStr;
         const thisMonthStr = istComponents.monthStr;
         const thisYearStr = istComponents.yearStr;
@@ -376,7 +334,7 @@ app.get('/admin/analytics', async (req, res) => {
         const totalQuotes = quotationsGenerated.length;
 
         const activeNow = visits.filter(v => {
-            const diff = (nowIST - new Date(v.lastActive)) / 1000;
+            const diff = (now - new Date(v.lastActive)) / 1000;
             return diff <= 120;
         }).length;
 
@@ -401,7 +359,7 @@ app.get('/admin/analytics', async (req, res) => {
             <title>TARAL - Admin Live Analytics Dashboard</title>
             <script src="https://cdn.tailwindcss.com"></script>
             <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-            <meta http-equiv="refresh" content="60">
+            <meta http-equiv="refresh" content="86400">
         </head>
         <body class="bg-slate-900 text-slate-100 font-sans p-6">
             <div class="max-w-7xl mx-auto space-y-6">
@@ -545,8 +503,8 @@ app.get('/admin/analytics', async (req, res) => {
                                         <td class="p-3">${v.ip}</td>
                                         <td class="p-3 font-bold text-emerald-400">${v.durationSeconds || 0}s</td>
                                         <td class="p-3 text-slate-400">${v.referrer}</td>
-                                        <td class="p-3 text-slate-400">${new Date(v.timestamp).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' })}</td>
-                                        <td class="p-3 text-slate-400">${new Date(v.lastActive).toLocaleTimeString('en-IN', { timeZone: 'Asia/Kolkata' })}</td>
+                                        <td class="p-3 text-slate-400">${new Date(v.timestamp).toLocaleTimeString()}</td>
+                                        <td class="p-3 text-slate-400">${new Date(v.lastActive).toLocaleTimeString()}</td>
                                     </tr>
                                 `).join('') : '<tr><td colspan="6" class="p-4 text-center text-slate-500">No visitor activity recorded for today yet.</td></tr>'}
                             </tbody>
@@ -566,7 +524,7 @@ app.get('/admin/analytics', async (req, res) => {
                                     <th class="p-3">Role</th>
                                     <th class="p-3">Location</th>
                                     <th class="p-3">Bottle / Cases</th>
-                                    <th class="P-3">Time</th>
+                                    <th class="p-3">Time</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-700/50">
@@ -577,7 +535,7 @@ app.get('/admin/analytics', async (req, res) => {
                                         <td class="p-3">${i.type}</td>
                                         <td class="p-3">${i.location}</td>
                                         <td class="p-3">${i.bottleSize} (${i.quantity} Cases)</td>
-                                        <td class="p-3 text-slate-400">${new Date(i.timestamp).toLocaleString('en-IN', { timeZone: 'Asia/Kolkata' })}</td>
+                                        <td class="p-3 text-slate-400">${new Date(i.timestamp).toLocaleString()}</td>
                                     </tr>
                                 `).join('')}
                             </tbody>
@@ -600,7 +558,7 @@ app.get('*', (req, res) => {
 });
 
 // Start Express Server
-app.listen(PORT, '0.0.0.0', () => {
+app.listen(PORT, () => {
     console.log(`\n==================================================`);
     console.log(`🚀 TARAL Server running on port: ${PORT}`);
     console.log(`🌐 Website URL: http://localhost:${PORT}`);
