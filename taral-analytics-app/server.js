@@ -119,7 +119,7 @@ function getISTDateComponents(date = new Date()) {
 // API ENDPOINTS FOR FRONTEND TRACKING
 // ==========================================
 
-// 1. Log Website Visit (FIXED: Unique session per day with proper hit counting & duration tracking)
+// 1. Log Website Visit (FIXED: Updates existing session duration/lastActive or creates new daily record)
 app.post('/api/track/visit', async (req, res) => {
     try {
         const { sessionId, userAgent, referrer, screenResolution } = req.body;
@@ -129,7 +129,7 @@ app.post('/api/track/visit', async (req, res) => {
         const currentSessionId = sessionId || 'anon_' + Date.now();
 
         if (isDbConnected) {
-            const existingVisit = await Visit.findOne({ 
+            let existingVisit = await Visit.findOne({ 
                 sessionId: currentSessionId, 
                 dateStr: istComponents.dateStr 
             });
@@ -175,7 +175,7 @@ app.post('/api/track/visit', async (req, res) => {
     }
 });
 
-// 2. Active Ping / Heartbeat (Tracks how long user stayed active)
+// 2. Active Ping / Heartbeat (FIXED: Real-time update for Time Spent and Last Active)
 app.post('/api/track/ping', async (req, res) => {
     try {
         const { sessionId } = req.body;
