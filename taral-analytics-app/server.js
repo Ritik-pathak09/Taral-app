@@ -353,8 +353,18 @@ app.get('/admin/analytics', async (req, res) => {
         // All Time Total Visits calculation (Summing all visitCounts safely)
         const totalVisits = allVisits.reduce((acc, v) => acc + (Number(v.visitCount) || 1), 0);
 
-        // FIXED: Sorted strictly by _id descending so newest visit/refresh appears instantly on top
-        const todayVisitsLog = todayVisitsDocs.sort((a, b) => b._id.getTimestamp() - a._id.getTimestamp());
+        // FIXED: Explicitly map and sort safely ensuring time spent and timestamps show correctly
+        const todayVisitsLog = todayVisitsDocs.map(v => {
+            const t = new Date(v.timestamp);
+            const l = v.lastActive ? new Date(v.lastActive) : t;
+            const duration = v.durationSeconds || Math.max(0, Math.round((l - t) / 1000));
+            return {
+                ...v.toObject(),
+                durationSeconds: duration,
+                firstTimeStr: t.toLocaleTimeString(),
+                lastTimeStr: l.toLocaleTimeString()
+            };
+        }).sort((a, b) => b._id.getTimestamp() - a._id.getTimestamp());
 
         const inquiries = isDbConnected ? await Inquiry.find({}).sort({ timestamp: -1 }) : [];
         const sampleRequests = isDbConnected ? await SampleRequest.find({}) : [];
@@ -539,10 +549,10 @@ app.get('/admin/analytics', async (req, res) => {
                                     <tr class="hover:bg-slate-700/30">
                                         <td class="p-3 font-mono text-sky-300">${(v.sessionId || '').substring(0, 18)}...</td>
                                         <td class="p-3">${v.ip}</td>
-                                        <td class="p-3 font-bold text-emerald-400">${v.durationSeconds || 0}s</td>
+                                        <td class="p-3 font-bold text-emerald-400">${v.durationSeconds}s</td>
                                         <td class="p-3 text-slate-400">${v.referrer}</td>
-                                        <td class="p-3 text-slate-400">${v.timestamp ? new Date(v.timestamp).toLocaleTimeString() : 'N/A'}</td>
-                                        <td class="p-3 text-slate-400">${v.lastActive ? new Date(v.lastActive).toLocaleTimeString() : new Date(v.timestamp).toLocaleTimeString()}</td>
+                                        <td class="p-3 text-slate-400">${v.firstTimeStr}</td>
+                                        <td class="p-3 text-slate-400">${v.lastTimeStr}</td>
                                     </tr>
                                 `).join('') : '<tr><td colspan="6" class="p-4 text-center text-slate-500">No visitor activity recorded for today yet.</td></tr>'}
                             </tbody>
@@ -559,6 +569,7 @@ app.get('/admin/analytics', async (req, res) => {
                                 <tr class="bg-slate-900/80 text-slate-400 border-b border-slate-700 sticky top-0">
                                     <th class="p-3">Name</th>
                                     <th class="p-3">Phone</th>
+                                    <th class="p-3">Role</th>
                                     <th class="p-3">Role</th>
                                     <th class="p-3">Location</th>
                                     <th class="p-3">Bottle / Cases</th>
