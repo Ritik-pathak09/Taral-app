@@ -345,34 +345,38 @@ app.get('/admin/analytics', async (req, res) => {
         const endOfDay = new Date();
         endOfDay.setHours(23, 59, 59, 999);
 
-        const todayVisitsDocs = isDbConnected ? await Visit.find({
-            $or: [
-                { dateStr: todayStr },
-                { timestamp: { $gte: startOfDay, $lte: endOfDay } }
-            ]
-        }) : [];
+        // Fetch all visits from database
+        const allVisits = isDbConnected ? await Visit.find({}).sort({ timestamp: -1 }) : [];
 
-        const todayVisits = todayVisitsDocs.reduce((acc, v) => acc + (v.visitCount || 1), 0);
+        // Today's Visits calculation (fallback safe)
+        const todayVisitsDocs = allVisits.filter(v => {
+            const vDate = new Date(v.timestamp);
+            const dStr = v.dateStr || vDate.toISOString().split('T')[0];
+            return (dStr === todayStr) || (vDate >= startOfDay && vDate <= endOfDay);
+        });
+        const todayVisits = todayVisitsDocs.reduce((acc, v) => acc + (Number(v.visitCount) || 1), 0);
 
-        const monthVisits = isDbConnected ? await Visit.countDocuments({
-            $or: [
-                { monthStr: thisMonthStr },
-                { timestamp: { $gte: new Date(now.getFullYear(), now.getMonth(), 1) } }
-            ]
-        }) : 0;
+        // This Month Visits calculation
+        const monthVisitsDocs = allVisits.filter(v => {
+            const vDate = new Date(v.timestamp);
+            const mStr = v.monthStr || vDate.toISOString().slice(0, 7);
+            return (mStr === thisMonthStr) || (vDate.getFullYear() === now.getFullYear() && vDate.getMonth() === now.getMonth());
+        });
+        const monthVisits = monthVisitsDocs.reduce((acc, v) => acc + (Number(v.visitCount) || 1), 0);
 
-        const yearVisits = isDbConnected ? await Visit.countDocuments({
-            $or: [
-                { yearStr: thisYearStr },
-                { timestamp: { $gte: new Date(now.getFullYear(), 0, 1) } }
-            ]
-        }) : 0;
+        // This Year Visits calculation
+        const yearVisitsDocs = allVisits.filter(v => {
+            const vDate = new Date(v.timestamp);
+            const yStr = v.yearStr || vDate.getFullYear().toString();
+            return (yStr === thisYearStr) || (vDate.getFullYear() === now.getFullYear());
+        });
+        const yearVisits = yearVisitsDocs.reduce((acc, v) => acc + (Number(v.visitCount) || 1), 0);
 
-        const totalVisits = isDbConnected ? await Visit.countDocuments({}) : 0;
+        // All Time Total Visits calculation (Summing all visitCounts safely)
+        const totalVisits = allVisits.reduce((acc, v) => acc + (Number(v.visitCount) || 1), 0);
 
-        const todayVisitsLog = todayVisitsDocs.sort((a, b) => new Date(b.lastActive) - new Date(a.lastActive));
+        const todayVisitsLog = todayVisitsDocs.sort((a, b) => new Date(b.lastActive || b.timestamp) - new Date(a.lastActive || a.timestamp));
 
-        const visits = isDbConnected ? await Visit.find({}).sort({ timestamp: -1 }) : [];
         const inquiries = isDbConnected ? await Inquiry.find({}).sort({ timestamp: -1 }) : [];
         const sampleRequests = isDbConnected ? await SampleRequest.find({}) : [];
         const quotationsGenerated = isDbConnected ? await Quotation.find({}) : [];
@@ -381,20 +385,22 @@ app.get('/admin/analytics', async (req, res) => {
         const totalSamples = sampleRequests.length;
         const totalQuotes = quotationsGenerated.length;
 
-        const activeNow = visits.filter(v => {
-            const diff = (now - new Date(v.lastActive)) / 1000;
+        const activeNow = allVisits.filter(v => {
+            const lastActiveTime = v.lastActive || v.timestamp;
+            const diff = (now - new Date(lastActiveTime)) / 1000;
             return diff <= 120;
         }).length;
 
-        const availableYears = [...new Set(visits.map(v => v.yearStr || new Date(v.timestamp).getFullYear().toString()).filter(Boolean))].sort().reverse();
-        const availableMonths = [...new Set(visits.map(v => v.monthStr || new Date(v.timestamp).toISOString().slice(0, 7)).filter(Boolean))].sort().reverse();
+        const availableYears = [...new Set(allVisits.map(v => v.yearStr || new Date(v.timestamp).getFullYear().toString()).filter(Boolean))].sort().reverse();
+        const availableMonths = [...new Set(allVisits.map(v => v.monthStr || new Date(v.timestamp).toISOString().slice(0, 7)).filter(Boolean))].sort().reverse();
 
         const dailyStats = {};
-        visits.forEach(v => {
-            const dStr = v.dateStr || new Date(v.timestamp).toISOString().split('T')[0];
-            const yStr = v.yearStr || new Date(v.timestamp).getFullYear().toString();
+        allVisits.forEach(v => {
+            const vDate = new Date(v.timestamp);
+            const dStr = v.dateStr || vDate.toISOString().split('T')[0];
+            const yStr = v.yearStr || vDate.getFullYear().toString();
             const mStr = v.monthStr || dStr.slice(0, 7);
-            const count = v.visitCount || 1;
+            const count = Number(v.visitCount) || 1;
 
             if (dStr) {
                 if (filterYear && yStr !== filterYear) return;
@@ -556,8 +562,8 @@ app.get('/admin/analytics', async (req, res) => {
                                         <td class="p-3">${v.ip}</td>
                                         <td class="p-3 font-bold text-emerald-400">${v.durationSeconds || 0}s</td>
                                         <td class="p-3 text-slate-400">${v.referrer}</td>
-                                        <td class="p-3 text-slate-400">${new Date(v.timestamp).toLocaleTimeString()}</td>
-                                        <td class="p-3 text-slate-400">${new Date(v.lastActive).toLocaleTimeString()}</td>
+                                        <td class="p-3 text-slate-400">${v.timestamp ? new Date(v.timestamp).toLocaleTimeString() : 'N/A'}</td>
+                                        <td class="p-3 text-slate-400">${v.lastActive ? new Date(v.lastActive).toLocaleTimeString() : new Date(v.timestamp).toLocaleTimeString()}</td>
                                     </tr>
                                 `).join('') : '<tr><td colspan="6" class="p-4 text-center text-slate-500">No visitor activity recorded for today yet.</td></tr>'}
                             </tbody>
