@@ -323,13 +323,13 @@ app.get('/admin/analytics', async (req, res) => {
         const endOfDay = new Date();
         endOfDay.setHours(23, 59, 59, 999);
 
-        // Fetch all visits from database
-        const allVisits = isDbConnected ? await Visit.find({}).sort({ timestamp: -1 }) : [];
+        // Fetch all visits from database sorted by latest creation order
+        const allVisits = isDbConnected ? await Visit.find({}).sort({ _id: -1 }) : [];
 
         // Today's Visits calculation (fallback safe)
         const todayVisitsDocs = allVisits.filter(v => {
             const vDate = new Date(v.timestamp);
-            const dStr = v.dateStr || vDate.toISOString().split('T')[0];
+            const dStr = v.dateStr || vDate.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
             return (dStr === todayStr) || (vDate >= startOfDay && vDate <= endOfDay);
         });
         const todayVisits = todayVisitsDocs.reduce((acc, v) => acc + (Number(v.visitCount) || 1), 0);
@@ -337,7 +337,7 @@ app.get('/admin/analytics', async (req, res) => {
         // This Month Visits calculation
         const monthVisitsDocs = allVisits.filter(v => {
             const vDate = new Date(v.timestamp);
-            const mStr = v.monthStr || vDate.toISOString().slice(0, 7);
+            const mStr = v.monthStr || vDate.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }).slice(0, 7);
             return (mStr === thisMonthStr) || (vDate.getFullYear() === now.getFullYear() && vDate.getMonth() === now.getMonth());
         });
         const monthVisits = monthVisitsDocs.reduce((acc, v) => acc + (Number(v.visitCount) || 1), 0);
@@ -353,16 +353,25 @@ app.get('/admin/analytics', async (req, res) => {
         // All Time Total Visits calculation (Summing all visitCounts safely)
         const totalVisits = allVisits.reduce((acc, v) => acc + (Number(v.visitCount) || 1), 0);
 
-        // FIXED: Explicitly map and sort safely ensuring time spent and timestamps show correctly
+        // FIXED: Explicitly map with IST Time Formatter ensuring First Visit and Last Active update live in real-time
         const todayVisitsLog = todayVisitsDocs.map(v => {
             const t = new Date(v.timestamp);
             const l = v.lastActive ? new Date(v.lastActive) : t;
             const duration = v.durationSeconds || Math.max(0, Math.round((l - t) / 1000));
+            
+            const timeFormatter = new Intl.DateTimeFormat('en-IN', {
+                timeZone: 'Asia/Kolkata',
+                hour: 'numeric',
+                minute: '2-digit',
+                second: '2-digit',
+                hour12: true
+            });
+
             return {
                 ...v.toObject(),
                 durationSeconds: duration,
-                firstTimeStr: t.toLocaleTimeString(),
-                lastTimeStr: l.toLocaleTimeString()
+                firstTimeStr: timeFormatter.format(t),
+                lastTimeStr: timeFormatter.format(l)
             };
         }).sort((a, b) => b._id.getTimestamp() - a._id.getTimestamp());
 
@@ -386,7 +395,7 @@ app.get('/admin/analytics', async (req, res) => {
         const dailyStats = {};
         allVisits.forEach(v => {
             const vDate = new Date(v.timestamp);
-            const dStr = v.dateStr || vDate.toISOString().split('T')[0];
+            const dStr = v.dateStr || vDate.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
             const yStr = v.yearStr || vDate.getFullYear().toString();
             const mStr = v.monthStr || dStr.slice(0, 7);
             const count = Number(v.visitCount) || 1;
@@ -570,7 +579,6 @@ app.get('/admin/analytics', async (req, res) => {
                                     <th class="p-3">Name</th>
                                     <th class="p-3">Phone</th>
                                     <th class="p-3">Role</th>
-                                    <th class="p-3">Role</th>
                                     <th class="p-3">Location</th>
                                     <th class="p-3">Bottle / Cases</th>
                                     <th class="p-3">Time</th>
@@ -606,7 +614,7 @@ app.get('*', (req, res) => {
     res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
-// Start Express Server
+// Start Server
 app.listen(PORT, () => {
     console.log(`\n==================================================`);
     console.log(`🚀 TARAL Server running on port: ${PORT}`);
