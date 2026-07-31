@@ -339,7 +339,7 @@ app.get('/admin/analytics', async (req, res) => {
         });
         const todayVisits = todayVisitsDocs.reduce((acc, v) => acc + (Number(v.visitCount) || 1), 0);
 
-        // This Month Visits (Current running month)
+        // This Month Visits
         const monthVisitsDocs = allVisits.filter(v => {
             const vDate = new Date(v.timestamp);
             const mStr = v.monthStr || vDate.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }).slice(0, 7);
@@ -347,7 +347,7 @@ app.get('/admin/analytics', async (req, res) => {
         });
         const monthVisits = monthVisitsDocs.reduce((acc, v) => acc + (Number(v.visitCount) || 1), 0);
 
-        // This Year Visits (Current running year)
+        // This Year Visits
         const yearVisitsDocs = allVisits.filter(v => {
             const vDate = new Date(v.timestamp);
             const yStr = v.yearStr || vDate.getFullYear().toString();
@@ -396,20 +396,34 @@ app.get('/admin/analytics', async (req, res) => {
             return diff <= 120;
         }).length;
 
-        // Group available years and months hierarchy for clickable filters
+        // Group years and calculate month-wise traffic counts
         const yearsMap = {};
+        const monthlyTrafficCounts = {};
+
         allVisits.forEach(v => {
             const vDate = new Date(v.timestamp);
             const dStr = v.dateStr || vDate.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
             const yStr = v.yearStr || vDate.getFullYear().toString();
             const mStr = v.monthStr || dStr.slice(0, 7);
+            const count = Number(v.visitCount) || 1;
+
             if (yStr) {
                 if (!yearsMap[yStr]) yearsMap[yStr] = new Set();
-                if (mStr) yearsMap[yStr].add(mStr);
+                if (mStr) {
+                    yearsMap[yStr].add(mStr);
+                    monthlyTrafficCounts[mStr] = (monthlyTrafficCounts[mStr] || 0) + count;
+                }
             }
         });
 
         const sortedYears = Object.keys(yearsMap).sort().reverse();
+
+        // Helper to format YYYY-MM into readable month names (e.g., January, July)
+        function formatMonthName(mStr) {
+            const [y, m] = mStr.split('-');
+            const date = new Date(y, m - 1, 1);
+            return date.toLocaleString('en-US', { month: 'long' });
+        }
 
         // Daily stats for filtered view
         const dailyStats = {};
@@ -497,7 +511,7 @@ app.get('/admin/analytics', async (req, res) => {
                     </div>
                 </div>
 
-                <!-- ENHANCED CLICKABLE HISTORY FILTERS (Year -> Month Hierarchy) -->
+                <!-- ENHANCED CLICKABLE HISTORY FILTERS (Year Columns & Readable Month Names) -->
                 <div class="bg-slate-800 rounded-2xl p-5 border border-slate-700 space-y-4">
                     <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-700/60 pb-3">
                         <h3 class="text-sm font-bold text-slate-300"><i class="fa-solid fa-filter text-sky-400 mr-2"></i> Clickable History Filters:</h3>
@@ -505,22 +519,28 @@ app.get('/admin/analytics', async (req, res) => {
                     </div>
 
                     <div class="space-y-3">
-                        <span class="text-xs text-slate-400 font-bold block">Select Year & Drill down to Months:</span>
-                        <div class="flex flex-wrap gap-3">
+                        <span class="text-xs text-slate-400 font-bold block">Select Year & Months:</span>
+                        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
                             ${sortedYears.length ? sortedYears.map(y => {
                                 const monthsInYear = [...yearsMap[y]].sort().reverse();
-                                const isYearSelected = filterYear === y || (filterMonth && filterMonth.startsWith(y));
+                                const isYearSelected = filterYear === y;
                                 return `
-                                <div class="bg-slate-900/60 border ${isYearSelected ? 'border-purple-500 shadow-md' : 'border-slate-700'} rounded-xl p-3 space-y-2 min-w-[220px]">
-                                    <a href="/admin/analytics?year=${y}" class="block text-center px-3 py-1.5 rounded-lg text-xs font-black transition ${filterYear === y && !filterMonth ? 'bg-purple-600 text-white shadow' : 'bg-slate-800 text-purple-300 hover:bg-slate-700'}">
+                                <div class="bg-slate-900/80 border ${isYearSelected ? 'border-purple-500 shadow-md' : 'border-slate-700'} rounded-2xl p-4 space-y-3">
+                                    <a href="/admin/analytics?year=${y}" class="block text-center px-4 py-2 rounded-xl text-xs font-black transition ${filterYear === y && !filterMonth ? 'bg-purple-600 text-white shadow' : 'bg-slate-800 text-purple-300 hover:bg-slate-700'}">
                                         📅 Year: ${y}
                                     </a>
-                                    <div class="flex flex-wrap gap-1.5 pt-1 border-t border-slate-800">
-                                        ${monthsInYear.map(m => `
-                                            <a href="/admin/analytics?month=${m}" class="px-2.5 py-1 rounded-md text-[11px] font-bold transition ${filterMonth === m ? 'bg-emerald-600 text-white shadow' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">
-                                                🗓️ ${m}
+                                    <div class="space-y-1.5 pt-1 border-t border-slate-800">
+                                        ${monthsInYear.map(m => {
+                                            const monthTraffic = monthlyTrafficCounts[m] || 0;
+                                            const monthName = formatMonthName(m); // Jaise: July, August
+                                            const isMonthSelected = filterMonth === m;
+                                            return `
+                                            <a href="/admin/analytics?month=${m}" class="flex justify-between items-center px-3 py-2 rounded-lg text-xs font-bold transition ${isMonthSelected ? 'bg-emerald-600 text-white shadow' : 'bg-slate-800/80 text-slate-300 hover:bg-slate-700'}">
+                                                <span>🗓️ ${monthName}</span>
+                                                <span class="bg-slate-900/60 px-2 py-0.5 rounded text-[11px] ${isMonthSelected ? 'text-white' : 'text-emerald-400'}">${monthTraffic} Visits</span>
                                             </a>
-                                        `).join('')}
+                                            `;
+                                        }).join('')}
                                     </div>
                                 </div>
                                 `;
@@ -532,8 +552,8 @@ app.get('/admin/analytics', async (req, res) => {
                 <!-- DAILY BREAKDOWN LOG TABLE -->
                 <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700 space-y-4">
                     <div class="flex justify-between items-center">
-                        <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-calendar-days text-sky-400 mr-2"></i> Traffic History ${filterYear ? '('+filterYear+')' : ''} ${filterMonth ? '('+filterMonth+')' : ''}</h3>
-                        ${filterYear || filterMonth ? `<span class="text-xs font-bold bg-sky-500/20 text-sky-300 px-3 py-1 rounded-full border border-sky-400/30">Active Filter: ${filterYear || filterMonth}</span>` : ''}
+                        <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-calendar-days text-sky-400 mr-2"></i> Traffic History ${filterYear ? '('+filterYear+')' : ''} ${filterMonth ? '('+formatMonthName(filterMonth)+' '+filterMonth.slice(0,4)+')' : ''}</h3>
+                        ${filterYear || filterMonth ? `<span class="text-xs font-bold bg-sky-500/20 text-sky-300 px-3 py-1 rounded-full border border-sky-400/30">Active Filter: ${filterYear || formatMonthName(filterMonth)+' '+filterMonth.slice(0,4)}</span>` : ''}
                     </div>
                     <div class="overflow-x-auto max-h-[350px] overflow-y-auto">
                         <table class="w-full text-left text-xs border-collapse">
