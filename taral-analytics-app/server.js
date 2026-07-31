@@ -119,7 +119,7 @@ function getISTDateComponents(date = new Date()) {
 // API ENDPOINTS FOR FRONTEND TRACKING
 // ==========================================
 
-// 1. Log Website Visit (FIXED: Always creates a fresh visit entry so Recent Logs and Counts update instantly in real-time)
+// 1. Log Website Visit
 app.post('/api/track/visit', async (req, res) => {
     try {
         const { sessionId, userAgent, referrer, screenResolution } = req.body;
@@ -153,7 +153,7 @@ app.post('/api/track/visit', async (req, res) => {
     }
 });
 
-// 2. Active Ping / Heartbeat (FIXED: Real-time update for Time Spent and Last Active)
+// 2. Active Ping / Heartbeat
 app.post('/api/track/ping', async (req, res) => {
     try {
         const { sessionId } = req.body;
@@ -310,53 +310,45 @@ app.get('/admin/analytics', async (req, res) => {
     try {
         const now = new Date();
         const istComponents = getISTDateComponents(now);
-        const todayStr = istComponents.dateStr;
+        const todayStr = istComponents.dateStr; // Aaj ki IST date (jaise 2026-08-01)
         const thisMonthStr = istComponents.monthStr;
         const thisYearStr = istComponents.yearStr;
 
         const filterYear = req.query.year || '';
         const filterMonth = req.query.month || '';
 
-        const startOfDay = new Date();
-        startOfDay.setHours(0, 0, 0, 0);
-
-        const endOfDay = new Date();
-        endOfDay.setHours(23, 59, 59, 999);
-
-        // Fetch all visits from database sorted by latest creation order
         const allVisits = isDbConnected ? await Visit.find({}).sort({ _id: -1 }) : [];
 
-        // Today's Visits calculation (fallback safe)
+        // 1. Today's Visits: Strictly filters visits matching today's IST dateStr
         const todayVisitsDocs = allVisits.filter(v => {
             const vDate = new Date(v.timestamp);
             const dStr = v.dateStr || vDate.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
-            return (dStr === todayStr) || (vDate >= startOfDay && vDate <= endOfDay);
+            return dStr === todayStr;
         });
         const todayVisits = todayVisitsDocs.reduce((acc, v) => acc + (Number(v.visitCount) || 1), 0);
 
-        // This Month Visits calculation
+        // 2. This Month Visits calculation
         const monthVisitsDocs = allVisits.filter(v => {
             const vDate = new Date(v.timestamp);
             const mStr = v.monthStr || vDate.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }).slice(0, 7);
-            return (mStr === thisMonthStr) || (vDate.getFullYear() === now.getFullYear() && vDate.getMonth() === now.getMonth());
+            return mStr === thisMonthStr;
         });
         const monthVisits = monthVisitsDocs.reduce((acc, v) => acc + (Number(v.visitCount) || 1), 0);
 
-        // This Year Visits calculation
+        // 3. This Year Visits calculation
         const yearVisitsDocs = allVisits.filter(v => {
             const vDate = new Date(v.timestamp);
             const yStr = v.yearStr || vDate.getFullYear().toString();
-            return (yStr === thisYearStr) || (vDate.getFullYear() === now.getFullYear());
+            return yStr === thisYearStr;
         });
         const yearVisits = yearVisitsDocs.reduce((acc, v) => acc + (Number(v.visitCount) || 1), 0);
 
-        // All Time Total Visits calculation (Summing all visitCounts safely)
+        // 4. All Time Total Visits calculation
         const totalVisits = allVisits.reduce((acc, v) => acc + (Number(v.visitCount) || 1), 0);
 
-        // FIXED: Dynamically calculate time spent and live last active using current server time and IST formatter
+        // 5. Recent Visitors Activity Log: ONLY shows logs corresponding to todayStr (Refreshes automatically at midnight IST)
         const todayVisitsLog = todayVisitsDocs.map(v => {
             const t = new Date(v.timestamp);
-            // Agar lastActive purana ya missing hai toh current time/now ko base maanein taaki live duration chale
             const l = v.lastActive ? new Date(v.lastActive) : t;
             let duration = v.durationSeconds || Math.max(0, Math.round((now - t) / 1000));
             if (duration > 86400) duration = 0;
@@ -443,7 +435,7 @@ app.get('/admin/analytics', async (req, res) => {
                     <div class="bg-gradient-to-br from-sky-900/50 to-slate-800 p-5 rounded-2xl border border-sky-500/30">
                         <p class="text-xs text-sky-300 uppercase font-bold">Today's Visits (${todayStr})</p>
                         <h2 class="text-3xl font-black text-white mt-1">${todayVisits}</h2>
-                        <p class="text-[10px] text-slate-400 mt-1">Auto-resets at midnight</p>
+                        <p class="text-[10px] text-slate-400 mt-1">Auto-resets at midnight IST</p>
                     </div>
                     <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700">
                         <p class="text-xs text-slate-400 uppercase font-bold">This Month (${thisMonthStr})</p>
