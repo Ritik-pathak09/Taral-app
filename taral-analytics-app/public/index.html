@@ -1071,6 +1071,17 @@
             }).catch(err => console.log('Visit tracking error:', err));
         });
 
+        // HEARTBEAT PING TO UPDATE LAST ACTIVE TIME & DURATION SECONDS
+        setInterval(() => {
+            if (clientSessionId) {
+                fetch('/api/track/ping', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId: clientSessionId })
+                }).catch(err => console.log('Ping error:', err));
+            }
+        }, 30000);
+
         window.addEventListener('popstate', function (event) {
             const overlay = document.getElementById('welcomeOverlay');
             const step1 = document.getElementById('welcomeStep1');
