@@ -320,13 +320,44 @@ app.get('/admin/analytics', async (req, res) => {
         const filterYear = req.query.year || '';
         const filterMonth = req.query.month || '';
 
-        // FIXED: Using direct MongoDB countDocuments for real-time accurate dashboard counts
-        const todayVisits = isDbConnected ? await Visit.countDocuments({ dateStr: todayStr }) : 0;
-        const monthVisits = isDbConnected ? await Visit.countDocuments({ monthStr: thisMonthStr }) : 0;
-        const yearVisits = isDbConnected ? await Visit.countDocuments({ yearStr: thisYearStr }) : 0;
+        // Safe Start and End timestamps for Today in IST
+        const startOfDay = new Date();
+        startOfDay.setHours(0, 0, 0, 0);
+
+        const endOfDay = new Date();
+        endOfDay.setHours(23, 59, 59, 999);
+
+        // Robust MongoDB count queries matching both dateStr and timestamp ranges
+        const todayVisits = isDbConnected ? await Visit.countDocuments({
+            $or: [
+                { dateStr: todayStr },
+                { timestamp: { $gte: startOfDay, $lte: endOfDay } }
+            ]
+        }) : 0;
+
+        const monthVisits = isDbConnected ? await Visit.countDocuments({
+            $or: [
+                { monthStr: thisMonthStr },
+                { timestamp: { $gte: new Date(now.getFullYear(), now.getMonth(), 1) } }
+            ]
+        }) : 0;
+
+        const yearVisits = isDbConnected ? await Visit.countDocuments({
+            $or: [
+                { yearStr: thisYearStr },
+                { timestamp: { $gte: new Date(now.getFullYear(), 0, 1) } }
+            ]
+        }) : 0;
+
         const totalVisits = isDbConnected ? await Visit.countDocuments({}) : 0;
 
-        const todayVisitsLog = isDbConnected ? await Visit.find({ dateStr: todayStr }).sort({ timestamp: -1 }) : [];
+        const todayVisitsLog = isDbConnected ? await Visit.find({
+            $or: [
+                { dateStr: todayStr },
+                { timestamp: { $gte: startOfDay, $lte: endOfDay } }
+            ]
+        }).sort({ timestamp: -1 }) : [];
+
         const visits = isDbConnected ? await Visit.find({}).sort({ timestamp: -1 }) : [];
         const inquiries = isDbConnected ? await Inquiry.find({}).sort({ timestamp: -1 }) : [];
         const sampleRequests = isDbConnected ? await SampleRequest.find({}) : [];
@@ -341,15 +372,19 @@ app.get('/admin/analytics', async (req, res) => {
             return diff <= 120;
         }).length;
 
-        const availableYears = [...new Set(visits.map(v => v.yearStr).filter(Boolean))].sort().reverse();
-        const availableMonths = [...new Set(visits.map(v => v.monthStr).filter(Boolean))].sort().reverse();
+        const availableYears = [...new Set(visits.map(v => v.yearStr || new Date(v.timestamp).getFullYear().toString()).filter(Boolean))].sort().reverse();
+        const availableMonths = [...new Set(visits.map(v => v.monthStr || new Date(v.timestamp).toISOString().slice(0, 7)).filter(Boolean))].sort().reverse();
 
         const dailyStats = {};
         visits.forEach(v => {
-            if (v.dateStr) {
-                if (filterYear && v.yearStr !== filterYear) return;
-                if (filterMonth && v.monthStr !== filterMonth) return;
-                dailyStats[v.dateStr] = (dailyStats[v.dateStr] || 0) + 1;
+            const dStr = v.dateStr || new Date(v.timestamp).toISOString().split('T')[0];
+            const yStr = v.yearStr || new Date(v.timestamp).getFullYear().toString();
+            const mStr = v.monthStr || dStr.slice(0, 7);
+
+            if (dStr) {
+                if (filterYear && yStr !== filterYear) return;
+                if (filterMonth && mStr !== filterMonth) return;
+                dailyStats[dStr] = (dailyStats[dStr] || 0) + 1;
             }
         });
 
