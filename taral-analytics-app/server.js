@@ -310,16 +310,28 @@ app.get('/admin/analytics', async (req, res) => {
     try {
         const now = new Date();
         const istComponents = getISTDateComponents(now);
-        const todayStr = istComponents.dateStr; // Aaj ki IST date (jaise 2026-08-01)
-        const thisMonthStr = istComponents.monthStr;
-        const thisYearStr = istComponents.yearStr;
+        const todayStr = istComponents.dateStr;       // 2026-08-01
+        const thisMonthStr = istComponents.monthStr; // 2026-08
+        const thisYearStr = istComponents.yearStr;   // 2026
 
         const filterYear = req.query.year || '';
         const filterMonth = req.query.month || '';
 
         const allVisits = isDbConnected ? await Visit.find({}).sort({ _id: -1 }) : [];
 
-        // 1. Today's Visits: Strictly filters visits matching today's IST dateStr
+        // Filter visits based on URL query parameters (?year=2026 or ?month=2026-07)
+        const filteredVisits = allVisits.filter(v => {
+            const vDate = new Date(v.timestamp);
+            const dStr = v.dateStr || vDate.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+            const yStr = v.yearStr || vDate.getFullYear().toString();
+            const mStr = v.monthStr || dStr.slice(0, 7);
+
+            if (filterYear && yStr !== filterYear) return false;
+            if (filterMonth && mStr !== filterMonth) return false;
+            return true;
+        });
+
+        // Today's Visits calculation
         const todayVisitsDocs = allVisits.filter(v => {
             const vDate = new Date(v.timestamp);
             const dStr = v.dateStr || vDate.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
@@ -327,7 +339,7 @@ app.get('/admin/analytics', async (req, res) => {
         });
         const todayVisits = todayVisitsDocs.reduce((acc, v) => acc + (Number(v.visitCount) || 1), 0);
 
-        // 2. This Month Visits calculation
+        // This Month Visits (Current running month)
         const monthVisitsDocs = allVisits.filter(v => {
             const vDate = new Date(v.timestamp);
             const mStr = v.monthStr || vDate.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' }).slice(0, 7);
@@ -335,7 +347,7 @@ app.get('/admin/analytics', async (req, res) => {
         });
         const monthVisits = monthVisitsDocs.reduce((acc, v) => acc + (Number(v.visitCount) || 1), 0);
 
-        // 3. This Year Visits calculation
+        // This Year Visits (Current running year)
         const yearVisitsDocs = allVisits.filter(v => {
             const vDate = new Date(v.timestamp);
             const yStr = v.yearStr || vDate.getFullYear().toString();
@@ -343,11 +355,12 @@ app.get('/admin/analytics', async (req, res) => {
         });
         const yearVisits = yearVisitsDocs.reduce((acc, v) => acc + (Number(v.visitCount) || 1), 0);
 
-        // 4. All Time Total Visits calculation
+        // All Time Total Visits
         const totalVisits = allVisits.reduce((acc, v) => acc + (Number(v.visitCount) || 1), 0);
 
-        // 5. Recent Visitors Activity Log: ONLY shows logs corresponding to todayStr (Refreshes automatically at midnight IST)
-        const todayVisitsLog = todayVisitsDocs.map(v => {
+        // Recent Visitors Log
+        const displayVisitsLog = (filterYear || filterMonth) ? filteredVisits : todayVisitsDocs;
+        const visitsLogFormatted = displayVisitsLog.map(v => {
             const t = new Date(v.timestamp);
             const l = v.lastActive ? new Date(v.lastActive) : t;
             let duration = v.durationSeconds || Math.max(0, Math.round((now - t) / 1000));
@@ -383,20 +396,28 @@ app.get('/admin/analytics', async (req, res) => {
             return diff <= 120;
         }).length;
 
-        const availableYears = [...new Set(allVisits.map(v => v.yearStr || new Date(v.timestamp).getFullYear().toString()).filter(Boolean))].sort().reverse();
-        const availableMonths = [...new Set(allVisits.map(v => v.monthStr || new Date(v.timestamp).toISOString().slice(0, 7)).filter(Boolean))].sort().reverse();
-
-        const dailyStats = {};
+        // Group available years and months hierarchy for clickable filters
+        const yearsMap = {};
         allVisits.forEach(v => {
             const vDate = new Date(v.timestamp);
             const dStr = v.dateStr || vDate.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
             const yStr = v.yearStr || vDate.getFullYear().toString();
             const mStr = v.monthStr || dStr.slice(0, 7);
-            const count = Number(v.visitCount) || 1;
+            if (yStr) {
+                if (!yearsMap[yStr]) yearsMap[yStr] = new Set();
+                if (mStr) yearsMap[yStr].add(mStr);
+            }
+        });
 
+        const sortedYears = Object.keys(yearsMap).sort().reverse();
+
+        // Daily stats for filtered view
+        const dailyStats = {};
+        filteredVisits.forEach(v => {
+            const vDate = new Date(v.timestamp);
+            const dStr = v.dateStr || vDate.toLocaleDateString('en-CA', { timeZone: 'Asia/Kolkata' });
+            const count = Number(v.visitCount) || 1;
             if (dStr) {
-                if (filterYear && yStr !== filterYear) return;
-                if (filterMonth && mStr !== filterMonth) return;
                 dailyStats[dStr] = (dailyStats[dStr] || 0) + count;
             }
         });
@@ -476,37 +497,43 @@ app.get('/admin/analytics', async (req, res) => {
                     </div>
                 </div>
 
-                <!-- CLICKABLE YEAR & MONTH DRILL-DOWN FILTERS -->
-                <div class="bg-slate-800 rounded-2xl p-5 border border-slate-700 space-y-3">
-                    <div class="flex flex-wrap items-center justify-between gap-3">
+                <!-- ENHANCED CLICKABLE HISTORY FILTERS (Year -> Month Hierarchy) -->
+                <div class="bg-slate-800 rounded-2xl p-5 border border-slate-700 space-y-4">
+                    <div class="flex flex-wrap items-center justify-between gap-3 border-b border-slate-700/60 pb-3">
                         <h3 class="text-sm font-bold text-slate-300"><i class="fa-solid fa-filter text-sky-400 mr-2"></i> Clickable History Filters:</h3>
-                        <a href="/admin/analytics" class="text-xs font-bold text-sky-400 hover:underline">Clear Filters (Show All)</a>
+                        <a href="/admin/analytics" class="text-xs font-bold text-sky-400 hover:underline bg-sky-500/10 px-3 py-1 rounded-lg border border-sky-500/20">Clear Filters (Show All)</a>
                     </div>
 
-                    <div class="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-700/60">
-                        <span class="text-xs text-slate-400 font-bold mr-1">Select Year:</span>
-                        ${availableYears.length ? availableYears.map(y => `
-                            <a href="/admin/analytics?year=${y}" class="px-3 py-1 rounded-lg text-xs font-bold transition ${filterYear === y ? 'bg-purple-600 text-white shadow-md' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}">
-                                📅 ${y}
-                            </a>
-                        `).join('') : '<span class="text-xs text-slate-500">No years recorded yet</span>'}
-                    </div>
-
-                    <div class="flex flex-wrap items-center gap-2 pt-1 border-t border-slate-700/60">
-                        <span class="text-xs text-slate-400 font-bold mr-1">Select Month:</span>
-                        ${availableMonths.length ? availableMonths.map(m => `
-                            <a href="/admin/analytics?month=${m}" class="px-3 py-1 rounded-lg text-xs font-bold transition ${filterMonth === m ? 'bg-emerald-600 text-white shadow-md' : 'bg-slate-700 text-slate-300 hover:bg-slate-600'}">
-                                🗓️ ${m}
-                            </a>
-                        `).join('') : '<span class="text-xs text-slate-500">No months recorded yet</span>'}
+                    <div class="space-y-3">
+                        <span class="text-xs text-slate-400 font-bold block">Select Year & Drill down to Months:</span>
+                        <div class="flex flex-wrap gap-3">
+                            ${sortedYears.length ? sortedYears.map(y => {
+                                const monthsInYear = [...yearsMap[y]].sort().reverse();
+                                const isYearSelected = filterYear === y || (filterMonth && filterMonth.startsWith(y));
+                                return `
+                                <div class="bg-slate-900/60 border ${isYearSelected ? 'border-purple-500 shadow-md' : 'border-slate-700'} rounded-xl p-3 space-y-2 min-w-[220px]">
+                                    <a href="/admin/analytics?year=${y}" class="block text-center px-3 py-1.5 rounded-lg text-xs font-black transition ${filterYear === y && !filterMonth ? 'bg-purple-600 text-white shadow' : 'bg-slate-800 text-purple-300 hover:bg-slate-700'}">
+                                        📅 Year: ${y}
+                                    </a>
+                                    <div class="flex flex-wrap gap-1.5 pt-1 border-t border-slate-800">
+                                        ${monthsInYear.map(m => `
+                                            <a href="/admin/analytics?month=${m}" class="px-2.5 py-1 rounded-md text-[11px] font-bold transition ${filterMonth === m ? 'bg-emerald-600 text-white shadow' : 'bg-slate-800 text-slate-300 hover:bg-slate-700'}">
+                                                🗓️ ${m}
+                                            </a>
+                                        `).join('')}
+                                    </div>
+                                </div>
+                                `;
+                            }).join('') : '<span class="text-xs text-slate-500">No years recorded yet</span>'}
+                        </div>
                     </div>
                 </div>
 
                 <!-- DAILY BREAKDOWN LOG TABLE -->
                 <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700 space-y-4">
                     <div class="flex justify-between items-center">
-                        <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-calendar-days text-sky-400 mr-2"></i> Daily Traffic History (Per Day Count)</h3>
-                        ${filterYear || filterMonth ? `<span class="text-xs font-bold bg-sky-500/20 text-sky-300 px-3 py-1 rounded-full border border-sky-400/30">Showing Filter: ${filterYear || filterMonth}</span>` : ''}
+                        <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-calendar-days text-sky-400 mr-2"></i> Traffic History ${filterYear ? '('+filterYear+')' : ''} ${filterMonth ? '('+filterMonth+')' : ''}</h3>
+                        ${filterYear || filterMonth ? `<span class="text-xs font-bold bg-sky-500/20 text-sky-300 px-3 py-1 rounded-full border border-sky-400/30">Active Filter: ${filterYear || filterMonth}</span>` : ''}
                     </div>
                     <div class="overflow-x-auto max-h-[350px] overflow-y-auto">
                         <table class="w-full text-left text-xs border-collapse">
@@ -534,7 +561,7 @@ app.get('/admin/analytics', async (req, res) => {
 
                 <!-- VISITOR LOG TABLE -->
                 <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700 space-y-4">
-                    <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-users text-sky-400 mr-2"></i> Recent Visitors Activity Log (Today: ${todayStr})</h3>
+                    <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-users text-sky-400 mr-2"></i> Recent Visitors Activity Log</h3>
                     <div class="overflow-x-auto max-h-[400px] overflow-y-auto">
                         <table class="w-full text-left text-xs border-collapse">
                             <thead>
@@ -548,7 +575,7 @@ app.get('/admin/analytics', async (req, res) => {
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-slate-700/50">
-                                ${todayVisitsLog.length ? todayVisitsLog.map(v => `
+                                ${visitsLogFormatted.length ? visitsLogFormatted.map(v => `
                                     <tr class="hover:bg-slate-700/30">
                                         <td class="p-3 font-mono text-sky-300">${(v.sessionId || '').substring(0, 18)}...</td>
                                         <td class="p-3">${v.ip}</td>
@@ -557,7 +584,7 @@ app.get('/admin/analytics', async (req, res) => {
                                         <td class="p-3 text-slate-400">${v.firstTimeStr}</td>
                                         <td class="p-3 text-slate-400">${v.lastTimeStr}</td>
                                     </tr>
-                                `).join('') : '<tr><td colspan="6" class="p-4 text-center text-slate-500">No visitor activity recorded for today yet.</td></tr>'}
+                                `).join('') : '<tr><td colspan="6" class="p-4 text-center text-slate-500">No visitor activity recorded for selected filter.</td></tr>'}
                             </tbody>
                         </table>
                     </div>
