@@ -1161,16 +1161,16 @@
                     <button onclick="resetRatingForm()" class="mt-4 text-xs font-bold text-sky-600 hover:underline cursor-pointer">Submit another review</button>
                 </div>
 
-                <!-- NEW: Fake/Sample Reviews Display -->
+                <!-- NEW: Fake/Sample Reviews Display (Added id="reviewsList" here) -->
                 <div class="mt-10 pt-8 border-t border-slate-100 space-y-4">
                     <h3 class="text-lg font-bold text-slate-800 font-heading px-2">Recent Partner Reviews</h3>
-                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                    <div id="reviewsList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                         <!-- Review 1 -->
                         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm">
                             <div class="flex text-amber-400 text-[10px] sm:text-xs mb-2 drop-shadow-sm">
                                 <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
                             </div>
-                            <p class="text-xs text-slate-600 mb-3 italic">"Water quality is excellent and the margin is really good. Delivery was exactly within 24 hours as promised."</p>
+                            <p class="text-xs text-slate-600 mb-3 italic font-medium">"Water quality is excellent and the margin is really good. Delivery was exactly within 24 hours as promised."</p>
                             <p class="text-[11px] font-bold text-slate-900">- Amit Sharma</p>
                             <p class="text-[9px] text-slate-500 font-medium">Sharma Kirana Store</p>
                         </div>
@@ -1179,16 +1179,16 @@
                             <div class="flex text-amber-400 text-[10px] sm:text-xs mb-2 drop-shadow-sm">
                                 <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
                             </div>
-                            <p class="text-xs text-slate-600 mb-3 italic">"Premium bottle design. My cafe customers love it. Highly recommended for HORECA business."</p>
+                            <p class="text-xs text-slate-600 mb-3 italic font-medium">"Premium bottle design. My cafe customers love it. Highly recommended for HORECA business."</p>
                             <p class="text-[11px] font-bold text-slate-900">- Rahul Verma</p>
                             <p class="text-[9px] text-slate-500 font-medium">Cafe Owner, Pari Chowk</p>
                         </div>
                         <!-- Review 3 -->
                         <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm">
                             <div class="flex text-amber-400 text-[10px] sm:text-xs mb-2 drop-shadow-sm">
-                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i>
+                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star text-slate-300"></i>
                             </div>
-                            <p class="text-xs text-slate-600 mb-3 italic">"Good margins compared to other local brands. Stock buy-back guarantee gave me confidence to start."</p>
+                            <p class="text-xs text-slate-600 mb-3 italic font-medium">"Good margins compared to other local brands. Stock buy-back guarantee gave me confidence to start."</p>
                             <p class="text-[11px] font-bold text-slate-900">- Vikash Singh</p>
                             <p class="text-[9px] text-slate-500 font-medium">Regional Distributor</p>
                         </div>
@@ -1773,9 +1773,9 @@
                 return;
             }
 
-            const rating = ratingObj.value;
+            const rating = parseInt(ratingObj.value);
             const name = document.getElementById('reviewerName').value;
-            const business = document.getElementById('reviewerBusiness').value;
+            const business = document.getElementById('reviewerBusiness').value || 'Customer';
             const message = document.getElementById('reviewerMessage').value;
 
             // Form hide karke Success message show karna
@@ -1784,11 +1784,35 @@
             successDiv.classList.remove('hidden');
             successDiv.classList.add('flex');
 
-            // Admin ko direct WhatsApp par alert bhej dega (Optional: Uncomment if needed)
-            /*
-            const adminReviewText = `*NEW TARAL CLIENT REVIEW*%0A------------------------------------%0A*Rating:* ${rating} Stars ⭐%0A*Name:* ${encodeURIComponent(name)}%0A*Business:* ${encodeURIComponent(business || 'N/A')}%0A*Feedback:* ${encodeURIComponent(message)}`;
-            window.open("https://wa.me/917432057456?text=" + adminReviewText, '_blank');
-            */
+            // --- NEW: Add the submitted review to the page dynamically ---
+            const reviewsList = document.getElementById('reviewsList');
+            if(reviewsList) {
+                // Generate Stars HTML
+                let starsHtml = '';
+                for(let i=1; i<=5; i++) {
+                    if(i <= rating) {
+                        starsHtml += '<i class="fa-solid fa-star"></i>';
+                    } else {
+                        starsHtml += '<i class="fa-solid fa-star text-slate-300"></i>';
+                    }
+                }
+
+                // Create new review card
+                const newReview = document.createElement('div');
+                newReview.className = 'bg-sky-50 p-4 rounded-xl border border-sky-200 shadow-md transform transition duration-500 hover:scale-105';
+                newReview.innerHTML = `
+                    <div class="flex text-amber-400 text-[10px] sm:text-xs mb-2 drop-shadow-sm">
+                        ${starsHtml}
+                        <span class="ml-2 text-[10px] font-bold text-sky-600 bg-sky-100 px-1.5 py-0.5 rounded">New</span>
+                    </div>
+                    <p class="text-xs text-slate-700 mb-3 italic font-medium">"${message}"</p>
+                    <p class="text-[11px] font-bold text-slate-900">- ${name}</p>
+                    <p class="text-[9px] text-slate-500 font-medium">${business}</p>
+                `;
+
+                // Insert at the beginning of the list
+                reviewsList.insertBefore(newReview, reviewsList.firstChild);
+            }
         }
 
         function resetRatingForm() {
