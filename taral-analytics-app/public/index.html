@@ -272,15 +272,21 @@
     <!-- Navigation Header -->
     <nav class="sticky top-0 z-50 bg-white/95 backdrop-blur-md border-b border-sky-100 px-4 sm:px-6 py-3 sm:py-4 shadow-sm">
         <div class="max-w-7xl mx-auto flex justify-between items-center">
-            <a href="#" onclick="scrollToTop()" class="flex items-center space-x-2.5">
-                <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-teal-600 to-teal-800 flex items-center justify-center shadow-md">
-                    <i class="fa-solid fa-droplet text-white text-lg sm:text-xl"></i>
-                </div>
-                <div>
-                    <span class="text-xl sm:text-2xl font-black tracking-wider text-slate-900 block leading-none font-heading uppercase">TARAL</span>
-                    <span class="text-[8px] sm:text-[9px] tracking-widest text-teal-700 font-bold uppercase">Nature's Flow</span>
-                </div>
-            </a>
+            <div class="flex items-center">
+                <!-- HAMBURGER MENU BUTTON -->
+                <button onclick="toggleSideMenu()" class="lg:hidden text-slate-700 hover:text-sky-600 focus:outline-none mr-3 sm:mr-4 text-xl sm:text-2xl cursor-pointer transition">
+                    <i class="fa-solid fa-bars"></i>
+                </button>
+                <a href="#" onclick="scrollToTop()" class="flex items-center space-x-2.5">
+                    <div class="w-9 h-9 sm:w-10 sm:h-10 rounded-xl bg-gradient-to-tr from-teal-600 to-teal-800 flex items-center justify-center shadow-md">
+                        <i class="fa-solid fa-droplet text-white text-lg sm:text-xl"></i>
+                    </div>
+                    <div>
+                        <span class="text-xl sm:text-2xl font-black tracking-wider text-slate-900 block leading-none font-heading uppercase">TARAL</span>
+                        <span class="text-[8px] sm:text-[9px] tracking-widest text-teal-700 font-bold uppercase">Nature's Flow</span>
+                    </div>
+                </a>
+            </div>
             
             <div class="hidden lg:flex items-center space-x-8 font-semibold text-sm text-slate-600">
                 <button onclick="scrollToTop()" class="hover:text-sky-600 transition cursor-pointer">Home</button>
@@ -297,6 +303,40 @@
             </button>
         </div>
     </nav>
+
+    <!-- ================= SIDE MENU (MOBILE) ================= -->
+    <div id="sideMenuOverlay" onclick="toggleSideMenu()" class="fixed inset-0 bg-slate-900/50 backdrop-blur-sm z-[100] hidden opacity-0 transition-opacity duration-300"></div>
+    <div id="sideMenu" class="fixed top-0 left-0 w-72 h-full bg-white shadow-2xl z-[101] transform -translate-x-full transition-transform duration-300 ease-in-out overflow-y-auto flex flex-col">
+        <!-- Menu Header -->
+        <div class="p-5 flex justify-between items-center border-b border-sky-100 bg-slate-50">
+            <div class="flex items-center space-x-2">
+                <div class="w-8 h-8 rounded-lg bg-gradient-to-tr from-teal-600 to-teal-800 flex items-center justify-center shadow-md">
+                    <i class="fa-solid fa-droplet text-white text-sm"></i>
+                </div>
+                <span class="text-xl font-black tracking-wider text-slate-900 font-heading uppercase">TARAL</span>
+            </div>
+            <button onclick="toggleSideMenu()" class="w-8 h-8 rounded-full bg-white border border-slate-200 text-slate-500 hover:bg-rose-50 hover:text-rose-600 flex items-center justify-center transition cursor-pointer shadow-sm">
+                <i class="fa-solid fa-xmark"></i>
+            </button>
+        </div>
+        <!-- Menu Links -->
+        <div class="flex-1 py-4 px-3 space-y-1">
+            <button onclick="toggleSideMenu(); scrollToTop()" class="w-full text-left px-4 py-3.5 rounded-xl font-bold text-slate-700 hover:bg-sky-50 hover:text-sky-600 transition flex items-center gap-3.5"><i class="fa-solid fa-house w-5 text-sky-500"></i> Home</button>
+            <button onclick="toggleSideMenu(); scrollToSection('about')" class="w-full text-left px-4 py-3.5 rounded-xl font-bold text-slate-700 hover:bg-sky-50 hover:text-sky-600 transition flex items-center gap-3.5"><i class="fa-solid fa-leaf w-5 text-emerald-500"></i> Brand Philosophy</button>
+            <button onclick="toggleSideMenu(); scrollToSection('pricing')" class="w-full text-left px-4 py-3.5 rounded-xl font-bold text-slate-700 hover:bg-sky-50 hover:text-sky-600 transition flex items-center gap-3.5"><i class="fa-solid fa-bottle-water w-5 text-teal-500"></i> Products & Pricing</button>
+            <button onclick="toggleSideMenu(); scrollToSection('hydration')" class="w-full text-left px-4 py-3.5 rounded-xl font-bold text-slate-700 hover:bg-sky-50 hover:text-sky-600 transition flex items-center gap-3.5"><i class="fa-solid fa-glass-water w-5 text-blue-500"></i> Hydration Calculator</button>
+            <button onclick="toggleSideMenu(); scrollToSection('calculator')" class="w-full text-left px-4 py-3.5 rounded-xl font-bold text-slate-700 hover:bg-sky-50 hover:text-sky-600 transition flex items-center gap-3.5"><i class="fa-solid fa-calculator w-5 text-amber-500"></i> Margin Calculator</button>
+            <button onclick="toggleSideMenu(); scrollToSection('filtration')" class="w-full text-left px-4 py-3.5 rounded-xl font-bold text-slate-700 hover:bg-sky-50 hover:text-sky-600 transition flex items-center gap-3.5"><i class="fa-solid fa-filter w-5 text-indigo-500"></i> 5-Stage Filtration</button>
+            <button onclick="toggleSideMenu(); scrollToSection('faqs')" class="w-full text-left px-4 py-3.5 rounded-xl font-bold text-slate-700 hover:bg-sky-50 hover:text-sky-600 transition flex items-center gap-3.5"><i class="fa-solid fa-circle-question w-5 text-purple-500"></i> Merchant FAQ</button>
+        </div>
+        <!-- Menu Footer -->
+        <div class="p-5 border-t border-slate-100 bg-slate-50">
+            <button onclick="toggleSideMenu(); scrollToSection('contact')" class="w-full btn-gradient py-3.5 rounded-xl font-bold text-white text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-md cursor-pointer hover:scale-105 transition">
+                <i class="fa-brands fa-whatsapp text-lg"></i> Direct Order
+            </button>
+        </div>
+    </div>
+    <!-- ================= END SIDE MENU ================= -->
 
     <!-- HERO SECTION -->
     <section id="home" class="relative min-h-[80vh] sm:min-h-[85vh] flex items-center justify-center pt-6 pb-12 sm:pt-8 sm:pb-16 px-4 sm:px-6 bg-gradient-to-b from-sky-50/80 via-white to-slate-50 overflow-hidden">
@@ -575,6 +615,17 @@
                     </div>
                     <div>
                         <h3 class="text-lg sm:text-xl font-bold text-slate-900 font-heading">500ml Handheld Bottle</h3>
+                        <!-- Rating System -->
+                        <div class="flex items-center gap-1.5 mt-0.5 mb-1">
+                            <div class="flex text-amber-400 text-[10px] sm:text-xs drop-shadow-sm">
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star-half-stroke"></i>
+                            </div>
+                            <span class="text-[10px] sm:text-[11px] font-bold text-slate-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100">4.8/5 <span class="text-slate-400 font-normal ml-0.5">(150+ B2B Ratings)</span></span>
+                        </div>
                         <p class="text-slate-500 text-[10px] sm:text-[11px] font-semibold">Ideal for Transit Hubs, Events, and Cafes</p>
                     </div>
                 </div>
@@ -618,6 +669,17 @@
                     </div>
                     <div>
                         <h3 class="text-lg sm:text-xl font-bold text-slate-900 font-heading">1000ml (1 Litre) Bottle</h3>
+                        <!-- Rating System -->
+                        <div class="flex items-center gap-1.5 mt-0.5 mb-1">
+                            <div class="flex text-amber-400 text-[10px] sm:text-xs drop-shadow-sm">
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                                <i class="fa-solid fa-star"></i>
+                            </div>
+                            <span class="text-[10px] sm:text-[11px] font-bold text-slate-700 bg-amber-50 px-1.5 py-0.5 rounded border border-amber-100">4.9/5 <span class="text-slate-400 font-normal ml-0.5">(210+ Retailer Ratings)</span></span>
+                        </div>
                         <p class="text-slate-500 text-[10px] sm:text-[11px] font-semibold">Ideal for Kirana Stores and Home Daily Need</p>
                     </div>
                 </div>
@@ -1563,6 +1625,26 @@
                 var text = "*TARAL OFFICIAL B2B INQUIRY*%0A*Name:* " + encodeURIComponent(name) + "%0A*Phone:* " + encodeURIComponent(phone);
                 window.open("https://wa.me/917432057456?text=" + text, '_blank');
             });
+        }
+
+        // --- SIDE MENU LOGIC ---
+        function toggleSideMenu() {
+            const menu = document.getElementById('sideMenu');
+            const overlay = document.getElementById('sideMenuOverlay');
+            
+            if (menu.classList.contains('-translate-x-full')) {
+                // Menu Khulne ka animation
+                menu.classList.remove('-translate-x-full');
+                overlay.classList.remove('hidden');
+                setTimeout(() => overlay.classList.remove('opacity-0'), 10);
+                document.body.style.overflow = 'hidden'; // Pichla page scroll na ho
+            } else {
+                // Menu Band hone ka animation
+                menu.classList.add('-translate-x-full');
+                overlay.classList.add('opacity-0');
+                setTimeout(() => overlay.classList.add('hidden'), 300);
+                document.body.style.overflow = '';
+            }
         }
     </script>
 </body>
