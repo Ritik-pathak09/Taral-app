@@ -126,7 +126,7 @@
         body.mobile-desktop-mode .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
         body.mobile-desktop-mode .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
 
-        /* RATING STARS CSS (NEW) */
+        /* RATING STARS CSS */
         .star-rating-container { display: inline-flex; flex-direction: row-reverse; gap: 0.25rem; }
         .star-rating-container input { display: none; }
         .star-rating-container label { cursor: pointer; color: #cbd5e1; font-size: 2.5rem; transition: color 0.2s ease-in-out; }
@@ -1026,8 +1026,72 @@
         </div>
     </section>
 
-    <!-- SECTION 6: CLIENT REVIEWS & RATING (NEW FEATURE ADDED HERE) -->
-    <section id="reviews" class="py-12 sm:py-16 px-4 sm:px-6 bg-slate-50 border-y border-slate-200 mt-6 sm:mt-10">
+    <!-- SECTION 7: WHATSAPP ORDER & PARTNER FORM -->
+    <section id="contact" class="py-12 sm:py-16 px-4 sm:px-6 max-w-3xl mx-auto mt-6 sm:mt-10">
+        <div class="clean-card p-6 sm:p-10 rounded-2xl sm:rounded-3xl border border-sky-200 shadow-xl bg-white">
+            <div class="text-center mb-6 sm:mb-8 space-y-2">
+                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-heading">Become a Partner / Place Case Order</h2>
+                <p class="text-xs sm:text-sm text-sky-700 font-semibold max-w-lg mx-auto">Join our growing network of partners or place your bulk order instantly for fast doorstep delivery.</p>
+            </div>
+
+            <form onsubmit="sendToWhatsApp(event)" class="space-y-3.5 sm:space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Aapka Naam / Name *</label>
+                        <input type="text" id="name" required placeholder="Ex: Rahul Pathak" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 text-xs focus:outline-none focus:border-sky-500">
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Phone / Mobile Number *</label>
+                        <input type="tel" id="phone" required placeholder="Ex: 9876543210" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 text-xs focus:outline-none focus:border-sky-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Partnership Role *</label>
+                        <select id="type" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 text-xs focus:outline-none focus:border-sky-500">
+                            <option value="Regional Distributor">Regional Distributor</option>
+                            <option value="Retailer / Kirana Store">Retailer / Kirana Store</option>
+                            <option value="Cafe / Hotel / Club Owner">Cafe / Hotel / Club Owner</option>
+                            <option value="Free Sample Trial Order">Free Sample Case / Trial Request</option>
+                            <option value="Bulk Event Order">Bulk Event / Corporate Order</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Location / Address</label>
+                        <input type="text" id="location" placeholder="Ex: Pari Chowk, Greater Noida" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 text-xs focus:outline-none focus:border-sky-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Bottle Size Required</label>
+                        <select id="bottleSize" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 text-xs focus:outline-none focus:border-sky-500">
+                            <option value="500ml Bottles">500ml Bottles</option>
+                            <option value="1000ml / 1L Bottles">1000ml / 1L Bottles</option>
+                            <option value="Mix Cases Batch">Mix Cases Batch (500ml + 1L)</option>
+                        </select>
+                    </div>
+                    <div>
+                        <label class="block text-xs font-bold text-slate-700 mb-1">Quantity (No. of Cases)</label>
+                        <input type="number" id="quantity" placeholder="Ex: 50 Cases" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 text-xs focus:outline-none focus:border-sky-500">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-xs font-bold text-slate-700 mb-1">Additional Requirements / Message</label>
+                    <textarea id="message" rows="3" placeholder="Apni zaroorat ke bare mein likhein..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 text-xs focus:outline-none focus:border-sky-500"></textarea>
+                </div>
+
+                <button type="submit" class="w-full btn-gradient py-3.5 rounded-xl font-bold text-white text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg cursor-pointer">
+                    <i class="fa-brands fa-whatsapp text-lg sm:text-xl"></i> Send Direct WhatsApp Order
+                </button>
+            </form>
+        </div>
+    </section>
+
+    <!-- SECTION 6: CLIENT REVIEWS & RATING (MOVED TO BOTTOM & ADDED FAKE REVIEWS) -->
+    <section id="reviews" class="py-12 sm:py-16 px-4 sm:px-6 bg-slate-50 border-y border-slate-200">
         <div class="max-w-4xl mx-auto">
             <div class="text-center mb-8 sm:mb-10 space-y-2">
                 <span class="text-[10px] sm:text-xs font-bold text-amber-600 uppercase tracking-widest bg-amber-100 px-3.5 py-1.5 rounded-full border border-amber-200 inline-block">
@@ -1096,71 +1160,41 @@
                     <p class="text-sm text-slate-600 max-w-sm">Your rating and review have been submitted successfully. We highly value your feedback!</p>
                     <button onclick="resetRatingForm()" class="mt-4 text-xs font-bold text-sky-600 hover:underline cursor-pointer">Submit another review</button>
                 </div>
+
+                <!-- NEW: Fake/Sample Reviews Display -->
+                <div class="mt-10 pt-8 border-t border-slate-100 space-y-4">
+                    <h3 class="text-lg font-bold text-slate-800 font-heading px-2">Recent Partner Reviews</h3>
+                    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                        <!-- Review 1 -->
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm">
+                            <div class="flex text-amber-400 text-[10px] sm:text-xs mb-2 drop-shadow-sm">
+                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                            </div>
+                            <p class="text-xs text-slate-600 mb-3 italic">"Water quality is excellent and the margin is really good. Delivery was exactly within 24 hours as promised."</p>
+                            <p class="text-[11px] font-bold text-slate-900">- Amit Sharma</p>
+                            <p class="text-[9px] text-slate-500 font-medium">Sharma Kirana Store</p>
+                        </div>
+                        <!-- Review 2 -->
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm">
+                            <div class="flex text-amber-400 text-[10px] sm:text-xs mb-2 drop-shadow-sm">
+                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i>
+                            </div>
+                            <p class="text-xs text-slate-600 mb-3 italic">"Premium bottle design. My cafe customers love it. Highly recommended for HORECA business."</p>
+                            <p class="text-[11px] font-bold text-slate-900">- Rahul Verma</p>
+                            <p class="text-[9px] text-slate-500 font-medium">Cafe Owner, Pari Chowk</p>
+                        </div>
+                        <!-- Review 3 -->
+                        <div class="bg-slate-50 p-4 rounded-xl border border-slate-200 shadow-sm">
+                            <div class="flex text-amber-400 text-[10px] sm:text-xs mb-2 drop-shadow-sm">
+                                <i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star"></i><i class="fa-solid fa-star-half-stroke"></i>
+                            </div>
+                            <p class="text-xs text-slate-600 mb-3 italic">"Good margins compared to other local brands. Stock buy-back guarantee gave me confidence to start."</p>
+                            <p class="text-[11px] font-bold text-slate-900">- Vikash Singh</p>
+                            <p class="text-[9px] text-slate-500 font-medium">Regional Distributor</p>
+                        </div>
+                    </div>
+                </div>
             </div>
-        </div>
-    </section>
-
-    <!-- SECTION 7: WHATSAPP ORDER & PARTNER FORM -->
-    <section id="contact" class="py-12 sm:py-16 px-4 sm:px-6 max-w-3xl mx-auto mt-6 sm:mt-10">
-        <div class="clean-card p-6 sm:p-10 rounded-2xl sm:rounded-3xl border border-sky-200 shadow-xl bg-white">
-            <div class="text-center mb-6 sm:mb-8 space-y-2">
-                <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-heading">Become a Partner / Place Case Order</h2>
-                <p class="text-xs sm:text-sm text-sky-700 font-semibold max-w-lg mx-auto">Join our growing network of partners or place your bulk order instantly for fast doorstep delivery.</p>
-            </div>
-
-            <form onsubmit="sendToWhatsApp(event)" class="space-y-3.5 sm:space-y-4">
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Aapka Naam / Name *</label>
-                        <input type="text" id="name" required placeholder="Ex: Rahul Pathak" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 text-xs focus:outline-none focus:border-sky-500">
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Phone / Mobile Number *</label>
-                        <input type="tel" id="phone" required placeholder="Ex: 9876543210" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 text-xs focus:outline-none focus:border-sky-500">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Partnership Role *</label>
-                        <select id="type" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 text-xs focus:outline-none focus:border-sky-500">
-                            <option value="Regional Distributor">Regional Distributor</option>
-                            <option value="Retailer / Kirana Store">Retailer / Kirana Store</option>
-                            <option value="Cafe / Hotel / Club Owner">Cafe / Hotel / Club Owner</option>
-                            <option value="Free Sample Trial Order">Free Sample Case / Trial Request</option>
-                            <option value="Bulk Event Order">Bulk Event / Corporate Order</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Location / Address</label>
-                        <input type="text" id="location" placeholder="Ex: Pari Chowk, Greater Noida" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 text-xs focus:outline-none focus:border-sky-500">
-                    </div>
-                </div>
-
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-3.5 sm:gap-4">
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Bottle Size Required</label>
-                        <select id="bottleSize" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 text-xs focus:outline-none focus:border-sky-500">
-                            <option value="500ml Bottles">500ml Bottles</option>
-                            <option value="1000ml / 1L Bottles">1000ml / 1L Bottles</option>
-                            <option value="Mix Cases Batch">Mix Cases Batch (500ml + 1L)</option>
-                        </select>
-                    </div>
-                    <div>
-                        <label class="block text-xs font-bold text-slate-700 mb-1">Quantity (No. of Cases)</label>
-                        <input type="number" id="quantity" placeholder="Ex: 50 Cases" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 text-xs focus:outline-none focus:border-sky-500">
-                    </div>
-                </div>
-
-                <div>
-                    <label class="block text-xs font-bold text-slate-700 mb-1">Additional Requirements / Message</label>
-                    <textarea id="message" rows="3" placeholder="Apni zaroorat ke bare mein likhein..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 text-xs focus:outline-none focus:border-sky-500"></textarea>
-                </div>
-
-                <button type="submit" class="w-full btn-gradient py-3.5 rounded-xl font-bold text-white text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg cursor-pointer">
-                    <i class="fa-brands fa-whatsapp text-lg sm:text-xl"></i> Send Direct WhatsApp Order
-                </button>
-            </form>
         </div>
     </section>
 
