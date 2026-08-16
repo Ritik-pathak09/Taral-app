@@ -267,9 +267,10 @@ app.post('/api/track/inquiry', async (req, res) => {
             }
         });
 
-        const whatsappAutoReplyText = `Hello ${name}, 👋\nThank you for reaching out to TARAL Water! We have successfully received your inquiry regarding ${bottleSize} / ${quantity} Cases for ${location}.\nOur sales team is reviewing your requirements and will connect with you shortly to share the best quotation and sample details.  Team TARAL`;
+        // FIXED TYPO HERE (whatsappAutoReplyText -> whatsappAutoReplyTest) TO MATCH FRONTEND
+        const whatsappAutoReplyTest = `Hello ${name}, 👋\nThank you for reaching out to TARAL Water! We have successfully received your inquiry regarding ${bottleSize} / ${quantity} Cases for ${location}.\nOur sales team is reviewing your requirements and will connect with you shortly to share the best quotation and sample details.  Team TARAL`;
 
-        res.json({ status: 'success', whatsappAutoReplyText });
+        res.json({ status: 'success', whatsappAutoReplyTest });
     } catch (err) {
         console.error('Inquiry error:', err);
         res.status(500).json({ status: 'error' });
