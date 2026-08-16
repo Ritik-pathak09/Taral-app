@@ -125,6 +125,14 @@
         body.mobile-desktop-mode .lg\:grid-cols-12 { grid-template-columns: repeat(12, minmax(0, 1fr)) !important; }
         body.mobile-desktop-mode .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
         body.mobile-desktop-mode .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
+
+        /* RATING STARS CSS (NEW) */
+        .star-rating-container { display: inline-flex; flex-direction: row-reverse; gap: 0.25rem; }
+        .star-rating-container input { display: none; }
+        .star-rating-container label { cursor: pointer; color: #cbd5e1; font-size: 2.5rem; transition: color 0.2s ease-in-out; }
+        .star-rating-container input:checked ~ label { color: #fbbf24; }
+        .star-rating-container label:hover,
+        .star-rating-container label:hover ~ label { color: #f59e0b; }
     </style>
 </head>
 <body class="overflow-x-hidden relative">
@@ -1018,8 +1026,82 @@
         </div>
     </section>
 
+    <!-- SECTION 6: CLIENT REVIEWS & RATING (NEW FEATURE ADDED HERE) -->
+    <section id="reviews" class="py-12 sm:py-16 px-4 sm:px-6 bg-slate-50 border-y border-slate-200 mt-6 sm:mt-10">
+        <div class="max-w-4xl mx-auto">
+            <div class="text-center mb-8 sm:mb-10 space-y-2">
+                <span class="text-[10px] sm:text-xs font-bold text-amber-600 uppercase tracking-widest bg-amber-100 px-3.5 py-1.5 rounded-full border border-amber-200 inline-block">
+                    Client Feedback
+                </span>
+                <h2 class="text-2xl sm:text-4xl font-extrabold text-slate-900 font-heading">
+                    Rate Your TARAL Experience
+                </h2>
+                <p class="text-slate-600 text-xs sm:text-sm">Your feedback helps us maintain the highest standards of purity and service.</p>
+            </div>
+
+            <div class="clean-card p-6 sm:p-8 rounded-2xl sm:rounded-3xl border border-slate-200 shadow-lg bg-white relative overflow-hidden">
+                <div id="ratingFormContainer">
+                    <form id="ratingForm" onsubmit="submitRating(event)" class="space-y-5">
+                        
+                        <!-- Interactive Star Rating UI -->
+                        <div class="flex flex-col items-center justify-center space-y-2 mb-4">
+                            <label class="text-sm font-bold text-slate-700">Tap to Rate *</label>
+                            <div class="star-rating-container" id="star-rating">
+                                <input type="radio" name="rating" id="star5" value="5" required />
+                                <label for="star5" title="5 Stars"><i class="fa-solid fa-star"></i></label>
+
+                                <input type="radio" name="rating" id="star4" value="4" />
+                                <label for="star4" title="4 Stars"><i class="fa-solid fa-star"></i></label>
+
+                                <input type="radio" name="rating" id="star3" value="3" />
+                                <label for="star3" title="3 Stars"><i class="fa-solid fa-star"></i></label>
+
+                                <input type="radio" name="rating" id="star2" value="2" />
+                                <label for="star2" title="2 Stars"><i class="fa-solid fa-star"></i></label>
+
+                                <input type="radio" name="rating" id="star1" value="1" />
+                                <label for="star1" title="1 Star"><i class="fa-solid fa-star"></i></label>
+                            </div>
+                            <p id="ratingText" class="text-xs font-bold text-amber-500 min-h-[16px]"></p>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Your Name *</label>
+                                <input type="text" id="reviewerName" required placeholder="Enter your name" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 text-xs focus:outline-none focus:border-amber-500">
+                            </div>
+                            <div>
+                                <label class="block text-xs font-bold text-slate-700 mb-1">Business Name (Optional)</label>
+                                <input type="text" id="reviewerBusiness" placeholder="Ex: Sharma Kirana Store" class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 text-xs focus:outline-none focus:border-amber-500">
+                            </div>
+                        </div>
+
+                        <div>
+                            <label class="block text-xs font-bold text-slate-700 mb-1">Write your review *</label>
+                            <textarea id="reviewerMessage" required rows="3" placeholder="Tell us about water quality, delivery, or margins..." class="w-full bg-slate-50 border border-slate-300 rounded-xl px-4 py-3 text-slate-900 text-xs focus:outline-none focus:border-amber-500"></textarea>
+                        </div>
+
+                        <button type="submit" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 py-3.5 rounded-xl font-bold text-white text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition cursor-pointer">
+                            <i class="fa-solid fa-paper-plane"></i> Submit Feedback
+                        </button>
+                    </form>
+                </div>
+
+                <!-- Success State (Hidden by default) -->
+                <div id="ratingSuccess" class="hidden flex-col items-center justify-center text-center py-6 space-y-3">
+                    <div class="w-16 h-16 bg-emerald-100 text-emerald-500 rounded-full flex items-center justify-center text-3xl shadow-inner mb-2">
+                        <i class="fa-solid fa-check"></i>
+                    </div>
+                    <h3 class="text-xl font-extrabold text-slate-900 font-heading">Thank You!</h3>
+                    <p class="text-sm text-slate-600 max-w-sm">Your rating and review have been submitted successfully. We highly value your feedback!</p>
+                    <button onclick="resetRatingForm()" class="mt-4 text-xs font-bold text-sky-600 hover:underline cursor-pointer">Submit another review</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
     <!-- SECTION 7: WHATSAPP ORDER & PARTNER FORM -->
-    <section id="contact" class="py-12 sm:py-16 px-4 sm:px-6 max-w-3xl mx-auto">
+    <section id="contact" class="py-12 sm:py-16 px-4 sm:px-6 max-w-3xl mx-auto mt-6 sm:mt-10">
         <div class="clean-card p-6 sm:p-10 rounded-2xl sm:rounded-3xl border border-sky-200 shadow-xl bg-white">
             <div class="text-center mb-6 sm:mb-8 space-y-2">
                 <h2 class="text-2xl sm:text-3xl font-extrabold text-slate-900 font-heading">Become a Partner / Place Case Order</h2>
@@ -1646,6 +1728,52 @@
                 document.body.style.overflow = '';
             }
         }
+
+        // --- NEW: RATING & REVIEW LOGIC ---
+        function submitRating(e) {
+            e.preventDefault();
+            const ratingObj = document.querySelector('input[name="rating"]:checked');
+            
+            if(!ratingObj) {
+                alert("Please tap on the stars to give a rating first!");
+                return;
+            }
+
+            const rating = ratingObj.value;
+            const name = document.getElementById('reviewerName').value;
+            const business = document.getElementById('reviewerBusiness').value;
+            const message = document.getElementById('reviewerMessage').value;
+
+            // Form hide karke Success message show karna
+            document.getElementById('ratingFormContainer').classList.add('hidden');
+            const successDiv = document.getElementById('ratingSuccess');
+            successDiv.classList.remove('hidden');
+            successDiv.classList.add('flex');
+
+            // Admin ko direct WhatsApp par alert bhej dega (Optional: Uncomment if needed)
+            /*
+            const adminReviewText = `*NEW TARAL CLIENT REVIEW*%0A------------------------------------%0A*Rating:* ${rating} Stars ⭐%0A*Name:* ${encodeURIComponent(name)}%0A*Business:* ${encodeURIComponent(business || 'N/A')}%0A*Feedback:* ${encodeURIComponent(message)}`;
+            window.open("https://wa.me/917432057456?text=" + adminReviewText, '_blank');
+            */
+        }
+
+        function resetRatingForm() {
+            document.getElementById('ratingForm').reset();
+            document.getElementById('ratingText').innerText = "";
+            const successDiv = document.getElementById('ratingSuccess');
+            successDiv.classList.remove('flex');
+            successDiv.classList.add('hidden');
+            document.getElementById('ratingFormContainer').classList.remove('hidden');
+        }
+
+        // Rating Text change logic jab koi star click kare
+        document.querySelectorAll('.star-rating-container input').forEach(radio => {
+            radio.addEventListener('change', function() {
+                const texts = {1: "Poor", 2: "Fair", 3: "Good", 4: "Very Good", 5: "Excellent!"};
+                document.getElementById('ratingText').innerText = texts[this.value];
+            });
+        });
+
     </script>
 </body>
 </html>
