@@ -78,10 +78,22 @@ const quotationSchema = new mongoose.Schema({
     timestamp: { type: Date, default: Date.now }
 });
 
+// === NAYA SCHEMA: Ratings & Reviews ke liye ===
+const reviewSchema = new mongoose.Schema({
+    sessionId: String,
+    rating: Number,
+    name: String,
+    business: String,
+    message: String,
+    ip: String,
+    timestamp: { type: Date, default: Date.now }
+});
+
 const Visit = mongoose.model('Visit', visitSchema);
 const Inquiry = mongoose.model('Inquiry', inquirySchema);
 const SampleRequest = mongoose.model('SampleRequest', sampleRequestSchema);
 const Quotation = mongoose.model('Quotation', quotationSchema);
+const Review = mongoose.model('Review', reviewSchema); // Review Model Register
 
 let isDbConnected = false;
 if (MONGO_URI) {
@@ -267,12 +279,82 @@ app.post('/api/track/inquiry', async (req, res) => {
             }
         });
 
-        // FIXED TYPO HERE (whatsappAutoReplyText -> whatsappAutoReplyTest) TO MATCH FRONTEND
         const whatsappAutoReplyTest = `Hello ${name}, 👋\nThank you for reaching out to TARAL Water! We have successfully received your inquiry regarding ${bottleSize} / ${quantity} Cases for ${location}.\nOur sales team is reviewing your requirements and will connect with you shortly to share the best quotation and sample details.  Team TARAL`;
 
         res.json({ status: 'success', whatsappAutoReplyTest });
     } catch (err) {
         console.error('Inquiry error:', err);
+        res.status(500).json({ status: 'error' });
+    }
+});
+
+// ==========================================
+// REVIEWS & RATINGS API ENDPOINTS
+// ==========================================
+
+// 1. Get all reviews (Show on Website)
+app.get('/api/reviews', async (req, res) => {
+    try {
+        const reviews = isDbConnected ? await Review.find().sort({ timestamp: -1 }) : [];
+        res.json({ status: 'success', reviews });
+    } catch (err) {
+        res.status(500).json({ status: 'error' });
+    }
+});
+
+// 2. Add new review
+app.post('/api/reviews', async (req, res) => {
+    try {
+        const { sessionId, rating, name, business, message } = req.body;
+        if (isDbConnected) {
+            const review = await Review.create({
+                sessionId, rating, name, business, message, ip: getClientIP(req), timestamp: new Date()
+            });
+            res.json({ status: 'success', review });
+        } else {
+            res.json({ status: 'error', message: 'DB not connected' });
+        }
+    } catch (err) {
+        res.status(500).json({ status: 'error' });
+    }
+});
+
+// 3. Edit review (Only by User who posted it)
+app.put('/api/reviews/:id', async (req, res) => {
+    try {
+        const { sessionId, rating, name, business, message } = req.body;
+        if (isDbConnected) {
+            const review = await Review.findById(req.params.id);
+            if (review && review.sessionId === sessionId) {
+                review.rating = rating;
+                review.name = name;
+                review.business = business;
+                review.message = message;
+                await review.save();
+                return res.json({ status: 'success', review });
+            }
+            return res.json({ status: 'error', message: 'Unauthorized' });
+        }
+        res.json({ status: 'error' });
+    } catch (err) {
+        res.status(500).json({ status: 'error' });
+    }
+});
+
+// 4. Delete review (Only by User who posted it)
+app.delete('/api/reviews/:id', async (req, res) => {
+    try {
+        const { sessionId } = req.body;
+        if (isDbConnected) {
+            const review = await Review.findById(req.params.id);
+            if (review && review.sessionId === sessionId) {
+                await Review.findByIdAndDelete(req.params.id);
+                return res.json({ status: 'success' });
+            }
+            return res.json({ status: 'error', message: 'Unauthorized' });
+        }
+        res.json({ status: 'error' });
+    } catch (err) {
         res.status(500).json({ status: 'error' });
     }
 });
@@ -293,6 +375,22 @@ app.post('/admin/delete-inquiry', async (req, res) => {
         res.json({ status: 'error', message: 'DB not connected or invalid ID' });
     } catch (err) {
         console.error('Delete inquiry error:', err);
+        res.status(500).json({ status: 'error' });
+    }
+});
+
+// NAYA: Admin Delete Review Endpoint
+app.post('/admin/delete-review', async (req, res) => {
+    try {
+        const { id } = req.body;
+        if (isDbConnected && id) {
+            await Review.findByIdAndDelete(id);
+            console.log(`[REVIEW DELETED BY ADMIN] ID: ${id}`);
+            return res.json({ status: 'success' });
+        }
+        res.json({ status: 'error', message: 'DB not connected or invalid ID' });
+    } catch (err) {
+        console.error('Delete review error:', err);
         res.status(500).json({ status: 'error' });
     }
 });
@@ -335,6 +433,9 @@ app.get('/admin/analytics', async (req, res) => {
         const filterMonth = req.query.month || '';
 
         const allVisits = isDbConnected ? await Visit.find({}).sort({ _id: -1 }) : [];
+        
+        // Fetch all reviews for admin dashboard
+        const allReviews = isDbConnected ? await Review.find({}).sort({ timestamp: -1 }) : [];
 
         // Filter visits based on URL query parameters (?year=2026 or ?month=2026-07)
         const filteredVisits = allVisits.filter(v => {
@@ -375,7 +476,7 @@ app.get('/admin/analytics', async (req, res) => {
         // All Time Total Visits
         const totalVisits = allVisits.reduce((acc, v) => acc + (Number(v.visitCount) || 1), 0);
 
-        // Recent Visitors Log (FIXED: Shows true individual session lastActive time without global over-writing)
+        // Recent Visitors Log
         const displayVisitsLog = (filterYear || filterMonth) ? filteredVisits : todayVisitsDocs;
         const visitsLogFormatted = displayVisitsLog.map(v => {
             const t = new Date(v.timestamp);
@@ -406,6 +507,7 @@ app.get('/admin/analytics', async (req, res) => {
         const totalInquiries = inquiries.length;
         const totalSamples = sampleRequests.length;
         const totalQuotes = quotationsGenerated.length;
+        const totalReviewsCount = allReviews.length; // Count Reviews
 
         const activeNow = allVisits.filter(v => {
             const lastActiveTime = v.lastActive || v.timestamp;
@@ -503,8 +605,8 @@ app.get('/admin/analytics', async (req, res) => {
                     </div>
                 </div>
 
-                <!-- BUSINESS LEADS STATS -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <!-- BUSINESS LEADS STATS (4 Cards Now) -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4">
                     <div class="bg-slate-800/80 p-4 rounded-xl border border-slate-700/50 flex justify-between items-center">
                         <div>
                             <p class="text-xs text-slate-400 font-bold">Inquiries Submitted</p>
@@ -515,9 +617,9 @@ app.get('/admin/analytics', async (req, res) => {
                     <div class="bg-slate-800/80 p-4 rounded-xl border border-slate-700/50 flex justify-between items-center">
                         <div>
                             <p class="text-xs text-slate-400 font-bold">Free Sample Clicks</p>
-                            <h3 class="text-2xl font-bold text-amber-400 mt-0.5">${totalSamples}</h3>
+                            <h3 class="text-2xl font-bold text-emerald-400 mt-0.5">${totalSamples}</h3>
                         </div>
-                        <i class="fa-solid fa-vial text-2xl text-amber-500/40"></i>
+                        <i class="fa-solid fa-vial text-2xl text-emerald-500/40"></i>
                     </div>
                     <div class="bg-slate-800/80 p-4 rounded-xl border border-slate-700/50 flex justify-between items-center">
                         <div>
@@ -525,6 +627,14 @@ app.get('/admin/analytics', async (req, res) => {
                             <h3 class="text-2xl font-bold text-purple-400 mt-0.5">${totalQuotes}</h3>
                         </div>
                         <i class="fa-solid fa-calculator text-2xl text-purple-500/40"></i>
+                    </div>
+                    <!-- NAYA: Total Reviews Stat Card -->
+                    <div class="bg-slate-800/80 p-4 rounded-xl border border-slate-700/50 flex justify-between items-center">
+                        <div>
+                            <p class="text-xs text-slate-400 font-bold">Website Reviews</p>
+                            <h3 class="text-2xl font-bold text-amber-400 mt-0.5">${totalReviewsCount}</h3>
+                        </div>
+                        <i class="fa-solid fa-star text-2xl text-amber-500/40"></i>
                     </div>
                 </div>
 
@@ -563,6 +673,41 @@ app.get('/admin/analytics', async (req, res) => {
                                 `;
                             }).join('') : '<span class="text-xs text-slate-500">No years recorded yet</span>'}
                         </div>
+                    </div>
+                </div>
+
+                <!-- ALL CLIENT REVIEWS TABLE (NAYA) -->
+                <div class="bg-slate-800 rounded-2xl p-6 border border-slate-700 space-y-4">
+                    <h3 class="text-lg font-bold text-white"><i class="fa-solid fa-star text-amber-400 mr-2"></i> Client Reviews</h3>
+                    <div class="overflow-x-auto max-h-[350px] overflow-y-auto">
+                        <table class="w-full text-left text-xs border-collapse">
+                            <thead>
+                                <tr class="bg-slate-900/80 text-slate-400 border-b border-slate-700 sticky top-0">
+                                    <th class="p-3">Rating</th>
+                                    <th class="p-3">Name</th>
+                                    <th class="p-3">Business</th>
+                                    <th class="p-3">Review Message</th>
+                                    <th class="p-3">Date</th>
+                                    <th class="p-3 text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="divide-y divide-slate-700/50">
+                                ${allReviews.length ? allReviews.map(r => `
+                                    <tr class="hover:bg-slate-700/30" id="review-row-${r._id}">
+                                        <td class="p-3 font-bold text-amber-400">${r.rating} ⭐</td>
+                                        <td class="p-3 font-bold text-white">${r.name || 'Anonymous'}</td>
+                                        <td class="p-3 text-sky-400">${r.business || '-'}</td>
+                                        <td class="p-3 italic text-slate-300">"${r.message || ''}"</td>
+                                        <td class="p-3 text-slate-400">${new Date(r.timestamp).toLocaleString()}</td>
+                                        <td class="p-3 text-center">
+                                            <button onclick="deleteReviewAdmin('${r._id}')" class="bg-rose-500/20 hover:bg-rose-500 text-rose-400 hover:text-white px-2.5 py-1 rounded-lg font-bold text-[10px] transition border border-rose-500/30 cursor-pointer" title="Delete Review from Website">
+                                                <i class="fa-solid fa-trash"></i> Delete
+                                            </button>
+                                        </td>
+                                    </tr>
+                                `).join('') : '<tr><td colspan="6" class="p-4 text-center text-slate-500">No reviews found yet.</td></tr>'}
+                            </tbody>
+                        </table>
                     </div>
                 </div>
 
@@ -665,7 +810,7 @@ app.get('/admin/analytics', async (req, res) => {
                 </div>
             </div>
 
-            <!-- JavaScript for deleting inquiry dynamically -->
+            <!-- JavaScript for deleting inquiry and review dynamically -->
             <script>
                 function deleteInquiry(id) {
                     if (confirm('Kya aap sach mein is inquiry ko delete karna chahte hain?')) {
@@ -684,6 +829,26 @@ app.get('/admin/analytics', async (req, res) => {
                             }
                         })
                         .catch(err => console.error('Error deleting inquiry:', err));
+                    }
+                }
+
+                function deleteReviewAdmin(id) {
+                    if (confirm('Kya aap sach mein is Customer Review ko website se hamesha ke liye hatana chahte hain?')) {
+                        fetch('/admin/delete-review', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ id: id })
+                        })
+                        .then(res => res.json())
+                        .then(data => {
+                            if (data.status === 'success') {
+                                const row = document.getElementById('review-row-' + id);
+                                if (row) row.remove();
+                            } else {
+                                alert('Review delete karne mein samasya aayi.');
+                            }
+                        })
+                        .catch(err => console.error('Error deleting review:', err));
                     }
                 }
             </script>
