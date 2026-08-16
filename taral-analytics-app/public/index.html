@@ -203,7 +203,7 @@
                 </div>
 
                 <div class="space-y-2.5">
-                    <!-- 3 OPTION BUTTONS: INSTAGRAM STORY, INSTAGRAM POST, WHATSAPP STATUS -->
+                    <!-- 3 OPTION BUTTONS -->
                     <div class="grid grid-cols-1 sm:grid-cols-3 gap-2">
                         <!-- Instagram Story Option -->
                         <button onclick="handleShare('insta_story')" class="w-full insta-gradient text-white py-3 px-2 rounded-2xl font-bold text-[11px] uppercase tracking-wider flex items-center justify-center gap-1 shadow-md hover:scale-[1.02] transition cursor-pointer">
@@ -304,7 +304,6 @@
                 <button onclick="scrollToSection('calculator')" class="hover:text-sky-600 transition cursor-pointer">Margin & Quotation</button>
                 <button onclick="scrollToSection('filtration')" class="hover:text-sky-600 transition cursor-pointer">5-Stage Filtration</button>
                 <button onclick="scrollToSection('faqs')" class="hover:text-sky-600 transition cursor-pointer">Merchant FAQ</button>
-                <!-- NEW DESKTOP NAV OPTION ADDED HERE -->
                 <button onclick="scrollToSection('reviews')" class="hover:text-sky-600 transition cursor-pointer">Rate Us</button>
             </div>
 
@@ -338,7 +337,6 @@
             <button onclick="toggleSideMenu(); scrollToSection('calculator')" class="w-full text-left px-4 py-3.5 rounded-xl font-bold text-slate-700 hover:bg-sky-50 hover:text-sky-600 transition flex items-center gap-3.5"><i class="fa-solid fa-calculator w-5 text-amber-500"></i> Margin Calculator</button>
             <button onclick="toggleSideMenu(); scrollToSection('filtration')" class="w-full text-left px-4 py-3.5 rounded-xl font-bold text-slate-700 hover:bg-sky-50 hover:text-sky-600 transition flex items-center gap-3.5"><i class="fa-solid fa-filter w-5 text-indigo-500"></i> 5-Stage Filtration</button>
             <button onclick="toggleSideMenu(); scrollToSection('faqs')" class="w-full text-left px-4 py-3.5 rounded-xl font-bold text-slate-700 hover:bg-sky-50 hover:text-sky-600 transition flex items-center gap-3.5"><i class="fa-solid fa-circle-question w-5 text-purple-500"></i> Merchant FAQ</button>
-            <!-- NEW MOBILE NAV OPTION ADDED HERE -->
             <button onclick="toggleSideMenu(); scrollToSection('reviews')" class="w-full text-left px-4 py-3.5 rounded-xl font-bold text-slate-700 hover:bg-sky-50 hover:text-sky-600 transition flex items-center gap-3.5"><i class="fa-solid fa-star w-5 text-amber-500"></i> Rate Us</button>
         </div>
         <!-- Menu Footer -->
@@ -1094,7 +1092,7 @@
         </div>
     </section>
 
-    <!-- SECTION 6: CLIENT REVIEWS & RATING (MOVED TO BOTTOM & ADDED FAKE REVIEWS) -->
+    <!-- SECTION 6: CLIENT REVIEWS & RATING -->
     <section id="reviews" class="py-12 sm:py-16 px-4 sm:px-6 bg-slate-50 border-y border-slate-200">
         <div class="max-w-4xl mx-auto">
             <div class="text-center mb-8 sm:mb-10 space-y-2">
@@ -1150,7 +1148,7 @@
                         </div>
 
                         <button type="submit" class="w-full bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 py-3.5 rounded-xl font-bold text-white text-xs sm:text-sm uppercase tracking-wider flex items-center justify-center gap-2 shadow-lg transition cursor-pointer">
-                            <i class="fa-solid fa-paper-plane"></i> Submit Feedback
+                            <span id="submitBtnText"><i class="fa-solid fa-paper-plane"></i> Submit Feedback</span>
                         </button>
                     </form>
                 </div>
@@ -1165,7 +1163,7 @@
                     <button onclick="resetRatingForm()" class="mt-4 text-xs font-bold text-sky-600 hover:underline cursor-pointer">Submit another review</button>
                 </div>
 
-                <!-- NEW: Fake/Sample Reviews Display (Added id="reviewsList" here) -->
+                <!-- Fake/Sample Reviews Display -->
                 <div class="mt-10 pt-8 border-t border-slate-100 space-y-4">
                     <h3 class="text-lg font-bold text-slate-800 font-heading px-2">Recent Partner Reviews</h3>
                     <div id="reviewsList" class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
@@ -1228,6 +1226,9 @@
 
     <!-- JavaScript & Analytics Integration Logic -->
     <script>
+        // Edit Review Feature Global Variable
+        let editingReviewId = null;
+
         if ('scrollRestoration' in history) {
             history.scrollRestoration = 'manual';
         }
@@ -1264,9 +1265,7 @@
                 console.error('⚠️ Visit tracking error:', err);
             });
 
-            // ========================================================
-            // FIXED: Live Heartbeat Ping Interval for Real-time Time Spent
-            // ========================================================
+            // Live Heartbeat Ping Interval for Real-time Time Spent
             setInterval(() => {
                 if (clientSessionId) {
                     fetch('/api/track/ping', {
@@ -1280,7 +1279,7 @@
                     })
                     .catch(err => console.error('Ping error:', err));
                 }
-            }, 15000); // Har 15 seconds mein server ko update bhejega
+            }, 15000); 
         });
 
         window.addEventListener('popstate', function (event) {
@@ -1753,13 +1752,11 @@
             const overlay = document.getElementById('sideMenuOverlay');
             
             if (menu.classList.contains('-translate-x-full')) {
-                // Menu Khulne ka animation
                 menu.classList.remove('-translate-x-full');
                 overlay.classList.remove('hidden');
                 setTimeout(() => overlay.classList.remove('opacity-0'), 10);
-                document.body.style.overflow = 'hidden'; // Pichla page scroll na ho
+                document.body.style.overflow = 'hidden'; 
             } else {
-                // Menu Band hone ka animation
                 menu.classList.add('-translate-x-full');
                 overlay.classList.add('opacity-0');
                 setTimeout(() => overlay.classList.add('hidden'), 300);
@@ -1767,7 +1764,7 @@
             }
         }
 
-        // --- NEW: RATING & REVIEW LOGIC ---
+        // --- RATING & REVIEW LOGIC ---
         function submitRating(e) {
             e.preventDefault();
             const ratingObj = document.querySelector('input[name="rating"]:checked');
@@ -1782,40 +1779,123 @@
             const business = document.getElementById('reviewerBusiness').value || 'Customer';
             const message = document.getElementById('reviewerMessage').value;
 
-            // Form hide karke Success message show karna
+            // Hide form & Show success msg
             document.getElementById('ratingFormContainer').classList.add('hidden');
             const successDiv = document.getElementById('ratingSuccess');
             successDiv.classList.remove('hidden');
             successDiv.classList.add('flex');
 
-            // --- NEW: Add the submitted review to the page dynamically ---
             const reviewsList = document.getElementById('reviewsList');
-            if(reviewsList) {
-                // Generate Stars HTML
-                let starsHtml = '';
-                for(let i=1; i<=5; i++) {
-                    if(i <= rating) {
-                        starsHtml += '<i class="fa-solid fa-star"></i>';
-                    } else {
-                        starsHtml += '<i class="fa-solid fa-star text-slate-300"></i>';
+
+            if (editingReviewId) {
+                // UPDATE EXISTING REVIEW
+                const reviewEl = document.getElementById(editingReviewId);
+                if (reviewEl) {
+                    reviewEl.setAttribute('data-rating', rating);
+                    reviewEl.setAttribute('data-name', name);
+                    reviewEl.setAttribute('data-business', business);
+                    reviewEl.setAttribute('data-message', message);
+
+                    let starsHtml = '';
+                    for(let i=1; i<=5; i++) {
+                        starsHtml += (i <= rating) ? '<i class="fa-solid fa-star"></i>' : '<i class="fa-solid fa-star text-slate-300"></i>';
                     }
+
+                    reviewEl.innerHTML = `
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex text-amber-400 text-[10px] sm:text-xs drop-shadow-sm">
+                                ${starsHtml}
+                                <span class="ml-2 text-[10px] font-bold text-sky-600 bg-sky-100 px-1.5 py-0.5 rounded">Edited</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="editReview('${editingReviewId}')" class="text-sky-600 hover:text-sky-800" title="Edit"><i class="fa-solid fa-pen-to-square text-sm"></i></button>
+                                <button onclick="deleteReview('${editingReviewId}')" class="text-rose-500 hover:text-rose-700" title="Delete"><i class="fa-solid fa-trash text-sm"></i></button>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-700 mb-3 italic font-medium">"${message}"</p>
+                        <p class="text-[11px] font-bold text-slate-900">- ${name}</p>
+                        <p class="text-[9px] text-slate-500 font-medium">${business}</p>
+                    `;
                 }
+                editingReviewId = null;
+                document.getElementById('submitBtnText').innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Feedback';
+            } else {
+                // CREATE NEW REVIEW
+                if(reviewsList) {
+                    let starsHtml = '';
+                    for(let i=1; i<=5; i++) {
+                        starsHtml += (i <= rating) ? '<i class="fa-solid fa-star"></i>' : '<i class="fa-solid fa-star text-slate-300"></i>';
+                    }
 
-                // Create new review card
-                const newReview = document.createElement('div');
-                newReview.className = 'bg-sky-50 p-4 rounded-xl border border-sky-200 shadow-md transform transition duration-500 hover:scale-105';
-                newReview.innerHTML = `
-                    <div class="flex text-amber-400 text-[10px] sm:text-xs mb-2 drop-shadow-sm">
-                        ${starsHtml}
-                        <span class="ml-2 text-[10px] font-bold text-sky-600 bg-sky-100 px-1.5 py-0.5 rounded">New</span>
-                    </div>
-                    <p class="text-xs text-slate-700 mb-3 italic font-medium">"${message}"</p>
-                    <p class="text-[11px] font-bold text-slate-900">- ${name}</p>
-                    <p class="text-[9px] text-slate-500 font-medium">${business}</p>
-                `;
+                    const newId = 'review-' + Date.now();
+                    const newReview = document.createElement('div');
+                    newReview.id = newId;
+                    newReview.className = 'bg-sky-50 p-4 rounded-xl border border-sky-200 shadow-md transform transition duration-500 hover:scale-105';
+                    
+                    newReview.setAttribute('data-rating', rating);
+                    newReview.setAttribute('data-name', name);
+                    newReview.setAttribute('data-business', business);
+                    newReview.setAttribute('data-message', message);
 
-                // Insert at the beginning of the list
-                reviewsList.insertBefore(newReview, reviewsList.firstChild);
+                    newReview.innerHTML = `
+                        <div class="flex justify-between items-start mb-2">
+                            <div class="flex text-amber-400 text-[10px] sm:text-xs drop-shadow-sm">
+                                ${starsHtml}
+                                <span class="ml-2 text-[10px] font-bold text-sky-600 bg-sky-100 px-1.5 py-0.5 rounded">New</span>
+                            </div>
+                            <div class="flex gap-2">
+                                <button onclick="editReview('${newId}')" class="text-sky-600 hover:text-sky-800" title="Edit"><i class="fa-solid fa-pen-to-square text-sm"></i></button>
+                                <button onclick="deleteReview('${newId}')" class="text-rose-500 hover:text-rose-700" title="Delete"><i class="fa-solid fa-trash text-sm"></i></button>
+                            </div>
+                        </div>
+                        <p class="text-xs text-slate-700 mb-3 italic font-medium">"${message}"</p>
+                        <p class="text-[11px] font-bold text-slate-900">- ${name}</p>
+                        <p class="text-[9px] text-slate-500 font-medium">${business}</p>
+                    `;
+                    reviewsList.insertBefore(newReview, reviewsList.firstChild);
+                }
+            }
+        }
+
+        // FUNCTION TO EDIT REVIEW
+        function editReview(id) {
+            const reviewEl = document.getElementById(id);
+            if(!reviewEl) return;
+            
+            const rating = reviewEl.getAttribute('data-rating');
+            const name = reviewEl.getAttribute('data-name');
+            const business = reviewEl.getAttribute('data-business');
+            const message = reviewEl.getAttribute('data-message');
+
+            document.getElementById('reviewerName').value = name;
+            document.getElementById('reviewerBusiness').value = (business === 'Customer') ? '' : business;
+            document.getElementById('reviewerMessage').value = message;
+            
+            const radio = document.getElementById('star' + rating);
+            if(radio) radio.checked = true;
+            
+            const texts = {1: "Poor", 2: "Fair", 3: "Good", 4: "Very Good", 5: "Excellent!"};
+            document.getElementById('ratingText').innerText = texts[rating] || "";
+
+            editingReviewId = id;
+            document.getElementById('submitBtnText').innerHTML = '<i class="fa-solid fa-pen"></i> Update Feedback';
+
+            document.getElementById('ratingSuccess').classList.add('hidden');
+            document.getElementById('ratingSuccess').classList.remove('flex');
+            document.getElementById('ratingFormContainer').classList.remove('hidden');
+
+            document.getElementById('reviews').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // FUNCTION TO DELETE REVIEW
+        function deleteReview(id) {
+            if(confirm("Are you sure you want to delete this review?")) {
+                const reviewEl = document.getElementById(id);
+                if(reviewEl) reviewEl.remove();
+                
+                if(editingReviewId === id) {
+                    resetRatingForm();
+                }
             }
         }
 
@@ -1826,9 +1906,11 @@
             successDiv.classList.remove('flex');
             successDiv.classList.add('hidden');
             document.getElementById('ratingFormContainer').classList.remove('hidden');
+            
+            editingReviewId = null;
+            document.getElementById('submitBtnText').innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Feedback';
         }
 
-        // Rating Text change logic jab koi star click kare
         document.querySelectorAll('.star-rating-container input').forEach(radio => {
             radio.addEventListener('change', function() {
                 const texts = {1: "Poor", 2: "Fair", 3: "Good", 4: "Very Good", 5: "Excellent!"};
