@@ -341,17 +341,25 @@ app.put('/api/reviews/:id', async (req, res) => {
     }
 });
 
-// 4. Delete review (Only by User who posted it)
+// 4. Delete review (Only by User who posted it OR Admin)
 app.delete('/api/reviews/:id', async (req, res) => {
     try {
-        const { sessionId } = req.body;
+        const { sessionId, adminKey } = req.body;
         if (isDbConnected) {
             const review = await Review.findById(req.params.id);
-            if (review && review.sessionId === sessionId) {
+            if (!review) {
+                return res.json({ status: 'error', message: 'Review not found' });
+            }
+            
+            // Check if user is the creator OR the admin
+            const isOwner = (adminKey && adminKey === ADMIN_KEY);
+            const isCreator = (review.sessionId === sessionId);
+
+            if (isOwner || isCreator) {
                 await Review.findByIdAndDelete(req.params.id);
                 return res.json({ status: 'success' });
             }
-            return res.json({ status: 'error', message: 'Unauthorized' });
+            return res.json({ status: 'error', message: 'Unauthorized: Only creator or admin can delete' });
         }
         res.json({ status: 'error' });
     } catch (err) {
