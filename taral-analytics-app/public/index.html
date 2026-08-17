@@ -1239,12 +1239,32 @@
             localStorage.setItem('taral_session_id', clientSessionId);
         }
 
+        // ==========================================
+        // FETCH AND LOAD REVIEWS FROM DATABASE
+        // ==========================================
+        function fetchReviews() {
+            fetch('/api/reviews')
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success' && data.reviews) {
+                    // Reverse the array so we can insert them at the top in correct order
+                    data.reviews.reverse().forEach(r => {
+                        addReviewToDOM(r);
+                    });
+                }
+            })
+            .catch(err => console.error('Error fetching reviews:', err));
+        }
+
         window.addEventListener('DOMContentLoaded', () => {
             window.scrollTo(0, 0);
             handleDesktopMode();
             if (!window.history.state || window.history.state.step !== 'main') {
                 window.history.replaceState({ step: 'main' }, '', window.location.href);
             }
+
+            // Fetch permanent reviews from DB
+            fetchReviews();
 
             // Log initial visit
             fetch('/api/track/visit', {
@@ -1764,7 +1784,9 @@
             }
         }
 
-        // --- RATING & REVIEW LOGIC ---
+        // ==========================================
+        // RATING & REVIEW LOGIC (BACKEND INTEGRATED)
+        // ==========================================
         function submitRating(e) {
             e.preventDefault();
             const ratingObj = document.querySelector('input[name="rating"]:checked');
@@ -1779,85 +1801,117 @@
             const business = document.getElementById('reviewerBusiness').value || 'Customer';
             const message = document.getElementById('reviewerMessage').value;
 
-            // Hide form & Show success msg
             document.getElementById('ratingFormContainer').classList.add('hidden');
             const successDiv = document.getElementById('ratingSuccess');
             successDiv.classList.remove('hidden');
             successDiv.classList.add('flex');
 
-            const reviewsList = document.getElementById('reviewsList');
-
             if (editingReviewId) {
-                // UPDATE EXISTING REVIEW
-                const reviewEl = document.getElementById(editingReviewId);
-                if (reviewEl) {
-                    reviewEl.setAttribute('data-rating', rating);
-                    reviewEl.setAttribute('data-name', name);
-                    reviewEl.setAttribute('data-business', business);
-                    reviewEl.setAttribute('data-message', message);
+                // Update Review in Database
+                const dbId = editingReviewId.replace('review-', '');
+                fetch('/api/reviews/' + dbId, {
+                    method: 'PUT',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId: clientSessionId, rating, name, business, message })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        const reviewEl = document.getElementById(editingReviewId);
+                        if (reviewEl) {
+                            reviewEl.setAttribute('data-rating', rating);
+                            reviewEl.setAttribute('data-name', name);
+                            reviewEl.setAttribute('data-business', business);
+                            reviewEl.setAttribute('data-message', message);
 
-                    let starsHtml = '';
-                    for(let i=1; i<=5; i++) {
-                        starsHtml += (i <= rating) ? '<i class="fa-solid fa-star"></i>' : '<i class="fa-solid fa-star text-slate-300"></i>';
+                            let starsHtml = '';
+                            for(let i=1; i<=5; i++) {
+                                starsHtml += (i <= rating) ? '<i class="fa-solid fa-star"></i>' : '<i class="fa-solid fa-star text-slate-300"></i>';
+                            }
+
+                            reviewEl.innerHTML = `
+                                <div class="flex justify-between items-start mb-2">
+                                    <div class="flex text-amber-400 text-[10px] sm:text-xs drop-shadow-sm">
+                                        ${starsHtml}
+                                        <span class="ml-2 text-[10px] font-bold text-sky-600 bg-sky-100 px-1.5 py-0.5 rounded">Edited</span>
+                                    </div>
+                                    <div class="flex gap-2">
+                                        <button onclick="editReview('${editingReviewId}')" class="text-sky-600 hover:text-sky-800" title="Edit"><i class="fa-solid fa-pen-to-square text-sm"></i></button>
+                                        <button onclick="deleteReview('${editingReviewId}', '${clientSessionId}')" class="text-rose-500 hover:text-rose-700" title="Delete"><i class="fa-solid fa-trash text-sm"></i></button>
+                                    </div>
+                                </div>
+                                <p class="text-xs text-slate-700 mb-3 italic font-medium">"${message}"</p>
+                                <p class="text-[11px] font-bold text-slate-900">- ${name}</p>
+                                <p class="text-[9px] text-slate-500 font-medium">${business}</p>
+                            `;
+                        }
+                    } else {
+                        alert("Update failed!");
                     }
+                    editingReviewId = null;
+                    document.getElementById('submitBtnText').innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Feedback';
+                }).catch(err => console.error(err));
 
-                    reviewEl.innerHTML = `
-                        <div class="flex justify-between items-start mb-2">
-                            <div class="flex text-amber-400 text-[10px] sm:text-xs drop-shadow-sm">
-                                ${starsHtml}
-                                <span class="ml-2 text-[10px] font-bold text-sky-600 bg-sky-100 px-1.5 py-0.5 rounded">Edited</span>
-                            </div>
-                            <div class="flex gap-2">
-                                <button onclick="editReview('${editingReviewId}')" class="text-sky-600 hover:text-sky-800" title="Edit"><i class="fa-solid fa-pen-to-square text-sm"></i></button>
-                                <button onclick="deleteReview('${editingReviewId}')" class="text-rose-500 hover:text-rose-700" title="Delete"><i class="fa-solid fa-trash text-sm"></i></button>
-                            </div>
-                        </div>
-                        <p class="text-xs text-slate-700 mb-3 italic font-medium">"${message}"</p>
-                        <p class="text-[11px] font-bold text-slate-900">- ${name}</p>
-                        <p class="text-[9px] text-slate-500 font-medium">${business}</p>
-                    `;
-                }
-                editingReviewId = null;
-                document.getElementById('submitBtnText').innerHTML = '<i class="fa-solid fa-paper-plane"></i> Submit Feedback';
             } else {
-                // CREATE NEW REVIEW
-                if(reviewsList) {
-                    let starsHtml = '';
-                    for(let i=1; i<=5; i++) {
-                        starsHtml += (i <= rating) ? '<i class="fa-solid fa-star"></i>' : '<i class="fa-solid fa-star text-slate-300"></i>';
+                // Save New Review to Database
+                fetch('/api/reviews', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ sessionId: clientSessionId, rating, name, business, message })
+                })
+                .then(res => res.json())
+                .then(data => {
+                    if(data.status === 'success') {
+                        addReviewToDOM(data.review);
                     }
-
-                    const newId = 'review-' + Date.now();
-                    const newReview = document.createElement('div');
-                    newReview.id = newId;
-                    newReview.className = 'bg-sky-50 p-4 rounded-xl border border-sky-200 shadow-md transform transition duration-500 hover:scale-105';
-                    
-                    newReview.setAttribute('data-rating', rating);
-                    newReview.setAttribute('data-name', name);
-                    newReview.setAttribute('data-business', business);
-                    newReview.setAttribute('data-message', message);
-
-                    newReview.innerHTML = `
-                        <div class="flex justify-between items-start mb-2">
-                            <div class="flex text-amber-400 text-[10px] sm:text-xs drop-shadow-sm">
-                                ${starsHtml}
-                                <span class="ml-2 text-[10px] font-bold text-sky-600 bg-sky-100 px-1.5 py-0.5 rounded">New</span>
-                            </div>
-                            <div class="flex gap-2">
-                                <button onclick="editReview('${newId}')" class="text-sky-600 hover:text-sky-800" title="Edit"><i class="fa-solid fa-pen-to-square text-sm"></i></button>
-                                <button onclick="deleteReview('${newId}')" class="text-rose-500 hover:text-rose-700" title="Delete"><i class="fa-solid fa-trash text-sm"></i></button>
-                            </div>
-                        </div>
-                        <p class="text-xs text-slate-700 mb-3 italic font-medium">"${message}"</p>
-                        <p class="text-[11px] font-bold text-slate-900">- ${name}</p>
-                        <p class="text-[9px] text-slate-500 font-medium">${business}</p>
-                    `;
-                    reviewsList.insertBefore(newReview, reviewsList.firstChild);
-                }
+                }).catch(err => console.error(err));
             }
         }
 
-        // FUNCTION TO EDIT REVIEW
+        function addReviewToDOM(r) {
+            const reviewsList = document.getElementById('reviewsList');
+            const newId = 'review-' + r._id;
+            
+            if(document.getElementById(newId)) return;
+
+            const newReview = document.createElement('div');
+            newReview.id = newId;
+            newReview.className = 'bg-sky-50 p-4 rounded-xl border border-sky-200 shadow-md transform transition duration-500 hover:scale-105';
+            
+            newReview.setAttribute('data-rating', r.rating);
+            newReview.setAttribute('data-name', r.name);
+            newReview.setAttribute('data-business', r.business || '');
+            newReview.setAttribute('data-message', r.message);
+            newReview.setAttribute('data-session', r.sessionId);
+
+            let starsHtml = '';
+            for(let i=1; i<=5; i++) {
+                starsHtml += (i <= r.rating) ? '<i class="fa-solid fa-star"></i>' : '<i class="fa-solid fa-star text-slate-300"></i>';
+            }
+
+            // Only the creator can see the edit button
+            const editBtnHtml = (r.sessionId === clientSessionId) 
+                ? `<button onclick="editReview('${newId}')" class="text-sky-600 hover:text-sky-800" title="Edit"><i class="fa-solid fa-pen-to-square text-sm"></i></button>` 
+                : '';
+
+            newReview.innerHTML = `
+                <div class="flex justify-between items-start mb-2">
+                    <div class="flex text-amber-400 text-[10px] sm:text-xs drop-shadow-sm">
+                        ${starsHtml}
+                        <span class="ml-2 text-[10px] font-bold text-sky-600 bg-sky-100 px-1.5 py-0.5 rounded">New</span>
+                    </div>
+                    <div class="flex gap-2">
+                        ${editBtnHtml}
+                        <button onclick="deleteReview('${newId}', '${r.sessionId}')" class="text-rose-500 hover:text-rose-700" title="Delete"><i class="fa-solid fa-trash text-sm"></i></button>
+                    </div>
+                </div>
+                <p class="text-xs text-slate-700 mb-3 italic font-medium">"${r.message}"</p>
+                <p class="text-[11px] font-bold text-slate-900">- ${r.name}</p>
+                <p class="text-[9px] text-slate-500 font-medium">${r.business || ''}</p>
+            `;
+            reviewsList.insertBefore(newReview, reviewsList.firstChild);
+        }
+
         function editReview(id) {
             const reviewEl = document.getElementById(id);
             if(!reviewEl) return;
@@ -1887,16 +1941,40 @@
             document.getElementById('reviews').scrollIntoView({ behavior: 'smooth' });
         }
 
-        // FUNCTION TO DELETE REVIEW
-        function deleteReview(id) {
-            if(confirm("Are you sure you want to delete this review?")) {
+        function deleteReview(id, reviewSessionId) {
+            let adminKey = "";
+            
+            // Password verification logic if user is not the original creator
+            if (clientSessionId !== reviewSessionId) {
+                adminKey = prompt("Aap is review ke owner nahi hain. Website Owner hone par Admin Password (Secret Key) dalein:");
+                if (adminKey === null) return; 
+            } else {
+                if(!confirm("Kya aap sach mein apna review delete karna chahte hain?")) return;
+            }
+
+            const dbId = id.replace('review-', '');
+
+            // Call Backend to delete securely
+            fetch('/api/reviews/' + dbId, {
+                method: 'DELETE',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ sessionId: clientSessionId, adminKey: adminKey })
+            })
+            .then(res => res.json())
+            .then(data => {
+                if (data.status === 'success') {
+                    const reviewEl = document.getElementById(id);
+                    if(reviewEl) reviewEl.remove();
+                    if(editingReviewId === id) resetRatingForm();
+                } else {
+                    alert("Delete Failed: " + (data.message || "Invalid Admin Password or Unauthorized!"));
+                }
+            })
+            .catch(err => {
+                console.error('Error:', err);
                 const reviewEl = document.getElementById(id);
                 if(reviewEl) reviewEl.remove();
-                
-                if(editingReviewId === id) {
-                    resetRatingForm();
-                }
-            }
+            });
         }
 
         function resetRatingForm() {
