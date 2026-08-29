@@ -2,7 +2,7 @@
 <html lang="hi" class="scroll-smooth">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" id="viewportMeta" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" id="viewportMeta" content="width=device-width, initial-scale=1.0">
     <title>Oriel - Nature's Flow, Health and Glow | Packaged Drinking Water</title>
     <!-- Tailwind CSS -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -119,21 +119,6 @@
             visibility: hidden !important;
             pointer-events: none !important;
         }
-
-        /* ONLY FOR MOBILE DESKTOP SITE MODE */
-        body.mobile-desktop-mode {
-            width: 1200px !important;
-            max-width: 1200px !important;
-            margin: 0 auto !important;
-        }
-        body.mobile-desktop-mode .lg\:flex { display: flex !important; }
-        body.mobile-desktop-mode .lg\:hidden { display: none !important; }
-        body.mobile-desktop-mode .lg\:col-span-7 { grid-column: span 7 / span 7 !important; }
-        body.mobile-desktop-mode .lg\:col-span-5 { grid-column: span 5 / span 5 !important; }
-        body.mobile-desktop-mode .lg\:col-span-6 { grid-column: span 6 / span 6 !important; }
-        body.mobile-desktop-mode .lg\:grid-cols-12 { grid-template-columns: repeat(12, minmax(0, 1fr)) !important; }
-        body.mobile-desktop-mode .lg\:grid-cols-3 { grid-template-columns: repeat(3, minmax(0, 1fr)) !important; }
-        body.mobile-desktop-mode .md\:grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)) !important; }
 
         /* RATING STARS CSS */
         .star-rating-container { display: inline-flex; flex-direction: row-reverse; gap: 0.25rem; }
@@ -1267,7 +1252,6 @@
 
         window.addEventListener('DOMContentLoaded', () => {
             window.scrollTo(0, 0);
-            handleDesktopMode();
             if (!window.history.state || window.history.state.step !== 'main') {
                 window.history.replaceState({ step: 'main' }, '', window.location.href);
             }
@@ -1335,22 +1319,6 @@
                 }
             }
         });
-
-        function handleDesktopMode() {
-            const meta = document.getElementById('viewportMeta');
-            const isMobileDevice = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
-            
-            if (isMobileDevice && window.innerWidth >= 992) {
-                meta.setAttribute('content', 'width=1200, initial-scale=1.0');
-                document.body.classList.add('mobile-desktop-mode');
-            } else if (!isMobileDevice) {
-                document.body.classList.remove('mobile-desktop-mode');
-            } else {
-                meta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no');
-                document.body.classList.remove('mobile-desktop-mode');
-            }
-        }
-        window.addEventListener('resize', handleDesktopMode);
 
         const herQuotes = [
             "Hey Beautiful! You're working so hard today. Remember to pause, take a deep breath, and drink enough water. You've got this! ✨ Stay Hydrated & Keep Glowing 🌸",
